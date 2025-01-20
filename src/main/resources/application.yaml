@@ -1,1 +1,3 @@
-spring.application.name=beilsang-server-v2
+spring:
+  application:
+    name: beilsang-server-v2
