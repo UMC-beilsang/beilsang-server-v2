@@ -22,9 +22,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     //TODO
-//    private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
-//
-//    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
+
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     // 비밀번호 암/복호화를 위한 클래스
     @Bean
@@ -65,15 +65,12 @@ public class SecurityConfig {
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        //TODO
-/*
         //exception handler
         http.exceptionHandling(conf -> conf
                 // 인증 예외 처리
                 .authenticationEntryPoint(customAuthenticationEntryPointHandler)
                 // 인가 예외 처리
                 .accessDeniedHandler(customAccessDeniedHandler));
-*/
         return http.build();
     }
 }
