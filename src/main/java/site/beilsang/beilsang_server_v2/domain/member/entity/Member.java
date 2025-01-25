@@ -1,7 +1,10 @@
 package site.beilsang.beilsang_server_v2.domain.member.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.FeedLike;
 import site.beilsang.beilsang_server_v2.domain.like.entity.ChallengeLike;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
@@ -16,6 +19,9 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

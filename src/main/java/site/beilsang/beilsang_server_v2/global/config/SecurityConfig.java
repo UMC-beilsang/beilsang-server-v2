@@ -1,10 +1,12 @@
 package site.beilsang.beilsang_server_v2.global.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,19 +16,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import site.beilsang.beilsang_server_v2.global.jwt.JwtAuthFilter;
+import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2UserService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    //TODO
     private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
-
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    // 비밀번호 암/복호화를 위한 클래스
+    // 비밀번호 암&복호화를 위한 클래스
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -40,30 +43,38 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
-
-        // 토큰 검증 filter
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         // white list
         MvcRequestMatcher[] permitWhiteList = {
-                mvc.pattern("/login"),
-                mvc.pattern("/register"),
+                mvc.pattern("/form"),
+                mvc.pattern("/oauth/**"),
+                mvc.pattern("/favicon.ico"),
                 mvc.pattern("/token-refresh"),
         };
 
         // http request 인증 설정
-        http.authorizeHttpRequests(autorize -> autorize
+        http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(permitWhiteList).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
+        );
+
+        http.oauth2Login(oauth -> oauth
+//                .loginPage("/form").permitAll()
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService))
         );
 
         // jwt 방식 사용 -> 아래의 4개 미사용 설정
-        // form login, logout, csrf, session diabled
-        http.formLogin(AbstractHttpConfigurer::disable);
+        http.httpBasic(AbstractHttpConfigurer::disable); // jwt 토큰(Bearer 방식) 사용하기 위해 httpBasic disable
+        http.formLogin(AbstractHttpConfigurer::disable); // oauth2만 사용하기 때문에 diable
         http.logout(AbstractHttpConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
-        http.sessionManagement(session -> session
+        http.sessionManagement(session -> session // 세션을 사용하지 않기 때문에 stateless로 설정
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // 토큰 검증 filter
+        // header로부터 전달받는 토큰 검사, valid하면 authentication에 user 등록
+        // UsernamePasswordAuthenticationFilter 전 jwtAuthFilter 실행
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         //exception handler
         http.exceptionHandling(conf -> conf
