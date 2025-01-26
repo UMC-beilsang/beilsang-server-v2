@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -47,6 +46,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
+
         // white list
         MvcRequestMatcher[] permitWhiteList = {
                 mvc.pattern("/oauth/**"),
@@ -62,10 +62,10 @@ public class SecurityConfig {
         http.oauth2Login(oauth -> oauth
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService))
-                .redirectionEndpoint(redirection -> redirection
+                .redirectionEndpoint(redirection -> redirection // 기본 리다이렉션 경로 변경
                         .baseUri("/oauth/redirect/*"))
-                .successHandler(oAuth2LoginSuccessHandler)
-                .failureHandler(oAuth2LoginFailureHandler) //oauth2 로그인 과정 인증 실패
+                .successHandler(oAuth2LoginSuccessHandler) // oauth2 로그인 과정 인증
+                .failureHandler(oAuth2LoginFailureHandler) // oauth2 로그인 과정 인증 실패
         );
 
         // jwt 방식 사용 -> 아래의 4개 미사용 설정

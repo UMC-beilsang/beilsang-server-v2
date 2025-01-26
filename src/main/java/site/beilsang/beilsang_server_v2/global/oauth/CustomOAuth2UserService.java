@@ -35,7 +35,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 로그인 유저 정보 가져옴
         OAuth2UserService<OAuth2UserRequest, OAuth2User> service = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = service.loadUser(userRequest);
-        log.info("getAttributes: {}", oAuth2User.getAttributes());
 
         // OAuth2 서비스 id (google, kakao, naver)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();

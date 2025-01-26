@@ -108,7 +108,7 @@ public class JwtTokenProvider {
     /**
      * 토큰에서 Claim을 통해 원하는 값 추출
      *
-     * @param token accessToken
+     * @param token    accessToken
      * @param claimKey Claim에서 추출하려는 값
      * @return 값
      */

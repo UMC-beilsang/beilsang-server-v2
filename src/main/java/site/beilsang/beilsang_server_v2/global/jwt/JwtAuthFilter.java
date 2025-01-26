@@ -32,11 +32,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // access token이 존재하지 않거나 토큰이 유효하지 않으면 401 코드 반환
         if (!jwtTokenProvider.validateToken(token) || !StringUtils.hasText(token)) {
-            //TODO - 아래처럼 sendError하면 토큰이 필요 없는 도메인에서 접근 안됨
-            logger.info("토큰 없음");
+
 //            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             //토큰이 없을 경우
-            doFilter(request,response,filterChain);
+            doFilter(request, response, filterChain);
             return;
         }
         setSecurityContextHolder(token);

@@ -28,9 +28,6 @@ public class OAuthAttributes {
         if (provider.equals(Provider.KAKAO)) {
             return new KakaoUserInfo(attributes);
         }
-
         return null;
     }
-
-
 }

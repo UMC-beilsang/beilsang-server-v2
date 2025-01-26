@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import site.beilsang.beilsang_server_v2.global.enums.Role;
 import site.beilsang.beilsang_server_v2.global.jwt.JwtTokenProvider;
 import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2User;
 

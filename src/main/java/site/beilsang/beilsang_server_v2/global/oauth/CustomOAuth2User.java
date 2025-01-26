@@ -10,6 +10,7 @@ import java.util.Map;
 
 @Getter
 public class CustomOAuth2User extends DefaultOAuth2User {
+
     // Set<GrantedAuthority> authorities, Map<String, Object> attributes, String nameAttributeKey
     // 위 3개 외에 아래 필드를 추가로 가진다
     private final String socialId;
