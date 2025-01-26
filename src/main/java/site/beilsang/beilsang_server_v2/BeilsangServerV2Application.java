@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
-//@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
-@SpringBootApplication
+@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class BeilsangServerV2Application {
 
 	public static void main(String[] args) {

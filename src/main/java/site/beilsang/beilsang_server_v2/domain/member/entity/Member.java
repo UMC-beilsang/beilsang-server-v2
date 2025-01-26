@@ -30,6 +30,7 @@ public class Member {
 
     private String email;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @Enumerated(EnumType.STRING)
@@ -77,4 +78,8 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeLike> challengeLikes = new ArrayList<>();
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }

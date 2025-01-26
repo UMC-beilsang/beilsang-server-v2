@@ -17,6 +17,8 @@ import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import site.beilsang.beilsang_server_v2.global.jwt.JwtAuthFilter;
 import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2UserService;
+import site.beilsang.beilsang_server_v2.global.oauth.handler.OAuth2LoginFailureHandler;
+import site.beilsang.beilsang_server_v2.global.oauth.handler.OAuth2LoginSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +30,8 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     // 비밀번호 암&복호화를 위한 클래스
     @Bean
@@ -45,22 +49,23 @@ public class SecurityConfig {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
         // white list
         MvcRequestMatcher[] permitWhiteList = {
-                mvc.pattern("/form"),
                 mvc.pattern("/oauth/**"),
                 mvc.pattern("/favicon.ico"),
-                mvc.pattern("/token-refresh"),
         };
 
         // http request 인증 설정
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(permitWhiteList).permitAll()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
         );
 
         http.oauth2Login(oauth -> oauth
-//                .loginPage("/form").permitAll()
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService))
+                .redirectionEndpoint(redirection -> redirection
+                        .baseUri("/oauth/redirect/*"))
+                .successHandler(oAuth2LoginSuccessHandler)
+                .failureHandler(oAuth2LoginFailureHandler) //oauth2 로그인 과정 인증 실패
         );
 
         // jwt 방식 사용 -> 아래의 4개 미사용 설정
@@ -76,7 +81,7 @@ public class SecurityConfig {
         // UsernamePasswordAuthenticationFilter 전 jwtAuthFilter 실행
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        //exception handler
+        // jwt를 포함한 exception handler
         http.exceptionHandling(conf -> conf
                 // 인증 예외 처리
                 .authenticationEntryPoint(customAuthenticationEntryPointHandler)

@@ -1,19 +1,29 @@
 package site.beilsang.beilsang_server_v2.global.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
+import site.beilsang.beilsang_server_v2.domain.member.dto.MemberLoginResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
+import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
+import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2User;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.Date;
-import java.util.Random;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class JwtTokenProvider {
 
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30; // 30분
@@ -21,7 +31,9 @@ public class JwtTokenProvider {
 
     @Value("${jwt.secret-key}")
     private String secretKey; // jwt 시크릿 키
-    private SecretKey key;
+    private static SecretKey key;
+    private final MemberRepository memberRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void init() {
@@ -32,10 +44,11 @@ public class JwtTokenProvider {
      * access token 생성
      *
      * @param socialId
+     * @param email
      * @return accessToken
      */
-    public String createAccessToken(String socialId) {
-        return createToken(socialId, ACCESS_TOKEN_EXPIRE_TIME);
+    public String createAccessToken(String socialId, String email) {
+        return createToken(socialId, email, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     /**
@@ -43,11 +56,15 @@ public class JwtTokenProvider {
      *
      * @return refresh token
      */
-    public String createRefreshToken() {
-        byte[] array = new byte[7];
-        new Random().nextBytes(array);
-        String generatedString = new String(array, StandardCharsets.UTF_8);
-        return createToken(generatedString, REFRESH_TOKEN_EXPIRE_TIME);
+    public String createRefreshToken(String socialId, String email) {
+        String refreshToken = createToken(socialId, email, REFRESH_TOKEN_EXPIRE_TIME);
+
+        Member member = memberRepository.findBySocialIdAndEmail(socialId, email)
+                .orElseThrow();
+        member.setRefreshToken(refreshToken);
+        memberRepository.save(member);
+
+        return refreshToken;
     }
 
 
@@ -57,14 +74,16 @@ public class JwtTokenProvider {
      * @param socialId
      * @param expireTime
      */
-    private String createToken(String socialId, long expireTime) {
-        Claims claims = Jwts.claims().setSubject(socialId);
+    private String createToken(String socialId, String email, long expireTime) {
+        Claims claims = Jwts.claims()
+                .setSubject(email);
+        claims.put("socialId", socialId);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + expireTime);
+        Date expiration = new Date(now.getTime() + expireTime);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(validity)
+                .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -87,26 +106,44 @@ public class JwtTokenProvider {
     }
 
     /**
-     * claim에서 socialId 추출
+     * 토큰에서 Claim을 통해 원하는 값 추출
      *
-     * @param token
+     * @param token accessToken
+     * @param claimKey Claim에서 추출하려는 값
+     * @return 값
      */
-    public String getSocialId(String token) {
+    public String getClaimFromToken(String token, String claimKey) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
+            if ("email".equals(claimKey)) {
+                return Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody()
+                        .getSubject();
+            }
+            if ("socialId".equals(claimKey)) {
+                return (String) Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody()
+                        .get(claimKey);
+            }
+            return null;
         } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         } catch (JwtException e) {
             //TODO
-//            throw new ErrorHandler(ErrorStatus.UNAUTHORIZED);
+//        throw new ErrorHandler(ErrorStatus.UNAUTHORIZED);
             throw new RuntimeException();
         }
     }
 
-
+    public void sendToken(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
+        String accessToken = createAccessToken(oAuth2User.getSocialId(), oAuth2User.getEmail());
+        String refreshToken = createRefreshToken(oAuth2User.getSocialId(), oAuth2User.getEmail());
+        MemberLoginResDTO memberLoginResDTO = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, oAuth2User.getRole());
+        response.getWriter().write(objectMapper.writeValueAsString(memberLoginResDTO));
+    }
 }

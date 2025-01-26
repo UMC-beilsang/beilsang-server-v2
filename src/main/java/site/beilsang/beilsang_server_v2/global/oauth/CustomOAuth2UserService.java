@@ -40,7 +40,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // OAuth2 서비스 id (google, kakao, naver)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         Provider provider = Provider.getByName(registrationId);
-        log.info("provider: {}", provider);
 
         String userNameAttributeName = userRequest.getClientRegistration() // OAuth2 로그인 시 키(PK)가 되는 값
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
@@ -51,11 +50,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuthAttributes oAuthAttributes = OAuthAttributes.of(provider, userNameAttributeName, attributes);
         Member member = getMember(oAuthAttributes, provider);
 
-        return new CusotmOAuth2User(
+        return new CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),
                 attributes,
                 oAuthAttributes.getNameAttributesKey(),
-                oAuthAttributes.getOAuth2UserInfo().getEmail(),
+                member.getSocialId(),
                 member.getEmail(),
                 member.getRole()
         );

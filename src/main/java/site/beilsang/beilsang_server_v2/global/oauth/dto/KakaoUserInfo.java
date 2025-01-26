@@ -1,9 +1,11 @@
 package site.beilsang.beilsang_server_v2.global.oauth.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+@Slf4j
 public class KakaoUserInfo extends OAuth2UserInfo {
 
     public KakaoUserInfo(Map<String, Object> attributes) {
@@ -12,26 +14,15 @@ public class KakaoUserInfo extends OAuth2UserInfo {
 
     @Override
     public String getId() {
-        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-
-        if (response == null) {
-            return null;
-        }
-        // id : 네이버에서 지정한 동일인 식별 정보 이름
-        return (String) response.get("id");
+        Long socialId = (Long) attributes.get("id");
+        //카카오는 id를 Long형태로 전달
+        return String.valueOf(socialId);
     }
     public String getEmail(){
-        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        Map<String, Object> response = (Map<String, Object>) attributes.get("kakao_account");
         if (response == null) {
             return null;
         }
         return (String) response.get("email");
-    }
-    public String getUserName(){
-        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-        if (response == null) {
-            return null;
-        }
-        return (String) response.get("name");
     }
 }
