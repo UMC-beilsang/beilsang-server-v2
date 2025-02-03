@@ -41,7 +41,6 @@ public class ChallengeMember extends BaseEntity {
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-
     @OneToMany(mappedBy = "challengeMember", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Feed> feed = new ArrayList<>();
 }

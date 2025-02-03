@@ -1,7 +1,10 @@
 package site.beilsang.beilsang_server_v2.domain.member.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.FeedLike;
 import site.beilsang.beilsang_server_v2.domain.like.entity.ChallengeLike;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
@@ -16,6 +19,9 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +30,7 @@ public class Member {
 
     private String email;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @Enumerated(EnumType.STRING)
@@ -71,4 +78,8 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeLike> challengeLikes = new ArrayList<>();
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }
