@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +21,7 @@ import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private final JwtTokenProvider jwtTokenProvider;
@@ -75,14 +77,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 멤버 정보를 바탕으로 인증 토큰 생성
-     *
+     * 멤버 정보를 바탕으로 인증 토큰 생성,
+     * Controller에서 Authentication.getPrincipal로 값 받아올 수 있음
      * @param member
      * @return UsernamePasswordAuthenticationToken
      */
     private UsernamePasswordAuthenticationToken getUserAuth(Member member) {
         return new UsernamePasswordAuthenticationToken(
-                member.getId(),
+                member.getId(), //member가 아닌 memberId를 넣어 최소한의 정보만 갖도록 설정
                 member.getSocialId(),
                 Collections.singleton(new SimpleGrantedAuthority(Role.USER.getRole()))
         );

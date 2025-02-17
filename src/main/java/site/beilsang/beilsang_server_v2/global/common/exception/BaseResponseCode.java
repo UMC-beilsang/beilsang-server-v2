@@ -6,8 +6,6 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
 @AllArgsConstructor
 @Getter
 public enum BaseResponseCode {
@@ -20,8 +18,11 @@ public enum BaseResponseCode {
     NULL_REQUEST_PARAM(HttpStatus.BAD_REQUEST, "GL002", "쿼리 파라미터가 없습니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "GL003", "잘못된 요청입니다."),
     CONTENT_NULL(HttpStatus.BAD_REQUEST, "GL004", "내용을 입력해 주세요."),
-    ;
 
+    //member
+    NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "M0001", "존재하지 않은 멤버입니다"),
+
+    ;
 
     private final HttpStatus status; //커스텀 상태코드
     private final String code;  //Http 상태코드

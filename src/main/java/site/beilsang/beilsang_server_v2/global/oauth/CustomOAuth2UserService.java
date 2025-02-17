@@ -26,7 +26,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     // 유저 정보를 가져와 회원 정보가 없다면 저장
 
     private final MemberRepository memberRepository;
-    private final MemberAssembler memberAssembler;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -69,7 +68,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         if (member.isEmpty()) {
             log.info("존재하지 않는 유저, 추가하여 return");
-            Member newMember = memberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
+            Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
             return memberRepository.save(newMember);
         } else {
             log.info("이미 존재하는 user, findUser return");
