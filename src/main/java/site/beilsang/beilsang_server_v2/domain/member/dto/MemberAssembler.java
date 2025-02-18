@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
-import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
@@ -55,6 +55,14 @@ public class MemberAssembler {
                 .address(member.getAddress())
                 .gender(member.getGender())
                 .nickName(member.getNickName())
+                .build();
+    }
+
+
+    public static CheckEnrolledResDTO toCheckEnrolledDTO(Boolean isEnrolled, List<Long> enrolledChallengeIds) {
+        return CheckEnrolledResDTO.builder()
+                .isEnrolled(isEnrolled)
+                .enrolledChallengeIds(enrolledChallengeIds)
                 .build();
     }
 }

@@ -93,4 +93,7 @@ public class Member {
             this.address = memberProfileReqDTO.getAddress();
         }
     }
+    public void updateProfileImageUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
 }
