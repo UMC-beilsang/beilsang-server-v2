@@ -79,6 +79,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     /**
      * 멤버 정보를 바탕으로 인증 토큰 생성,
      * Controller에서 Authentication.getPrincipal로 값 받아올 수 있음
+     *
      * @param member
      * @return UsernamePasswordAuthenticationToken
      */

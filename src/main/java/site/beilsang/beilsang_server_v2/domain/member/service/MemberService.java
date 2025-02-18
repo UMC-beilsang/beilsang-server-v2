@@ -11,6 +11,10 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
+import site.beilsang.beilsang_server_v2.domain.point.dto.PointAssembler;
+import site.beilsang.beilsang_server_v2.domain.point.dto.res.PointLogListResDTO;
+import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
+import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
@@ -24,6 +28,7 @@ public class MemberService {
     private final ChallengeLikeRepository challengeLikeRepository;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
+    private final PointLogRepository pointLogRepository;
 
     /**
      * mypage에 필요한 모든 값들을 return
@@ -56,5 +61,13 @@ public class MemberService {
         //최근 4개 피드
         List<Feed> feedList = feedRepository.findTop4ByChallengeMember_IdInOrderByCreatedAtDesc(challengeMemberIds);
         return MemberAssembler.toMyPageResDTO(member, feedList, countFeed, countSuccessChallenge, countChallenge, countFailedChallenge, countlike);
+    }
+
+    public PointLogListResDTO getPointLog(Long memberId) {
+        Member member = memberRepository.findById(memberId).
+                orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        List<PointLog> pointLogList = pointLogRepository.findAllByMemberId(memberId);
+        return PointAssembler.toEntities(pointLogList, member);
     }
 }

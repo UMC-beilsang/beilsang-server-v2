@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.service.MemberService;
+import site.beilsang.beilsang_server_v2.domain.point.dto.res.PointLogListResDTO;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 
 @RestController
@@ -22,5 +23,11 @@ public class MemberController {
     public BaseResponse<MyPageResDTO> getMyPage(Authentication authentication) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.getMyPage(memberId));
+    }
+
+    @GetMapping("/mypage/point")
+    public BaseResponse<PointLogListResDTO> getPoingLog(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getPointLog(memberId));
     }
 }
