@@ -6,6 +6,8 @@ import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
@@ -69,5 +71,13 @@ public class MemberService {
 
         List<PointLog> pointLogList = pointLogRepository.findAllByMemberId(memberId);
         return PointAssembler.toEntities(pointLogList, member);
+    }
+
+    public MemberProfileResDTO updateProfile(Long memberId, MemberProfileReqDTO memberProfileReqDTO) {
+        Member member = memberRepository.findById(memberId).
+                orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+        member.updateProfile(memberProfileReqDTO);
+        memberRepository.save(member);
+        return MemberAssembler.toEntity(member);
     }
 }

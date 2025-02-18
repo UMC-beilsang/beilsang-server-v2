@@ -2,7 +2,7 @@ package site.beilsang.beilsang_server_v2.domain.member.dto.res;
 
 import lombok.Builder;
 import lombok.Getter;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDto;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.global.enums.Gender;
 
@@ -21,7 +21,7 @@ public class MyPageResDTO {
     Gender gender;
     LocalDate birth;
     //feed
-    List<PreviewFeedResDto> feedDTOs;
+    List<PreviewFeedResDTO> feedDTOs;
     Long countFeed;
     //challenge
     Long challenges;

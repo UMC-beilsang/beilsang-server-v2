@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
@@ -45,5 +47,14 @@ public class MemberAssembler {
                 .build();
         myPageResDTO.setMemberInfo(member);
         return myPageResDTO;
+    }
+
+    public static MemberProfileResDTO toEntity(Member member) {
+        return MemberProfileResDTO.builder()
+                .birth(member.getBirth())
+                .address(member.getAddress())
+                .gender(member.getGender())
+                .nickName(member.getNickName())
+                .build();
     }
 }

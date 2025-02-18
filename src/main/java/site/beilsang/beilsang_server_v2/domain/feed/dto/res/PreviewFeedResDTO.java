@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class PreviewFeedResDto {
+public class PreviewFeedResDTO {
     private Long feedId;
     private String feedUrl;
     private Long day;
