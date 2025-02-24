@@ -1,12 +1,10 @@
 package site.beilsang.beilsang_server_v2.domain.member.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.FeedLike;
 import site.beilsang.beilsang_server_v2.domain.like.entity.ChallengeLike;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 import site.beilsang.beilsang_server_v2.global.enums.Gender;
@@ -14,6 +12,7 @@ import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.enums.Role;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +61,7 @@ public class Member {
 
     private String profileUrl;
 
+    @Setter
     private String refreshToken;
 
     private String deviceToken;
@@ -79,7 +79,21 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeLike> challengeLikes = new ArrayList<>();
 
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+    public void updateProfile(MemberProfileReqDTO memberProfileReqDTO) {
+        if(!memberProfileReqDTO.getNickName().isBlank()){
+            this.nickName = memberProfileReqDTO.getNickName();
+        }
+        if(!memberProfileReqDTO.getBirth().isBlank()){
+            this.birth = LocalDate.parse(memberProfileReqDTO.getBirth(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+        if(!memberProfileReqDTO.getGender().isBlank()){
+            this.gender = Gender.valueOf(memberProfileReqDTO.getGender());
+        }
+        if(!memberProfileReqDTO.getAddress().isBlank()){
+            this.address = memberProfileReqDTO.getAddress();
+        }
+    }
+    public void updateProfileImageUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
-import site.beilsang.beilsang_server_v2.domain.member.dto.MemberLoginResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2User;

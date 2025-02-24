@@ -19,7 +19,7 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         log.info("[CustomAuthenticationEntryPointHandler] :: {}", authException.getMessage());
         log.info("[CustomAuthenticationEntryPointHandler] :: {}", request.getRequestURL());
-        log.info("[CustomAuthenticationEntryPointHandler] :: 토근 정보가 만료되었거나 존재하지 않음");
+        log.info("[CustomAuthenticationEntryPointHandler] :: 토큰 정보가 만료되었거나 존재하지 않음");
 
         //TODO
 
