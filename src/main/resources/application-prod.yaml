@@ -1,0 +1,11 @@
+logging:
+  level:
+    root: info
+  file:
+    name: logs/application-%d{yyyy-MM-dd}.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB #각 로그 파일의 최대 크기
+      max-history: 30 # 최대 로그 파일 개수
+      total-size-cap: 500MB # 총 로그 파일의 크기 제한
+      file-name-pattern: application-%d{yyyy-MM-dd}-%i.log
