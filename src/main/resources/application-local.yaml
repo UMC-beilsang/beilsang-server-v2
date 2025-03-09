@@ -1,3 +1,21 @@
+spring:
+  datasource: # DB
+    driver-class-name: org.h2.Driver
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password:
+  jpa:
+    database: h2
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        hbm2ddl:
+          auto: update
+
 logging:
   level:
     org.hibernate.SQL: debug
