@@ -93,7 +93,12 @@ public class Member {
             this.address = memberProfileReqDTO.getAddress();
         }
     }
+
     public void updateProfileImageUrl(String profileUrl) {
         this.profileUrl = profileUrl;
+    }
+
+    public void subPoint(int point) {
+        this.point -= point;
     }
 }

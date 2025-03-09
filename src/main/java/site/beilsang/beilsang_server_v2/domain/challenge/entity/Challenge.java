@@ -61,9 +61,9 @@ public class Challenge extends BaseEntity {
 
     private Integer totalGoalDay;
 
-    private Integer attendeeCount;
+    private Integer attendeeCount = 1;
 
-    private Integer countLikes;
+    private Integer countLikes = 0;
 
     private Integer collectedPoint;
 }

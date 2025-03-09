@@ -23,8 +23,8 @@ public class PointAssembler {
         return PointLogResDTO.builder()
                 .id(pointLog.getId())
                 .value(pointLog.getValue())
-                .name(pointLog.getName())
-                .period(pointLog.getPeriod())
+//                .name(pointLog.getName())
+//                .period(pointLog.getPeriod())
                 .date(pointLog.getCreatedAt().toLocalDate())
                 .status(pointLog.getStatus())
                 .build();
