@@ -32,8 +32,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         String certImageUrl = null;
 
         // 챌린지 생성
-        LocalDate finishDate = null; // 챌린지 종료 날짜 계산 로직
-        Challenge challenge = ChallengeAssembler.toEntity(createChallengeReqDTO, finishDate, mainImageUrl, certImageUrl);
+        Challenge challenge = ChallengeAssembler.toEntity(createChallengeReqDTO, mainImageUrl, certImageUrl);
 
         // ChallengeMember 생성 로직
 
