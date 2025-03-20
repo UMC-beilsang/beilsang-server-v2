@@ -2,9 +2,9 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 
 public interface ChallengeService {
 
-    ChallengeDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO, MultipartFile mainImage, MultipartFile certImage);
+    ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO, MultipartFile mainImage, MultipartFile certImage);
 }

@@ -3,7 +3,7 @@ package site.beilsang.beilsang_server_v2.domain.challenge.dto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 
 @Slf4j
@@ -33,10 +33,22 @@ public class ChallengeAssembler {
                 .build();
     }
 
-    public static ChallengeDTO toChallengeResDTO(Challenge challenge) {
-        return ChallengeDTO.builder()
+    public static ChallengeResDTO toChallengeResDTO(Challenge challenge) {
+        return ChallengeResDTO.builder()
                 .challengeId(challenge.getId())
-
+                .category(challenge.getCategory())
+                .title(challenge.getTitle())
+                .startDate(challenge.getStartDate())
+                .finishDate(challenge.getFinishDate())
+                .joinPoint(challenge.getJoinPoint())
+                .mainImageUrl(challenge.getMainImageUrl())
+                .certImageUrl(challenge.getCertImageUrl())
+                .details(challenge.getDetails())
+                .period(challenge.getPeriod())
+                .totalGoalDay(challenge.getTotalGoalDay())
+                .attendeeCount(challenge.getAttendeeCount())
+                .countLikes(challenge.getCountLikes())
+                .collectedPoint(challenge.getCollectedPoint())
                 .build();
     }
 }

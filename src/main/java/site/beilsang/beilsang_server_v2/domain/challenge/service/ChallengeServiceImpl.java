@@ -2,13 +2,12 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeNoteRepository;
@@ -37,8 +36,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final PointLogRepository pointLogRepository;
 
     @Override
-    public ChallengeDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
-                                        MultipartFile mainImage, MultipartFile certImage) {
+    public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
+                                           MultipartFile mainImage, MultipartFile certImage) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER)
         );
