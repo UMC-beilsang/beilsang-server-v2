@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChallengeServiceImpl implements ChallengeService {
 
     private final MemberRepository memberRepository;
