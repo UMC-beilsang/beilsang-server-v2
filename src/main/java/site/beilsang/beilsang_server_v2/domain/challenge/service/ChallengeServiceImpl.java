@@ -1,6 +1,7 @@
 package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,6 +9,8 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
+import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
+import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeNoteRepository;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
@@ -24,6 +27,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final MemberRepository memberRepository;
     private final ChallengeRepository challengeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
+    private final ChallengeNoteRepository challengeNoteRepository;
 
     @Override
     public ChallengeDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
@@ -44,6 +48,12 @@ public class ChallengeServiceImpl implements ChallengeService {
         );
 
         // ChallengeNote 생성
+        challengeNoteRepository.saveAll(createChallengeReqDTO.getNotes().stream()
+                .map(note -> ChallengeNote.builder()
+                        .note(note)
+                        .challenge(challenge)
+                        .build())
+                .toList());
 
         // ChallengeStatus 상태 결정
         ChallengeStatus challengeStatus = ChallengeStatus.ONGOING;
