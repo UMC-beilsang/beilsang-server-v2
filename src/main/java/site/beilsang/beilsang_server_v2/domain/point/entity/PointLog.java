@@ -21,8 +21,6 @@ public class PointLog extends BaseEntity {
     @Column(name = "point_id")
     private Long id;
 
-    private String name;
-
     @Enumerated(EnumType.STRING)
     private PointName pointName;
 
@@ -31,7 +29,7 @@ public class PointLog extends BaseEntity {
 
     private int value;
 
-    private int period;
+//    private int period; 만료기간 논의 필요
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")

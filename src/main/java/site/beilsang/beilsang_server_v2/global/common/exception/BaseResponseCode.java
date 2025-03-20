@@ -19,8 +19,11 @@ public enum BaseResponseCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "GL003", "잘못된 요청입니다."),
     CONTENT_NULL(HttpStatus.BAD_REQUEST, "GL004", "내용을 입력해 주세요."),
 
-    //member
+    // member
     NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "M0001", "존재하지 않은 멤버입니다"),
+
+    // point
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "P0001", "포인트가 부족합니다.")
 
     ;
 

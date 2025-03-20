@@ -16,9 +16,13 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
+import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
+import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.PointName;
+import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
     private final ChallengeNoteRepository challengeNoteRepository;
+    private final PointLogRepository pointLogRepository;
 
     @Override
     public ChallengeDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
@@ -36,7 +41,18 @@ public class ChallengeServiceImpl implements ChallengeService {
                 () -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER)
         );
 
-        // 멤버 포인트
+        // 멤버 포인트 부족 시 예외 처리
+        int joinPoint = createChallengeReqDTO.getJoinPoint();
+        if (member.getPoint() < joinPoint) {
+            throw new BaseException(BaseResponseCode.NOT_ENOUGH_POINT);
+        }
+        pointLogRepository.save(PointLog.builder()
+                .pointName(PointName.JOIN_CHALLENGE)
+                .status(PointStatus.USE)
+                .value(joinPoint)
+                .member(member)
+                .build());
+        member.subPoint(joinPoint); // 포인트 차감
 
         // S3 이용 챌린지 이미지 저장 로직
         String mainImageUrl = null;
