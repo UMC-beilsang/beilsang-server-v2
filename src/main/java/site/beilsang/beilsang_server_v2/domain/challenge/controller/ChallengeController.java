@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.CreateChallengeResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.service.ChallengeService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 
@@ -20,7 +20,7 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @PostMapping
-    public BaseResponse<CreateChallengeResDTO> createChallenge(
+    public BaseResponse<ChallengeDTO> createChallenge(
             Authentication authentication,
             @RequestPart("data") CreateChallengeReqDTO createChallengeReqDTO,
             @RequestPart("mainImage") MultipartFile mainImage,

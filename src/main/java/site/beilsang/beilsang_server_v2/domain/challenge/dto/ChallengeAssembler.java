@@ -1,11 +1,10 @@
 package site.beilsang.beilsang_server_v2.domain.challenge.dto;
 
-import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
-import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 @Slf4j
 @Component
@@ -16,7 +15,7 @@ public class ChallengeAssembler {
             String mainImageUrl,
             String certImageUrl
     ) {
-        Challenge challenge = Challenge.builder()
+        return Challenge.builder()
                 .category(request.getCategory())
                 .title(request.getTitle())
                 .startDate(request.getStartDate())
@@ -32,7 +31,12 @@ public class ChallengeAssembler {
                 .countLikes(0)
                 .collectedPoint(request.getJoinPoint())
                 .build();
+    }
 
-        return null;
+    public static ChallengeDTO toChallengeResDTO(Challenge challenge) {
+        return ChallengeDTO.builder()
+                .challengeId(challenge.getId())
+
+                .build();
     }
 }
