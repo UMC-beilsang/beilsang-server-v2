@@ -1,8 +1,10 @@
 package site.beilsang.beilsang_server_v2.global.aws.s3;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +14,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -33,7 +36,8 @@ public class S3Service {
     public String uploadFile(UploadPath uploadPath, MultipartFile file) {
 
         if (file.isEmpty()) {
-            return null;
+            log.info("Image is empty");
+            return "";
         }
 
         String path = null;
@@ -47,7 +51,7 @@ public class S3Service {
         }
 
         // 파일 이름 설정
-        String fileName = path + buildFileName(file.getOriginalFilename());
+        String fileName = path + buildFileName(Objects.requireNonNull(file.getOriginalFilename()));
 
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
