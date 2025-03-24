@@ -1,11 +1,12 @@
 package site.beilsang.beilsang_server_v2.global.aws.s3;
 
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import site.beilsang.beilsang_server_v2.global.config.AWSConfig;
+import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
@@ -20,14 +21,33 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file) {
+    @Value("${cloud.aws.s3.path.challenge-main}")
+    private String mainPath;
+
+    @Value("${cloud.aws.s3.path.challenge-cert}")
+    private String certPath;
+
+    @Value("${spring.cloud.aws.s3.path.member-profile}")
+    private String memberProfilePath;
+
+    public String uploadFile(UploadPath uploadPath, MultipartFile file) {
 
         if (file.isEmpty()) {
             return null;
         }
 
-        // 파일 이름 설정 로직 추가 필요
-        String fileName = file.getOriginalFilename();
+        String path = null;
+        switch (uploadPath) {
+            case CHALLENGE_MAIN:
+                path = mainPath;
+            case CHALLENGE_CERT:
+                path = certPath;
+            case MEMBER_PROFILE:
+                path = memberProfilePath;
+        }
+
+        // 파일 이름 설정
+        String fileName = path + buildFileName(file.getOriginalFilename());
 
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -50,4 +70,15 @@ public class S3Service {
         return s3Client.utilities().getUrl(getUrlRequest).toString();
     }
 
+    private String buildFileName(String originalFilename) {
+
+        String uuid = UUID.randomUUID().toString();
+
+        int fileExtensionIndex = originalFilename.lastIndexOf(".");
+        String fileExtension = originalFilename.substring(fileExtensionIndex + 1);
+
+        String now = String.valueOf(System.currentTimeMillis());
+
+        return uuid + "_" + now + "." + fileExtension;
+    }
 }
