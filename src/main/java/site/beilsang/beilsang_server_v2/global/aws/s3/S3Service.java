@@ -21,13 +21,13 @@ public class S3Service {
 
     private final S3Client s3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
 
-    @Value("${cloud.aws.s3.path.challenge-main}")
+    @Value("${spring.cloud.aws.s3.path.challenge-main}")
     private String mainPath;
 
-    @Value("${cloud.aws.s3.path.challenge-cert}")
+    @Value("${spring.cloud.aws.s3.path.challenge-cert}")
     private String certPath;
 
     @Value("${spring.cloud.aws.s3.path.member-profile}")

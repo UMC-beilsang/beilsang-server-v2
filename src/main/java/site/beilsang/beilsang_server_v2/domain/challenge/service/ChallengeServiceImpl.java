@@ -18,11 +18,13 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMember
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
 import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
+import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
+import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeMemberRepository challengeMemberRepository;
     private final ChallengeNoteRepository challengeNoteRepository;
     private final PointLogRepository pointLogRepository;
+    private final S3Service s3Service;
 
     @Override
     public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
@@ -56,8 +59,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         member.subPoint(joinPoint); // 포인트 차감
 
         // S3 이용 챌린지 이미지 저장 로직
-        String mainImageUrl = null;
-        String certImageUrl = null;
+        String mainImageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_MAIN, mainImage);
+        String certImageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_CERT, certImage);
 
         // 챌린지 생성
         Challenge challenge = challengeRepository.save(

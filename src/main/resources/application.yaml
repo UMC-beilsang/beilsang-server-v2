@@ -25,16 +25,16 @@ spring:
   cloud:
     aws:
       credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
+        accessKey: ${AWS_ACCESS_KEY_ID}
+        secretKey: ${AWS_SECRET_ACCESS_KEY}
       region:
         static: ap-northeast-2
       s3:
         bucket: beilsang-bucket-dev
         path:
-            challenge-main: challenge/main
-            challenge-cert: challenge/cert
-            member-profile: member/profile
+          challenge-main: challenge/main
+          challenge-cert: challenge/cert
+          member-profile: member/profile
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
