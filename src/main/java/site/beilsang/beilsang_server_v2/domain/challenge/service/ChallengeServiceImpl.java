@@ -41,9 +41,26 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
                                            MultipartFile mainImage, MultipartFile certImage) {
+        // 이미지 파일 검증
+        if (mainImage == null || mainImage.isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+        }
+        if (certImage == null || certImage.isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+        }
+
+        // 목표 일수가 전체 기간을 초과하지 않는지 검증
+        if (createChallengeReqDTO.getTotalGoalDay() > createChallengeReqDTO.getPeriod().getDays()) {
+            throw new BaseException(BaseResponseCode.INVALID_CHALLENGE_PERIOD);
+        }
+
+        // 시작 날짜가 오늘 이후인지 검증 (오늘은 허용)
+        if (createChallengeReqDTO.getStartDate().isBefore(LocalDate.now())) {
+            throw new BaseException(BaseResponseCode.INVALID_START_DATE);
+        }
+
         Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER)
-        );
+                () -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
         // 멤버 포인트 부족 시 예외 처리
         int joinPoint = createChallengeReqDTO.getJoinPoint();
@@ -64,8 +81,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 챌린지 생성
         Challenge challenge = challengeRepository.save(
-                ChallengeAssembler.toEntity(createChallengeReqDTO, mainImageUrl, certImageUrl)
-        );
+                ChallengeAssembler.toEntity(createChallengeReqDTO, mainImageUrl, certImageUrl));
 
         // ChallengeNote 생성
         challengeNoteRepository.saveAll(createChallengeReqDTO.getNotes().stream()

@@ -25,7 +25,6 @@ public class ChallengeAssembler {
                 .certImageUrl(certImageUrl)
                 .details(request.getDetails())
                 .period(request.getPeriod())
-                .category(request.getCategory())
                 .totalGoalDay(request.getTotalGoalDay())
                 .attendeeCount(1)
                 .countLikes(0)

@@ -10,7 +10,7 @@ import java.util.Arrays;
 @Getter
 public enum BaseResponseCode {
 
-    //success
+    // success
     SUCCESS(HttpStatus.OK, "S0001", "요청에 성공했습니다"),
 
     // global
@@ -23,12 +23,17 @@ public enum BaseResponseCode {
     NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "M0001", "존재하지 않은 멤버입니다"),
 
     // point
-    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "P0001", "포인트가 부족합니다.")
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "P0001", "포인트가 부족합니다."),
+
+    // challenge
+    INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "C0001", "유효하지 않은 이미지 파일입니다"),
+    INVALID_CHALLENGE_PERIOD(HttpStatus.BAD_REQUEST, "C0002", "목표 실천일수가 챌린지 기간을 초과할 수 없습니다"),
+    INVALID_START_DATE(HttpStatus.BAD_REQUEST, "C0003", "시작 날짜는 오늘 이후여야 합니다")
 
     ;
 
-    private final HttpStatus status; //커스텀 상태코드
-    private final String code;  //Http 상태코드
+    private final HttpStatus status; // 커스텀 상태코드
+    private final String code; // Http 상태코드
     private final String message;
 
     public static BaseResponseCode findByCode(String code) {
