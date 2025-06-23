@@ -34,6 +34,9 @@ import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 @Transactional
 public class ChallengeServiceImpl implements ChallengeService {
 
+    private static final int MAX_INFO_IMAGE = 5;
+    private static final int MAX_CERT_IMAGE = 4;
+
     private final MemberRepository memberRepository;
     private final ChallengeRepository challengeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
@@ -115,7 +118,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (infoImages == null || infoImages.isEmpty()) {
             throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
         }
-        if (infoImages.size() > 10) { // 최대 10장 제한
+        if (infoImages.size() > MAX_INFO_IMAGE) { // 최대 10장 제한
             throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE); // TODO: 적절한 에러 코드로 변경
         }
 
@@ -123,7 +126,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (certImages == null || certImages.isEmpty()) {
             throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
         }
-        if (certImages.size() > 5) { // 최대 5장 제한
+        if (certImages.size() > MAX_CERT_IMAGE) { // 최대 5장 제한
             throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE); // TODO: 적절한 에러 코드로 변경
         }
 
