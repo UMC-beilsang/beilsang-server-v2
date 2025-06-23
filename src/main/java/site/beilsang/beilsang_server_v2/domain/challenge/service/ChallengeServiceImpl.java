@@ -2,6 +2,7 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +11,8 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallenge
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
+import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeInfoImage;
+import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeCertImage;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeNoteRepository;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
@@ -40,14 +43,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
-                                           MultipartFile mainImage, MultipartFile certImage) {
+                                           List<MultipartFile> infoImages, List<MultipartFile> certImages) {
         // 이미지 파일 검증
-        if (mainImage == null || mainImage.isEmpty()) {
-            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
-        }
-        if (certImage == null || certImage.isEmpty()) {
-            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
-        }
+        validateImages(infoImages, certImages);
 
         // 목표 일수가 전체 기간을 초과하지 않는지 검증
         if (createChallengeReqDTO.getTotalGoalDay() > createChallengeReqDTO.getPeriod().getDays()) {
@@ -75,13 +73,15 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .build());
         member.subPoint(joinPoint); // 포인트 차감
 
-        // S3 이용 챌린지 이미지 저장 로직
-        String mainImageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_MAIN, mainImage);
-        String certImageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_CERT, certImage);
-
         // 챌린지 생성
         Challenge challenge = challengeRepository.save(
-                ChallengeAssembler.toEntity(createChallengeReqDTO, mainImageUrl, certImageUrl));
+                ChallengeAssembler.toEntity(createChallengeReqDTO));
+
+        // 챌린지 정보 이미지들 업로드 및 저장
+        saveInfoImages(challenge, infoImages);
+
+        // 챌린지 인증 이미지들 업로드 및 저장
+        saveCertImages(challenge, certImages);
 
         // ChallengeNote 생성
         challengeNoteRepository.saveAll(createChallengeReqDTO.getNotes().stream()
@@ -108,5 +108,59 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .build());
 
         return ChallengeAssembler.toChallengeResDTO(challenge);
+    }
+
+    private void validateImages(List<MultipartFile> infoImages, List<MultipartFile> certImages) {
+        // 정보 이미지 검증
+        if (infoImages == null || infoImages.isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+        }
+        if (infoImages.size() > 10) { // 최대 10장 제한
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE); // TODO: 적절한 에러 코드로 변경
+        }
+
+        // 인증 이미지 검증
+        if (certImages == null || certImages.isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+        }
+        if (certImages.size() > 5) { // 최대 5장 제한
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE); // TODO: 적절한 에러 코드로 변경
+        }
+
+        // 각 파일 유효성 검증
+        validateEachFile(infoImages);
+        validateEachFile(certImages);
+    }
+
+    private void validateEachFile(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            if (file == null || file.isEmpty()) {
+                throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+            }
+        }
+    }
+
+    private void saveInfoImages(Challenge challenge, List<MultipartFile> infoImages) {
+        for (int i = 0; i < infoImages.size(); i++) {
+            String imageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_MAIN, infoImages.get(i));
+            ChallengeInfoImage infoImage = ChallengeInfoImage.builder()
+                    .imageUrl(imageUrl)
+                    .imageOrder(i + 1)
+                    .challenge(challenge)
+                    .build();
+            challenge.getInfoImages().add(infoImage);
+        }
+    }
+
+    private void saveCertImages(Challenge challenge, List<MultipartFile> certImages) {
+        for (int i = 0; i < certImages.size(); i++) {
+            String imageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_CERT, certImages.get(i));
+            ChallengeCertImage certImage = ChallengeCertImage.builder()
+                    .imageUrl(imageUrl)
+                    .imageOrder(i + 1)
+                    .challenge(challenge)
+                    .build();
+            challenge.getCertImages().add(certImage);
+        }
     }
 }

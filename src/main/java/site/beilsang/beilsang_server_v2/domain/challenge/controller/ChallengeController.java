@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.challenge.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,12 +24,10 @@ public class ChallengeController {
     public BaseResponse<ChallengeResDTO> createChallenge(
             Authentication authentication,
             @RequestPart("data") CreateChallengeReqDTO createChallengeReqDTO,
-            @RequestPart("mainImage") MultipartFile mainImage,
-            @RequestPart("certImage") MultipartFile certImage
-    ) {
+            @RequestPart("infoImages") List<MultipartFile> infoImages,
+            @RequestPart("certImages") List<MultipartFile> certImages) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(
-                challengeService.createChallenge(memberId, createChallengeReqDTO, mainImage, certImage)
-        );
+                challengeService.createChallenge(memberId, createChallengeReqDTO, infoImages, certImages));
     }
 }
