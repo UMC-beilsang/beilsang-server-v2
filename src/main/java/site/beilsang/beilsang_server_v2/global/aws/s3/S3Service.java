@@ -40,15 +40,11 @@ public class S3Service {
             return "";
         }
 
-        String path = null;
-        switch (uploadPath) {
-            case CHALLENGE_MAIN:
-                path = mainPath;
-            case CHALLENGE_CERT:
-                path = certPath;
-            case MEMBER_PROFILE:
-                path = memberProfilePath;
-        }
+        String path = switch (uploadPath) {
+            case CHALLENGE_MAIN -> mainPath;
+            case CHALLENGE_CERT -> certPath;
+            case MEMBER_PROFILE -> memberProfilePath;
+        };
 
         // 파일 이름 설정
         String fileName = path + buildFileName(Objects.requireNonNull(file.getOriginalFilename()));
