@@ -38,11 +38,13 @@ public class Challenge extends BaseEntity {
 
     private Integer joinPoint;
 
-    private String mainImageUrl;
-
-    private String certImageUrl;
-
     private String details;
+
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeInfoImage> infoImages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeCertImage> certImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeNote> challengeNotes = new ArrayList<>();
