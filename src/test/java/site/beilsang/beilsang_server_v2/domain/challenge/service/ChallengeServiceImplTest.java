@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
@@ -26,9 +25,11 @@ import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogReposito
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.*;
+import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +57,9 @@ class ChallengeServiceImplTest {
     @Mock
     private PointLogRepository pointLogRepository;
 
+    @Mock
+    private S3Service s3Service;
+
     @InjectMocks
     private ChallengeServiceImpl challengeService;
 
@@ -64,6 +68,8 @@ class ChallengeServiceImplTest {
     private Challenge testChallenge;
     private MultipartFile testMainImage;
     private MultipartFile testCertImage;
+    private List<MultipartFile> testInfoImages;
+    private List<MultipartFile> testCertImages;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +83,7 @@ class ChallengeServiceImplTest {
         // 테스트용 챌린지 요청 DTO 준비
         testCreateChallengeReqDTO = createTestChallengeReqDTO();
 
-        // 테스트용 챌린지 엔티티 준비
+        // 테스트용 챌린지 엔티티 준비 (필수 필드 모두 채움)
         testChallenge = Challenge.builder()
                 .id(1L)
                 .title("테스트 챌린지")
@@ -96,8 +102,9 @@ class ChallengeServiceImplTest {
         // 테스트용 MultipartFile 준비
         testMainImage = new MockMultipartFile("mainImage", "main.jpg", "image/jpeg", "main image content".getBytes());
         testCertImage = new MockMultipartFile("certImage", "cert.jpg", "image/jpeg", "cert image content".getBytes());
+        testInfoImages = Collections.singletonList(testMainImage);
+        testCertImages = Collections.singletonList(testCertImage);
     }
-
 
     @Test
     @DisplayName("챌린지 생성 실패 - 존재하지 않는 멤버")
@@ -108,7 +115,7 @@ class ChallengeServiceImplTest {
 
         // when & then
         assertThatThrownBy(() -> challengeService.createChallenge(
-                nonExistentMemberId, testCreateChallengeReqDTO, testMainImage, testCertImage))
+                nonExistentMemberId, testCreateChallengeReqDTO, testInfoImages, testCertImages))
                 .isInstanceOf(BaseException.class)
                 .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
 
@@ -133,7 +140,7 @@ class ChallengeServiceImplTest {
 
         // when & then
         assertThatThrownBy(() -> challengeService.createChallenge(
-                memberId, testCreateChallengeReqDTO, testMainImage, testCertImage))
+                memberId, testCreateChallengeReqDTO, testInfoImages, testCertImages))
                 .isInstanceOf(BaseException.class)
                 .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
 
@@ -155,15 +162,19 @@ class ChallengeServiceImplTest {
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
+        when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
+                .thenReturn("https://s3-url/test.jpg");
 
         // when
-        challengeService.createChallenge(memberId, futureStartReqDTO, testMainImage, testCertImage);
+        ChallengeResDTO result = challengeService.createChallenge(memberId, futureStartReqDTO, testInfoImages,
+                testCertImages);
 
         // then
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
         assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.NOT_YET);
+        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
     @Test
@@ -178,15 +189,19 @@ class ChallengeServiceImplTest {
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
+        when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
+                .thenReturn("https://s3-url/test.jpg");
 
         // when
-        challengeService.createChallenge(memberId, todayStartReqDTO, testMainImage, testCertImage);
+        ChallengeResDTO result = challengeService.createChallenge(memberId, todayStartReqDTO, testInfoImages,
+                testCertImages);
 
         // then
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
         assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.ONGOING);
+        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
     @Test
@@ -207,12 +222,16 @@ class ChallengeServiceImplTest {
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
+        when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
+                .thenReturn("https://s3-url/test.jpg");
 
         // when
-        challengeService.createChallenge(memberId, testCreateChallengeReqDTO, testMainImage, testCertImage);
+        ChallengeResDTO result = challengeService.createChallenge(memberId, testCreateChallengeReqDTO, testInfoImages,
+                testCertImages);
 
         // then
         assertThat(memberWithPoint.getPoint()).isEqualTo(initialPoint - joinPoint);
+        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
     // 테스트 데이터 생성 헬퍼 메서드들
