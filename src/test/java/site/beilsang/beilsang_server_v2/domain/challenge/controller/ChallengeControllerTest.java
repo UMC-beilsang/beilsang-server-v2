@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
@@ -20,6 +21,7 @@ import site.beilsang.beilsang_server_v2.global.enums.ChallengePeriod;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -43,6 +45,8 @@ class ChallengeControllerTest {
     private ChallengeResDTO testChallengeResDTO;
     private MockMultipartFile testMainImage;
     private MockMultipartFile testCertImage;
+    private List<MultipartFile> testInfoImages;
+    private List<MultipartFile> testCertImages;
 
     @BeforeEach
     void setUp() {
@@ -78,6 +82,9 @@ class ChallengeControllerTest {
                 "cert.jpg",
                 "image/jpeg",
                 "cert image content".getBytes());
+
+        testInfoImages = List.of(testMainImage);
+        testCertImages = List.of(testCertImage);
     }
 
     @Test
@@ -91,7 +98,7 @@ class ChallengeControllerTest {
 
         // when
         BaseResponse<ChallengeResDTO> response = challengeController.createChallenge(
-                authentication, testCreateChallengeReqDTO, testMainImage, testCertImage);
+                authentication, testCreateChallengeReqDTO, testInfoImages, testCertImages);
 
         // then
         assertThat(response).isNotNull();
@@ -104,7 +111,7 @@ class ChallengeControllerTest {
         // 서비스 메서드 호출 검증
         verify(authentication).getPrincipal();
         verify(challengeService).createChallenge(eq(memberId), eq(testCreateChallengeReqDTO),
-                eq(testMainImage), eq(testCertImage));
+                eq(testInfoImages), eq(testCertImages));
     }
 
     @Test
@@ -118,14 +125,14 @@ class ChallengeControllerTest {
 
         // when & then
         assertThatThrownBy(() -> challengeController.createChallenge(
-                authentication, testCreateChallengeReqDTO, testMainImage, testCertImage))
+                authentication, testCreateChallengeReqDTO, testInfoImages, testCertImages))
                 .isInstanceOf(BaseException.class)
                 .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
 
         // 서비스 메서드 호출 검증
         verify(authentication).getPrincipal();
         verify(challengeService).createChallenge(eq(memberId), eq(testCreateChallengeReqDTO),
-                eq(testMainImage), eq(testCertImage));
+                eq(testInfoImages), eq(testCertImages));
     }
 
     @Test
@@ -139,14 +146,14 @@ class ChallengeControllerTest {
 
         // when & then
         assertThatThrownBy(() -> challengeController.createChallenge(
-                authentication, testCreateChallengeReqDTO, testMainImage, testCertImage))
+                authentication, testCreateChallengeReqDTO, testInfoImages, testCertImages))
                 .isInstanceOf(BaseException.class)
                 .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
 
         // 서비스 메서드 호출 검증
         verify(authentication).getPrincipal();
         verify(challengeService).createChallenge(eq(memberId), eq(testCreateChallengeReqDTO),
-                eq(testMainImage), eq(testCertImage));
+                eq(testInfoImages), eq(testCertImages));
     }
 
     @Test
@@ -159,12 +166,12 @@ class ChallengeControllerTest {
                 any(), any())).thenReturn(testChallengeResDTO);
 
         // when
-        challengeController.createChallenge(authentication, testCreateChallengeReqDTO, testMainImage, testCertImage);
+        challengeController.createChallenge(authentication, testCreateChallengeReqDTO, testInfoImages, testCertImages);
 
         // then
         verify(authentication).getPrincipal();
         verify(challengeService).createChallenge(eq(expectedMemberId), any(CreateChallengeReqDTO.class),
-                any(), any());
+                eq(testInfoImages), eq(testCertImages));
     }
 
     @Test
@@ -176,14 +183,14 @@ class ChallengeControllerTest {
         when(challengeService.createChallenge(any(), any(), any(), any())).thenReturn(testChallengeResDTO);
 
         // when
-        challengeController.createChallenge(authentication, testCreateChallengeReqDTO, testMainImage, testCertImage);
+        challengeController.createChallenge(authentication, testCreateChallengeReqDTO, testInfoImages, testCertImages);
 
         // then
         verify(challengeService).createChallenge(
                 eq(memberId),
                 eq(testCreateChallengeReqDTO),
-                eq(testMainImage),
-                eq(testCertImage));
+                eq(testInfoImages),
+                eq(testCertImages));
     }
 
     @Test
@@ -196,7 +203,7 @@ class ChallengeControllerTest {
 
         // when
         BaseResponse<ChallengeResDTO> response = challengeController.createChallenge(
-                authentication, testCreateChallengeReqDTO, testMainImage, testCertImage);
+                authentication, testCreateChallengeReqDTO, testInfoImages, testCertImages);
 
         // then
         assertThat(response).isNotNull();
