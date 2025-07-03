@@ -38,7 +38,9 @@ public class ChallengeController {
 
     @GetMapping
     public BaseResponse<PageResponseDTO<ChallengeListResponseDTO>> getChallengeList(
+            Authentication authentication,
             @ModelAttribute ChallengeListRequestDTO requestDTO) {
+        Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(challengeService.getChallengeList(requestDTO));
     }
 }

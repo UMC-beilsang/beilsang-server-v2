@@ -14,4 +14,7 @@ public class ChallengeListRequestDTO {
     private Category category;
     private ChallengeStatus status;
     private String keyword;
+    private Boolean isFinished;
+    private Boolean isJoined;
+    private Long memberId;
 }
