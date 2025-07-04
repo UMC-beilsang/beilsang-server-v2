@@ -41,6 +41,7 @@ public class ChallengeController {
             Authentication authentication,
             @ModelAttribute ChallengeListRequestDTO requestDTO) {
         Long memberId = (Long) authentication.getPrincipal();
+        requestDTO.setMemberId(memberId);
         return new BaseResponse<>(challengeService.getChallengeList(requestDTO));
     }
 }
