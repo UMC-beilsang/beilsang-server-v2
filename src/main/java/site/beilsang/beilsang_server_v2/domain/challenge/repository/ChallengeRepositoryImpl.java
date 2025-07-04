@@ -1,6 +1,7 @@
 package site.beilsang.beilsang_server_v2.domain.challenge.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,9 +68,11 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 .fetch();
 
         // 전체 개수 쿼리
-        long total = queryFactory.selectFrom(challenge)
+        long total = queryFactory
+                .select(Wildcard.count)
+                .from(challenge)
                 .where(builder)
-                .fetchCount();
+                .fetchOne();
 
         return new PageImpl<>(content, pageable, total);
     }
