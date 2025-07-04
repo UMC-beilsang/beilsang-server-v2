@@ -102,9 +102,9 @@ class ChallengeControllerTest {
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.statusCode).isEqualTo(200);
-        assertThat(response.code).isEqualTo("S0001");
-        assertThat(response.message).isEqualTo("요청에 성공했습니다");
+        assertThat(response.statusCode).isEqualTo(BaseResponseCode.SUCCESS.getStatus().value());
+        assertThat(response.code).isEqualTo(BaseResponseCode.SUCCESS.getCode());
+        assertThat(response.message).isEqualTo(BaseResponseCode.SUCCESS.getMessage());
         assertThat(response.data).isNotNull();
         assertThat(response.data).isEqualTo(testChallengeResDTO);
 
