@@ -8,9 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRequestDTO;
+import site.beilsang.beilsang_server_v2.global.enums.SortDirection;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.QChallenge;
-import site.beilsang.beilsang_server_v2.domain.member.entity.QChallengeMember;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,7 +38,6 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         }
         // isJoined 필터링
         if (requestDTO.getIsJoined() != null && requestDTO.getMemberId() != null) {
-            QChallengeMember challengeMember = QChallengeMember.challengeMember;
             if (requestDTO.getIsJoined()) {
                 builder.and(challenge.challengeMembers.any().member.id.eq(requestDTO.getMemberId()));
             } else {
@@ -51,15 +50,16 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
                 .where(builder);
 
         // 정렬 처리
-        pageable.getSort().forEach(order -> {
-            if (order.getProperty().equals("countLikes")) {
-                query.orderBy(order.isAscending() ? challenge.countLikes.asc() : challenge.countLikes.desc());
-            } else if (order.getProperty().equals("startDate")) {
-                query.orderBy(order.isAscending() ? challenge.startDate.asc() : challenge.startDate.desc());
-            } else if (order.getProperty().equals("endDate")) {
-                query.orderBy(order.isAscending() ? challenge.finishDate.asc() : challenge.finishDate.desc());
+        if (requestDTO.getSortField() != null && requestDTO.getSortDirection() != null) {
+            boolean asc = SortDirection.ASC == requestDTO
+                    .getSortDirection();
+            switch (requestDTO.getSortField()) {
+                case ATTENDEE_COUNT -> query.orderBy(asc ? challenge.attendeeCount.asc() : challenge.attendeeCount.desc());
+                case COUNT_LIKES -> query.orderBy(asc ? challenge.countLikes.asc() : challenge.countLikes.desc());
+                case START_DATE -> query.orderBy(asc ? challenge.startDate.asc() : challenge.startDate.desc());
+                case FINISH_DATE -> query.orderBy(asc ? challenge.finishDate.asc() : challenge.finishDate.desc());
             }
-        });
+        }
 
         // 페이징
         List<Challenge> content = query
