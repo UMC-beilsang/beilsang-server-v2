@@ -31,6 +31,10 @@ import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRequestDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResponseDTO;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -172,7 +176,20 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public PageResponseDTO<ChallengeListResponseDTO> getChallengeList(ChallengeListRequestDTO requestDTO) {
-        // TODO: 구현 예정
-        return null;
+        Pageable pageable = PageRequest.of(
+                requestDTO.getPage() != null ? requestDTO.getPage() : 0,
+                requestDTO.getSize() != null ? requestDTO.getSize() : 10);
+        Page<Challenge> page = challengeRepository.findChallenges(requestDTO, pageable);
+        List<ChallengeListResponseDTO> content = page.getContent().stream()
+                .map(ChallengeAssembler::toChallengeListResponseDTO)
+                .collect(Collectors.toList());
+        return PageResponseDTO.<ChallengeListResponseDTO>builder()
+                .content(content)
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .hasNext(page.hasNext())
+                .build();
     }
 }
