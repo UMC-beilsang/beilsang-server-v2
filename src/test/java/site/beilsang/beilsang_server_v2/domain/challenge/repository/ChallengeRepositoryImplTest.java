@@ -15,7 +15,6 @@ import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
