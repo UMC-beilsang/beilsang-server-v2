@@ -24,7 +24,7 @@ import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogReposito
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
@@ -101,17 +101,17 @@ public class ChallengeServiceImpl implements ChallengeService {
                         .build())
                 .toList());
 
-        // ChallengeStatus 상태 결정
-        ChallengeStatus challengeStatus = ChallengeStatus.ONGOING;
+        // ChallengeMemberStatus 상태 결정
+        ChallengeMemberStatus challengeMemberStatus = site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus.ONGOING;
         if (createChallengeReqDTO.getStartDate().isAfter(LocalDate.now())) {
-            challengeStatus = ChallengeStatus.NOT_YET;
+            challengeMemberStatus = ChallengeMemberStatus.NOT_YET;
         }
 
         // ChallengeMember 생성
         challengeMemberRepository.save(ChallengeMember.builder()
                 .isHost(true)
                 .successDays(0)
-                .challengeStatus(challengeStatus)
+                .challengeMemberStatus(challengeMemberStatus)
                 .isFeedUpload(false)
                 .member(member)
                 .challenge(challenge)

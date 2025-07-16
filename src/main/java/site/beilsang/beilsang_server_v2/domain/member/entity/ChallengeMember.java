@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.global.common.BaseEntity;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 
 @Entity
 @Getter
@@ -29,7 +29,7 @@ public class ChallengeMember extends BaseEntity {
     private Integer successDays;
 
     @Enumerated(EnumType.STRING)
-    private ChallengeStatus challengeStatus;
+    private ChallengeMemberStatus challengeMemberStatus;
 
     private Boolean isFeedUpload;
 

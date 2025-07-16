@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 
 @Getter
 @Builder
@@ -15,7 +15,7 @@ public class ChallengeListResponseDTO {
     private Long id;
     private String title;
     private Category category;
-    private ChallengeStatus status;
+    private ChallengeMemberStatus status;
     private int participantCount;
     private int likeCount;
     private String imageUrl;

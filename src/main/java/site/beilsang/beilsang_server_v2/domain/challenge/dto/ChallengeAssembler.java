@@ -68,7 +68,7 @@ public class ChallengeAssembler {
                                 .id(challenge.getId())
                                 .title(challenge.getTitle())
                                 .category(challenge.getCategory())
-                                .status(null) // TODO: ChallengeStatus 추가
+                                .status(null) // TODO: ChallengeMemberStatus 추가
                                 .participantCount(challenge.getAttendeeCount())
                                 .likeCount(challenge.getCountLikes())
                                 .imageUrl(imageUrl)

@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
-import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeNoteRepository;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
@@ -35,7 +34,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -173,7 +171,8 @@ class ChallengeServiceImplTest {
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.NOT_YET);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
+                site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus.NOT_YET);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
@@ -200,7 +199,8 @@ class ChallengeServiceImplTest {
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.ONGOING);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
+                site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus.ONGOING);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
