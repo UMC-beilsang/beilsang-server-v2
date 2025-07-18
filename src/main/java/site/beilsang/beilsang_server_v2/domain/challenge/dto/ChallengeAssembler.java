@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResponseDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 
 @Slf4j
 @Component
@@ -59,12 +60,12 @@ public class ChallengeAssembler {
                                 .build();
         }
 
-        public static ChallengeListResponseDTO toChallengeListResponseDTO(Challenge challenge) {
+        public static ChallengeListResDTO toChallengeListResDTO(Challenge challenge) {
                 String imageUrl = null;
                 if (!challenge.getInfoImages().isEmpty()) {
                         imageUrl = challenge.getInfoImages().get(0).getImageUrl();
                 }
-                return ChallengeListResponseDTO.builder()
+                return ChallengeListResDTO.builder()
                                 .id(challenge.getId())
                                 .title(challenge.getTitle())
                                 .category(challenge.getCategory())
@@ -73,6 +74,40 @@ public class ChallengeAssembler {
                                 .likeCount(challenge.getCountLikes())
                                 .imageUrl(imageUrl)
                                 .description(challenge.getDetails())
+                                .build();
+        }
+
+        public static ChallengeDetailResDTO toChallengeDetailResDTO(Challenge challenge) {
+                List<String> infoImageUrls = challenge.getInfoImages().stream()
+                                .sorted((a, b) -> a.getImageOrder().compareTo(b.getImageOrder()))
+                                .map(image -> image.getImageUrl())
+                                .toList();
+
+                List<String> certImageUrls = challenge.getCertImages().stream()
+                                .sorted((a, b) -> a.getImageOrder().compareTo(b.getImageOrder()))
+                                .map(image -> image.getImageUrl())
+                                .toList();
+
+                List<String> challengeNotes = challenge.getChallengeNotes().stream()
+                                .map(note -> note.getNote())
+                                .toList();
+
+                return ChallengeDetailResDTO.builder()
+                                .challengeId(challenge.getId())
+                                .title(challenge.getTitle())
+                                .description(challenge.getDetails())
+                                .category(challenge.getCategory())
+                                .status(null) // TODO: ChallengeStatus 매핑 필요시 추가
+                                .startDate(challenge.getStartDate())
+                                .finishDate(challenge.getFinishDate())
+                                .period(challenge.getPeriod())
+                                .totalGoalDay(challenge.getTotalGoalDay())
+                                .joinPoint(challenge.getJoinPoint())
+                                .attendeeCount(challenge.getAttendeeCount())
+                                .likeCount(challenge.getCountLikes())
+                                .infoImageUrls(infoImageUrls)
+                                .certImageUrls(certImageUrls)
+                                .challengeNotes(challengeNotes)
                                 .build();
         }
 }

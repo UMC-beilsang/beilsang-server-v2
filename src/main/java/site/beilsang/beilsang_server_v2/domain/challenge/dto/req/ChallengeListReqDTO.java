@@ -9,7 +9,7 @@ import site.beilsang.beilsang_server_v2.global.enums.SortDirection;
 
 @Getter
 @Setter
-public class ChallengeListRequestDTO {
+public class ChallengeListReqDTO {
     private Integer page = 0;
     private Integer size = 10;
     private ChallengeSortField sortField = ChallengeSortField.FINISH_DATE;

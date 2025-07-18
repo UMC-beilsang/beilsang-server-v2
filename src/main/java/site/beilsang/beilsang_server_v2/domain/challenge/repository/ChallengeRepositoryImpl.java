@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRequestDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.global.enums.SortDirection;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.QChallenge;
@@ -19,7 +19,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Challenge> findChallenges(ChallengeListRequestDTO requestDTO, Pageable pageable) {
+    public Page<Challenge> findChallenges(ChallengeListReqDTO requestDTO, Pageable pageable) {
         QChallenge challenge = QChallenge.challenge;
         BooleanBuilder builder = new BooleanBuilder();
         LocalDate today = LocalDate.now();

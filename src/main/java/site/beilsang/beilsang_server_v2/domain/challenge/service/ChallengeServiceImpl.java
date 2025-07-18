@@ -3,11 +3,13 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
@@ -28,8 +30,8 @@ import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRequestDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResponseDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,6 +52,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeNoteRepository challengeNoteRepository;
     private final PointLogRepository pointLogRepository;
     private final S3Service s3Service;
+    private final ChallengeAssembler challengeAssembler;
 
     @Override
     public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
@@ -175,15 +178,15 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public PageResponseDTO<ChallengeListResponseDTO> getChallengeList(ChallengeListRequestDTO requestDTO) {
+    public PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
                 requestDTO.getPage() != null ? requestDTO.getPage() : 0,
                 requestDTO.getSize() != null ? requestDTO.getSize() : 10);
         Page<Challenge> page = challengeRepository.findChallenges(requestDTO, pageable);
-        List<ChallengeListResponseDTO> content = page.getContent().stream()
-                .map(ChallengeAssembler::toChallengeListResponseDTO)
+        List<ChallengeListResDTO> content = page.getContent().stream()
+                .map(ChallengeAssembler::toChallengeListResDTO)
                 .collect(Collectors.toList());
-        return PageResponseDTO.<ChallengeListResponseDTO>builder()
+        return PageResponseDTO.<ChallengeListResDTO>builder()
                 .content(content)
                 .page(page.getNumber())
                 .size(page.getSize())
@@ -191,5 +194,14 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .totalPages(page.getTotalPages())
                 .hasNext(page.hasNext())
                 .build();
+    }
+
+    @Override
+    public ChallengeDetailResDTO getChallengeDetail(Long challengeId) {
+        Optional<Challenge> challenge = challengeRepository.getChallengeById(challengeId);
+        if (challenge.isEmpty()) {
+            throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
+        }
+        return ChallengeAssembler.toChallengeDetailResDTO(challenge.get());
     }
 }
