@@ -79,8 +79,7 @@ public class ChallengeAssembler {
     }
 
     public static ChallengeDetailResDTO toChallengeDetailResDTO(
-            Challenge challenge, boolean isJoinable, ChallengeStatus status, Float progress
-    ) {
+            Challenge challenge, boolean isJoinable, ChallengeStatus status, Float progress) {
         List<String> infoImageUrls = challenge.getInfoImages().stream()
                 .sorted((a, b) -> a.getImageOrder().compareTo(b.getImageOrder()))
                 .map(image -> image.getImageUrl())

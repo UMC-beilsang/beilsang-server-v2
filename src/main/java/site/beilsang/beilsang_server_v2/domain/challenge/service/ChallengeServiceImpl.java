@@ -56,7 +56,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
-            List<MultipartFile> infoImages, List<MultipartFile> certImages) {
+                                           List<MultipartFile> infoImages, List<MultipartFile> certImages) {
         // 이미지 파일 검증
         validateImages(infoImages, certImages);
 
@@ -205,22 +205,38 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 참여 가능 여부 판단
         ChallengeMember challengeMember = challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId);
-        boolean isJoinable = (challengeMember == null) && !challenge.getStartDate().isBefore(LocalDate.now());
+        boolean isJoinable = isJoinable(challenge, challengeMember);
 
-        // 챌린지 상태, 진행도 계산
-        Float progress = null;
-        ChallengeStatus status = isJoinable ? ChallengeStatus.NOT_YET : null;
-        if (challengeMember != null) {
-            switch (challengeMember.getChallengeStatus()) {
-                case ONGOING -> {
-                    status = ChallengeStatus.ONGOING;
-                    progress = (float) challengeMember.getSuccessDays() / challenge.getTotalGoalDay();
-                }
-                case SUCCESS -> status = ChallengeStatus.SUCCESS;
-                case FAIL -> status = ChallengeStatus.FAIL;
-            }
-        }
+        // 챌린지 상태
+        ChallengeStatus status = getChallengeStatus(challenge, challengeMember);
+
+        // 챌린지 진행률 계산
+        Float progress = getProgress(challenge, challengeMember, status);
 
         return ChallengeAssembler.toChallengeDetailResDTO(challenge, isJoinable, status, progress);
+    }
+
+    private boolean isJoinable(Challenge challenge, ChallengeMember challengeMember) {
+        LocalDate today = LocalDate.now();
+        if (challengeMember != null) {
+            return false; // 이미 참여 중인 경우는 참여 불가
+        }
+        return !challenge.getFinishDate().isBefore(today); // 챌린지가 이미 종료된 경우 참여 불가
+    }
+
+    private ChallengeStatus getChallengeStatus(Challenge challenge, ChallengeMember challengeMember) {
+        LocalDate today = LocalDate.now();
+        if (challengeMember == null) {
+            return challenge.getStartDate().isAfter(today) ? ChallengeStatus.NOT_YET : ChallengeStatus.ONGOING;
+        } else {
+            return challengeMember.getChallengeStatus();
+        }
+    }
+
+    private Float getProgress(Challenge challenge, ChallengeMember challengeMember, ChallengeStatus status) {
+        if (challengeMember != null && status == ChallengeStatus.ONGOING) {
+            return (float) challengeMember.getSuccessDays() / challenge.getTotalGoalDay();
+        }
+        return null;
     }
 }
