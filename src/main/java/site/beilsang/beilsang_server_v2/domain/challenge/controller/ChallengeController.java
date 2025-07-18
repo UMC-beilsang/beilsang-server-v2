@@ -49,8 +49,9 @@ public class ChallengeController {
 
     @GetMapping("/{challengeId}")
     public BaseResponse<ChallengeDetailResDTO> getChallengeDetail(
-            @PathVariable Long challengeId) {
-        // TODO: 서비스 호출 및 상세 정보 반환 구현
-        return null;
+            @PathVariable Long challengeId,
+            Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.getChallengeDetail(challengeId, memberId));
     }
 }

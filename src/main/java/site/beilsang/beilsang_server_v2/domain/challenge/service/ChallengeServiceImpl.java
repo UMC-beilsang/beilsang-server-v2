@@ -197,11 +197,30 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public ChallengeDetailResDTO getChallengeDetail(Long challengeId) {
-        Optional<Challenge> challenge = challengeRepository.getChallengeById(challengeId);
-        if (challenge.isEmpty()) {
+    public ChallengeDetailResDTO getChallengeDetail(Long challengeId, Long memberId) {
+        Challenge challenge = challengeRepository.getChallengeById(challengeId);
+        if (challenge == null) {
             throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
         }
-        return ChallengeAssembler.toChallengeDetailResDTO(challenge.get());
+
+        // 참여 가능 여부 판단
+        ChallengeMember challengeMember = challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId);
+        boolean isJoinable = (challengeMember == null) && !challenge.getStartDate().isBefore(LocalDate.now());
+
+        // 챌린지 상태, 진행도 계산
+        Float progress = null;
+        ChallengeStatus status = isJoinable ? ChallengeStatus.NOT_YET : null;
+        if (challengeMember != null) {
+            switch (challengeMember.getChallengeStatus()) {
+                case ONGOING -> {
+                    status = ChallengeStatus.ONGOING;
+                    progress = (float) challengeMember.getSuccessDays() / challenge.getTotalGoalDay();
+                }
+                case SUCCESS -> status = ChallengeStatus.SUCCESS;
+                case FAIL -> status = ChallengeStatus.FAIL;
+            }
+        }
+
+        return ChallengeAssembler.toChallengeDetailResDTO(challenge, isJoinable, status, progress);
     }
 }

@@ -15,7 +15,6 @@ public class ChallengeDetailResDTO {
     private String title;
     private String description;
     private Category category;
-    private ChallengeStatus status;
     private LocalDate startDate;
     private LocalDate finishDate;
     private ChallengePeriod period;
@@ -27,6 +26,6 @@ public class ChallengeDetailResDTO {
     private List<String> certImageUrls;
     private List<String> challengeNotes;
     private Boolean isJoinable;
-    private Integer progress;
-    // 필요시 참여자 정보 등 추가 가능
+    private ChallengeStatus status;
+    private Float progress;
 }

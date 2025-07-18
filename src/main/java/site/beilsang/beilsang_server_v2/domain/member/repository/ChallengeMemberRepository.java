@@ -9,11 +9,14 @@ import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
 @Repository
 public interface ChallengeMemberRepository extends JpaRepository<ChallengeMember, Long> {
-    //find
+    // find
     List<ChallengeMember> findAllByMemberId(Long memberId);
 
-    //count
+    // count
     Long countByMemberIdAndChallengeStatus(Long memberId, ChallengeStatus challengeStatus);
+
     Long countByMemberId(Long memberId);
 
+    // 챌린지-멤버 단건 조회
+    ChallengeMember findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 }

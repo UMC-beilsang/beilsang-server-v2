@@ -16,5 +16,5 @@ public interface ChallengeService {
 
     PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO);
 
-    ChallengeDetailResDTO getChallengeDetail(Long challengeId);
+    ChallengeDetailResDTO getChallengeDetail(Long challengeId, Long memberId);
 }
