@@ -213,6 +213,12 @@ public class ChallengeServiceImpl implements ChallengeService {
         // 챌린지 진행률 계산
         Float progress = getProgress(challenge, challengeMember, status);
 
+        // TODO: 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회 및 응답에 포함
+        // 1. PointLogRepository에서 memberId, challengeId로 포인트 내역 조회
+        // 2. 사용 포인트: challenge.getJoinPoint() 등
+        // 3. 획득 포인트: PointLog에서 CHALLENGE_SUCCESS/FAIL 등으로 합산
+        // 4. ChallengeDetailResDTO에 필드 추가 및 매핑
+
         return ChallengeAssembler.toChallengeDetailResDTO(challenge, isJoinable, status, progress);
     }
 
