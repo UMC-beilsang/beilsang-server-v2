@@ -26,5 +26,7 @@ public class ChallengeDetailResDTO {
     private List<String> infoImageUrls;
     private List<String> certImageUrls;
     private List<String> challengeNotes;
+    private Boolean isJoinable;
+    private Integer progress;
     // 필요시 참여자 정보 등 추가 가능
 }
