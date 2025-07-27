@@ -11,7 +11,7 @@ import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChallengeListResponseDTO {
+public class ChallengeListResDTO {
     private Long id;
     private String title;
     private Category category;

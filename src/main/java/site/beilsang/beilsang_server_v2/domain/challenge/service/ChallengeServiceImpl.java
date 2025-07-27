@@ -3,11 +3,13 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
@@ -28,8 +30,8 @@ import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRequestDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResponseDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,10 +52,11 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeNoteRepository challengeNoteRepository;
     private final PointLogRepository pointLogRepository;
     private final S3Service s3Service;
+    private final ChallengeAssembler challengeAssembler;
 
     @Override
     public ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
-            List<MultipartFile> infoImages, List<MultipartFile> certImages) {
+                                           List<MultipartFile> infoImages, List<MultipartFile> certImages) {
         // 이미지 파일 검증
         validateImages(infoImages, certImages);
 
@@ -175,15 +178,15 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public PageResponseDTO<ChallengeListResponseDTO> getChallengeList(ChallengeListRequestDTO requestDTO) {
+    public PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
                 requestDTO.getPage() != null ? requestDTO.getPage() : 0,
                 requestDTO.getSize() != null ? requestDTO.getSize() : 10);
         Page<Challenge> page = challengeRepository.findChallenges(requestDTO, pageable);
-        List<ChallengeListResponseDTO> content = page.getContent().stream()
-                .map(ChallengeAssembler::toChallengeListResponseDTO)
+        List<ChallengeListResDTO> content = page.getContent().stream()
+                .map(ChallengeAssembler::toChallengeListResDTO)
                 .collect(Collectors.toList());
-        return PageResponseDTO.<ChallengeListResponseDTO>builder()
+        return PageResponseDTO.<ChallengeListResDTO>builder()
                 .content(content)
                 .page(page.getNumber())
                 .size(page.getSize())
@@ -191,5 +194,55 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .totalPages(page.getTotalPages())
                 .hasNext(page.hasNext())
                 .build();
+    }
+
+    @Override
+    public ChallengeDetailResDTO getChallengeDetail(Long challengeId, Long memberId) {
+        Challenge challenge = challengeRepository.getChallengeById(challengeId);
+        if (challenge == null) {
+            throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
+        }
+
+        // 참여 가능 여부 판단
+        ChallengeMember challengeMember = challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId);
+        boolean isJoinable = isJoinable(challenge, challengeMember);
+
+        // 챌린지 상태
+        ChallengeStatus status = getChallengeStatus(challenge, challengeMember);
+
+        // 챌린지 진행률 계산
+        Float progress = getProgress(challenge, challengeMember, status);
+
+        // TODO: 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회 및 응답에 포함
+        // 1. PointLogRepository에서 memberId, challengeId로 포인트 내역 조회
+        // 2. 사용 포인트: challenge.getJoinPoint() 등
+        // 3. 획득 포인트: PointLog에서 CHALLENGE_SUCCESS/FAIL 등으로 합산
+        // 4. ChallengeDetailResDTO에 필드 추가 및 매핑
+
+        return ChallengeAssembler.toChallengeDetailResDTO(challenge, isJoinable, status, progress);
+    }
+
+    private boolean isJoinable(Challenge challenge, ChallengeMember challengeMember) {
+        LocalDate today = LocalDate.now();
+        if (challengeMember != null) {
+            return false; // 이미 참여 중인 경우는 참여 불가
+        }
+        return !challenge.getFinishDate().isBefore(today); // 챌린지가 이미 종료된 경우 참여 불가
+    }
+
+    private ChallengeStatus getChallengeStatus(Challenge challenge, ChallengeMember challengeMember) {
+        LocalDate today = LocalDate.now();
+        if (challengeMember == null) {
+            return challenge.getStartDate().isAfter(today) ? ChallengeStatus.NOT_YET : ChallengeStatus.ONGOING;
+        } else {
+            return challengeMember.getChallengeStatus();
+        }
+    }
+
+    private Float getProgress(Challenge challenge, ChallengeMember challengeMember, ChallengeStatus status) {
+        if (challengeMember != null && status == ChallengeStatus.ONGOING) {
+            return (float) challengeMember.getSuccessDays() / challenge.getTotalGoalDay();
+        }
+        return null;
     }
 }

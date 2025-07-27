@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRequestDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.global.config.QueryDslConfig;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
@@ -43,7 +43,7 @@ class ChallengeRepositoryImplTest {
         challengeRepository.save(finished);
         challengeRepository.save(ongoing);
 
-        ChallengeListRequestDTO dto = new ChallengeListRequestDTO();
+        ChallengeListReqDTO dto = new ChallengeListReqDTO();
         dto.setIsFinished(true);
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -74,7 +74,7 @@ class ChallengeRepositoryImplTest {
         challengeRepository.save(finished);
         challengeRepository.save(ongoing);
 
-        ChallengeListRequestDTO dto = new ChallengeListRequestDTO();
+        ChallengeListReqDTO dto = new ChallengeListReqDTO();
         dto.setIsFinished(false);
         Pageable pageable = PageRequest.of(0, 10);
 
