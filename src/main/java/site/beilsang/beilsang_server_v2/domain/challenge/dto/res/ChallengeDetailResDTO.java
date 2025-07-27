@@ -28,4 +28,6 @@ public class ChallengeDetailResDTO {
     private Boolean isJoinable;
     private ChallengeStatus status;
     private Float progress;
+    private Integer usedPoint;
+    private Integer earnedPoint;
 }
