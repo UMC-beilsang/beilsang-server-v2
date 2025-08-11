@@ -3,7 +3,6 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +25,7 @@ import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogReposito
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
@@ -105,17 +104,17 @@ public class ChallengeServiceImpl implements ChallengeService {
                         .build())
                 .toList());
 
-        // ChallengeStatus 상태 결정
-        ChallengeStatus challengeStatus = ChallengeStatus.ONGOING;
+        // ChallengeMemberStatus 상태 결정
+        ChallengeMemberStatus challengeMemberStatus = ChallengeMemberStatus.ONGOING;
         if (createChallengeReqDTO.getStartDate().isAfter(LocalDate.now())) {
-            challengeStatus = ChallengeStatus.NOT_YET;
+            challengeMemberStatus = ChallengeMemberStatus.NOT_YET;
         }
 
         // ChallengeMember 생성
         challengeMemberRepository.save(ChallengeMember.builder()
                 .isHost(true)
                 .successDays(0)
-                .challengeStatus(challengeStatus)
+                .challengeMemberStatus(challengeMemberStatus)
                 .isFeedUpload(false)
                 .member(member)
                 .challenge(challenge)
@@ -209,7 +208,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         boolean isJoinable = isJoinable(challenge, challengeMember);
 
         // 챌린지 상태
-        ChallengeStatus status = getChallengeStatus(challenge, challengeMember);
+        ChallengeMemberStatus status = getChallengeStatus(challenge, challengeMember);
 
         // 챌린지 진행률 계산
         Float progress = getProgress(challenge, challengeMember, status);
@@ -218,7 +217,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Integer usedPoint = null;
         Integer earnedPoint = null;
         
-        if (challengeMember != null && (status == ChallengeStatus.SUCCESS || status == ChallengeStatus.FAIL)) {
+        if (challengeMember != null && (status == ChallengeMemberStatus.SUCCESS || status == ChallengeMemberStatus.FAIL)) {
             // 사용 포인트: 해당 챌린지 참여 시 사용한 포인트 조회
             List<PointLog> pointLogs = pointLogRepository.findByMemberIdAndChallengeId(
                     memberId, challengeId
@@ -242,17 +241,17 @@ public class ChallengeServiceImpl implements ChallengeService {
         return !challenge.getFinishDate().isBefore(today); // 챌린지가 이미 종료된 경우 참여 불가
     }
 
-    private ChallengeStatus getChallengeStatus(Challenge challenge, ChallengeMember challengeMember) {
+    private ChallengeMemberStatus getChallengeStatus(Challenge challenge, ChallengeMember challengeMember) {
         LocalDate today = LocalDate.now();
         if (challengeMember == null) {
-            return challenge.getStartDate().isAfter(today) ? ChallengeStatus.NOT_YET : ChallengeStatus.ONGOING;
+            return challenge.getStartDate().isAfter(today) ? ChallengeMemberStatus.NOT_YET : ChallengeMemberStatus.ONGOING;
         } else {
-            return challengeMember.getChallengeStatus();
+            return challengeMember.getChallengeMemberStatus();
         }
     }
 
-    private Float getProgress(Challenge challenge, ChallengeMember challengeMember, ChallengeStatus status) {
-        if (challengeMember != null && status == ChallengeStatus.ONGOING) {
+    private Float getProgress(Challenge challenge, ChallengeMember challengeMember, ChallengeMemberStatus status) {
+        if (challengeMember != null && status == ChallengeMemberStatus.ONGOING) {
             return (float) challengeMember.getSuccessDays() / challenge.getTotalGoalDay();
         }
         return null;

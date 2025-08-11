@@ -8,7 +8,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 
 @Slf4j
 @Component
@@ -70,7 +70,7 @@ public class ChallengeAssembler {
                 .id(challenge.getId())
                 .title(challenge.getTitle())
                 .category(challenge.getCategory())
-                .status(null) // TODO: ChallengeStatus 추가
+                .status(null) // TODO: ChallengeMemberStatus 추가
                 .participantCount(challenge.getAttendeeCount())
                 .likeCount(challenge.getCountLikes())
                 .imageUrl(imageUrl)
@@ -79,7 +79,7 @@ public class ChallengeAssembler {
     }
 
     public static ChallengeDetailResDTO toChallengeDetailResDTO(
-            Challenge challenge, boolean isJoinable, ChallengeStatus status, Float progress,
+            Challenge challenge, boolean isJoinable, ChallengeMemberStatus status, Float progress,
             Integer usedPoint, Integer earnedPoint
     ) {
         List<String> infoImageUrls = challenge.getInfoImages().stream()

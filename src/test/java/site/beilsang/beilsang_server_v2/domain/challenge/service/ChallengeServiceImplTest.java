@@ -213,7 +213,7 @@ class ChallengeServiceImplTest {
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.NOT_YET);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.NOT_YET);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
@@ -240,7 +240,7 @@ class ChallengeServiceImplTest {
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.ONGOING);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.ONGOING);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
@@ -290,7 +290,7 @@ class ChallengeServiceImplTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getIsJoinable()).isTrue();
-        assertThat(result.getStatus()).isEqualTo(ChallengeStatus.ONGOING);
+        assertThat(result.getStatus()).isEqualTo(ChallengeMemberStatus.ONGOING);
         assertThat(result.getProgress()).isNull();
     }
 

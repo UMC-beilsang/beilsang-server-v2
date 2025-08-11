@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengePeriod;
 
 @Getter
@@ -26,7 +26,7 @@ public class ChallengeDetailResDTO {
     private List<String> certImageUrls;
     private List<String> challengeNotes;
     private Boolean isJoinable;
-    private ChallengeStatus status;
+    private ChallengeMemberStatus status;
     private Float progress;
     private Integer usedPoint;
     private Integer earnedPoint;
