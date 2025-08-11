@@ -78,17 +78,18 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (member.getPoint() < joinPoint) {
             throw new BaseException(BaseResponseCode.NOT_ENOUGH_POINT);
         }
+        // 챌린지 생성
+        Challenge challenge = challengeRepository.save(
+                ChallengeAssembler.toEntity(createChallengeReqDTO));
+
         pointLogRepository.save(PointLog.builder()
                 .pointName(PointName.JOIN_CHALLENGE)
                 .status(PointStatus.USE)
                 .value(joinPoint)
                 .member(member)
+                .challenge(challenge)
                 .build());
         member.subPoint(joinPoint); // 포인트 차감
-
-        // 챌린지 생성
-        Challenge challenge = challengeRepository.save(
-                ChallengeAssembler.toEntity(createChallengeReqDTO));
 
         // 챌린지 정보 이미지들 업로드 및 저장
         saveInfoImages(challenge, infoImages);
@@ -213,13 +214,24 @@ public class ChallengeServiceImpl implements ChallengeService {
         // 챌린지 진행률 계산
         Float progress = getProgress(challenge, challengeMember, status);
 
-        // TODO: 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회 및 응답에 포함
-        // 1. PointLogRepository에서 memberId, challengeId로 포인트 내역 조회
-        // 2. 사용 포인트: challenge.getJoinPoint() 등
-        // 3. 획득 포인트: PointLog에서 CHALLENGE_SUCCESS/FAIL 등으로 합산
-        // 4. ChallengeDetailResDTO에 필드 추가 및 매핑
+        // 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회 및 응답에 포함
+        Integer usedPoint = null;
+        Integer earnedPoint = null;
+        
+        if (challengeMember != null && (status == ChallengeStatus.SUCCESS || status == ChallengeStatus.FAIL)) {
+            // 사용 포인트: 해당 챌린지 참여 시 사용한 포인트 조회
+            List<PointLog> pointLogs = pointLogRepository.findByMemberIdAndChallengeId(
+                    memberId, challengeId
+            );
+            usedPoint = pointLogs.stream().filter(pointLog -> pointLog.getStatus() == PointStatus.USE)
+                    .mapToInt(PointLog::getValue).sum();
+            earnedPoint = pointLogs.stream().filter(pointLog -> pointLog.getStatus() == PointStatus.EARN)
+                    .mapToInt(PointLog::getValue).sum();
+        }
 
-        return ChallengeAssembler.toChallengeDetailResDTO(challenge, isJoinable, status, progress);
+        return ChallengeAssembler.toChallengeDetailResDTO(
+                challenge, isJoinable, status, progress, usedPoint, earnedPoint
+        );
     }
 
     private boolean isJoinable(Challenge challenge, ChallengeMember challengeMember) {
