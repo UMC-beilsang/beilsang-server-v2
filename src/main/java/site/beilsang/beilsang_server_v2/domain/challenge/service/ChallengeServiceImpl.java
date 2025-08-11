@@ -3,6 +3,7 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
@@ -104,11 +106,9 @@ public class ChallengeServiceImpl implements ChallengeService {
                         .build())
                 .toList());
 
-        // ChallengeMemberStatus 상태 결정
-        ChallengeMemberStatus challengeMemberStatus = ChallengeMemberStatus.ONGOING;
-        if (createChallengeReqDTO.getStartDate().isAfter(LocalDate.now())) {
-            challengeMemberStatus = ChallengeMemberStatus.NOT_YET;
-        }
+        // ChallengeMemberStatus 상태 결정 - Challenge의 현재 상태를 기반으로 결정
+        ChallengeMemberStatus challengeMemberStatus = challenge.getStatus() == ChallengeStatus.NOT_YET ? 
+            ChallengeMemberStatus.NOT_YET : ChallengeMemberStatus.ONGOING;
 
         // ChallengeMember 생성
         challengeMemberRepository.save(ChallengeMember.builder()
@@ -203,29 +203,39 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
         }
 
+        Optional<ChallengeMember> challengeMemberOpt = challengeMemberRepository.findByChallengeIdAndMemberId(
+                challengeId, memberId);
+        
         // 참여 가능 여부 판단
-        ChallengeMember challengeMember = challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId);
-        boolean isJoinable = isJoinable(challenge, challengeMember);
-
+        boolean isJoinable = challengeMemberOpt.isEmpty() && challenge.getStatus() != ChallengeStatus.END;
+        
         // 챌린지 상태
-        ChallengeMemberStatus status = getChallengeStatus(challenge, challengeMember);
+        ChallengeMemberStatus status = challengeMemberOpt
+                .map(ChallengeMember::getChallengeMemberStatus)
+                .orElse(ChallengeMemberStatus.NOT_JOINED);
 
         // 챌린지 진행률 계산
-        Float progress = getProgress(challenge, challengeMember, status);
+        Float progress = challengeMemberOpt
+                .filter(member -> status == ChallengeMemberStatus.ONGOING)
+                .map(member -> (float) member.getSuccessDays() / challenge.getTotalGoalDay())
+                .orElse(null);
 
-        // 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회 및 응답에 포함
+        // 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회
         Integer usedPoint = null;
         Integer earnedPoint = null;
         
-        if (challengeMember != null && (status == ChallengeMemberStatus.SUCCESS || status == ChallengeMemberStatus.FAIL)) {
-            // 사용 포인트: 해당 챌린지 참여 시 사용한 포인트 조회
-            List<PointLog> pointLogs = pointLogRepository.findByMemberIdAndChallengeId(
-                    memberId, challengeId
-            );
-            usedPoint = pointLogs.stream().filter(pointLog -> pointLog.getStatus() == PointStatus.USE)
-                    .mapToInt(PointLog::getValue).sum();
-            earnedPoint = pointLogs.stream().filter(pointLog -> pointLog.getStatus() == PointStatus.EARN)
-                    .mapToInt(PointLog::getValue).sum();
+        if (challengeMemberOpt.isPresent() && (status == ChallengeMemberStatus.SUCCESS || status == ChallengeMemberStatus.FAIL)) {
+            List<PointLog> pointLogs = pointLogRepository.findByMemberIdAndChallengeId(memberId, challengeId);
+
+            usedPoint = pointLogs.stream()
+                    .filter(pointLog -> pointLog.getStatus() == PointStatus.USE)
+                    .mapToInt(PointLog::getValue)
+                    .sum();
+
+            earnedPoint = pointLogs.stream()
+                    .filter(pointLog -> pointLog.getStatus() == PointStatus.EARN)
+                    .mapToInt(PointLog::getValue)
+                    .sum();
         }
 
         return ChallengeAssembler.toChallengeDetailResDTO(
@@ -233,27 +243,4 @@ public class ChallengeServiceImpl implements ChallengeService {
         );
     }
 
-    private boolean isJoinable(Challenge challenge, ChallengeMember challengeMember) {
-        LocalDate today = LocalDate.now();
-        if (challengeMember != null) {
-            return false; // 이미 참여 중인 경우는 참여 불가
-        }
-        return !challenge.getFinishDate().isBefore(today); // 챌린지가 이미 종료된 경우 참여 불가
-    }
-
-    private ChallengeMemberStatus getChallengeStatus(Challenge challenge, ChallengeMember challengeMember) {
-        LocalDate today = LocalDate.now();
-        if (challengeMember == null) {
-            return challenge.getStartDate().isAfter(today) ? ChallengeMemberStatus.NOT_YET : ChallengeMemberStatus.ONGOING;
-        } else {
-            return challengeMember.getChallengeMemberStatus();
-        }
-    }
-
-    private Float getProgress(Challenge challenge, ChallengeMember challengeMember, ChallengeMemberStatus status) {
-        if (challengeMember != null && status == ChallengeMemberStatus.ONGOING) {
-            return (float) challengeMember.getSuccessDays() / challenge.getTotalGoalDay();
-        }
-        return null;
-    }
 }
