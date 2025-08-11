@@ -13,7 +13,7 @@ public interface ChallengeMemberRepository extends JpaRepository<ChallengeMember
     List<ChallengeMember> findAllByMemberId(Long memberId);
 
     // count
-    Long countByMemberIdAndChallengeStatus(Long memberId, ChallengeMemberStatus challengeMemberStatus);
+    Long countByMemberIdAndChallengeMemberStatus(Long memberId, ChallengeMemberStatus challengeMemberStatus);
 
     Long countByMemberId(Long memberId);
 

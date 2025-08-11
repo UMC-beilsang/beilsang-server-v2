@@ -55,13 +55,13 @@ public class MemberService {
         Long countFeed = feedRepository.countByChallengeMember_IdIn(challengeMemberIds);
 
         //달성한 챌린지 개수
-        Long countSuccessChallenge = challengeMemberRepository.countByMemberIdAndChallengeStatus(memberId, ChallengeMemberStatus.SUCCESS);
+        Long countSuccessChallenge = challengeMemberRepository.countByMemberIdAndChallengeMemberStatus(memberId, ChallengeMemberStatus.SUCCESS);
 
         // 챌린지 개수 : 멤버 아이디로 챌린지멤버 테이블 카운트
         Long countChallenge = challengeMemberRepository.countByMemberId(memberId);
 
         // 실패한 챌린지 개수
-        Long countFailedChallenge = challengeMemberRepository.countByMemberIdAndChallengeStatus(memberId, ChallengeMemberStatus.FAIL);
+        Long countFailedChallenge = challengeMemberRepository.countByMemberIdAndChallengeMemberStatus(memberId, ChallengeMemberStatus.FAIL);
 
         // 찜 개수 : 회원 아이디로 챌린지라이크 테이블 접근해서 카운트
         Long countlike = challengeLikeRepository.countByMemberId(memberId);
