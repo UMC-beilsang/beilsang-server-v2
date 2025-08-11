@@ -220,22 +220,14 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .map(member -> (float) member.getSuccessDays() / challenge.getTotalGoalDay())
                 .orElse(null);
 
-        // 챌린지 종료 && 참여자라면 사용 포인트(usedPoint), 획득 포인트(earnedPoint) 조회
+        // 포인트 정보 계산
         Integer usedPoint = null;
         Integer earnedPoint = null;
         
         if (challengeMemberOpt.isPresent() && (status == ChallengeMemberStatus.SUCCESS || status == ChallengeMemberStatus.FAIL)) {
             List<PointLog> pointLogs = pointLogRepository.findByMemberIdAndChallengeId(memberId, challengeId);
-
-            usedPoint = pointLogs.stream()
-                    .filter(pointLog -> pointLog.getStatus() == PointStatus.USE)
-                    .mapToInt(PointLog::getValue)
-                    .sum();
-
-            earnedPoint = pointLogs.stream()
-                    .filter(pointLog -> pointLog.getStatus() == PointStatus.EARN)
-                    .mapToInt(PointLog::getValue)
-                    .sum();
+            usedPoint = calculatePointSum(pointLogs, PointStatus.USE);
+            earnedPoint = calculatePointSum(pointLogs, PointStatus.EARN);
         }
 
         return ChallengeAssembler.toChallengeDetailResDTO(
@@ -243,4 +235,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         );
     }
 
+    private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {
+        return pointLogs.stream()
+                .filter(pointLog -> pointLog.getStatus() == targetStatus)
+                .mapToInt(PointLog::getValue)
+                .sum();
+    }
 }
