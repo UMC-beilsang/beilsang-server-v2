@@ -8,18 +8,29 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+
+import java.time.LocalDate;
 
 @Slf4j
 @Component
 public class ChallengeAssembler {
 
     public static Challenge toEntity(CreateChallengeReqDTO request) {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = request.getStartDate();
+        
+        // 초기 상태 결정
+        ChallengeStatus initialStatus = today.isBefore(startDate) ? 
+            ChallengeStatus.NOT_YET : ChallengeStatus.IN_PROGRESS;
+            
         return Challenge.builder()
                 .category(request.getCategory())
+                .status(initialStatus)
                 .title(request.getTitle())
-                .startDate(request.getStartDate())
-                .finishDate(request.getStartDate().plusDays(request.getPeriod().getDays() - 1))
+                .startDate(startDate)
+                .finishDate(startDate.plusDays(request.getPeriod().getDays() - 1))
                 .joinPoint(request.getJoinPoint())
                 .details(request.getDetails())
                 .period(request.getPeriod())
@@ -70,7 +81,7 @@ public class ChallengeAssembler {
                 .id(challenge.getId())
                 .title(challenge.getTitle())
                 .category(challenge.getCategory())
-                .status(null) // TODO: ChallengeStatus 추가
+                .status(null) // TODO: ChallengeMemberStatus 추가
                 .participantCount(challenge.getAttendeeCount())
                 .likeCount(challenge.getCountLikes())
                 .imageUrl(imageUrl)
@@ -79,7 +90,7 @@ public class ChallengeAssembler {
     }
 
     public static ChallengeDetailResDTO toChallengeDetailResDTO(
-            Challenge challenge, boolean isJoinable, ChallengeStatus status, Float progress,
+            Challenge challenge, boolean isJoinable, ChallengeMemberStatus status, Float progress,
             Integer usedPoint, Integer earnedPoint
     ) {
         List<String> infoImageUrls = challenge.getInfoImages().stream()

@@ -95,6 +95,7 @@ class ChallengeServiceImplTest {
                 .period(ChallengePeriod.WEEK)
                 .totalGoalDay(5)
                 .details("테스트 챌린지 설명")
+                .status(ChallengeStatus.NOT_YET)
                 .attendeeCount(1)
                 .countLikes(0)
                 .collectedPoint(100)
@@ -113,6 +114,7 @@ class ChallengeServiceImplTest {
                 .period(ChallengePeriod.WEEK)
                 .totalGoalDay(5)
                 .details("테스트 챌린지 설명")
+                .status(ChallengeStatus.IN_PROGRESS)
                 .attendeeCount(1)
                 .countLikes(0)
                 .collectedPoint(100)
@@ -126,11 +128,12 @@ class ChallengeServiceImplTest {
                 .title("테스트 챌린지")
                 .category(Category.PLOGGING)
                 .startDate(LocalDate.now().minusDays(5))
-                .finishDate(LocalDate.now().plusDays(1))
+                .finishDate(LocalDate.now().minusDays(1))
                 .joinPoint(100)
                 .period(ChallengePeriod.WEEK)
                 .totalGoalDay(5)
                 .details("테스트 챌린지 설명")
+                .status(ChallengeStatus.END)
                 .attendeeCount(1)
                 .countLikes(0)
                 .collectedPoint(100)
@@ -213,7 +216,7 @@ class ChallengeServiceImplTest {
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.NOT_YET);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.NOT_YET);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
@@ -225,7 +228,7 @@ class ChallengeServiceImplTest {
         CreateChallengeReqDTO todayStartReqDTO = createTestChallengeReqDTOWithStartDate(LocalDate.now());
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_NOT_YET);
+        when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_ONGOING);
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
@@ -240,7 +243,7 @@ class ChallengeServiceImplTest {
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeStatus()).isEqualTo(ChallengeStatus.ONGOING);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.ONGOING);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
     }
 
@@ -282,7 +285,7 @@ class ChallengeServiceImplTest {
         Long challengeId = 1L;
 
         when(challengeRepository.getChallengeById(challengeId)).thenReturn(challenge_ONGOING);
-        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(null);
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
 
         // when
         var result = challengeService.getChallengeDetail(challengeId, memberId);
@@ -290,7 +293,7 @@ class ChallengeServiceImplTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getIsJoinable()).isTrue();
-        assertThat(result.getStatus()).isEqualTo(ChallengeStatus.ONGOING);
+        assertThat(result.getStatus()).isEqualTo(ChallengeMemberStatus.NOT_JOINED);
         assertThat(result.getProgress()).isNull();
     }
 

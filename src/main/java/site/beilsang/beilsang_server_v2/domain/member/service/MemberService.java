@@ -23,7 +23,7 @@ import site.beilsang.beilsang_server_v2.domain.uuid.entity.Uuid;
 import site.beilsang.beilsang_server_v2.domain.uuid.repository.UuidRepository;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,13 +55,13 @@ public class MemberService {
         Long countFeed = feedRepository.countByChallengeMember_IdIn(challengeMemberIds);
 
         //달성한 챌린지 개수
-        Long countSuccessChallenge = challengeMemberRepository.countByMemberIdAndChallengeStatus(memberId, ChallengeStatus.SUCCESS);
+        Long countSuccessChallenge = challengeMemberRepository.countByMemberIdAndChallengeMemberStatus(memberId, ChallengeMemberStatus.SUCCESS);
 
         // 챌린지 개수 : 멤버 아이디로 챌린지멤버 테이블 카운트
         Long countChallenge = challengeMemberRepository.countByMemberId(memberId);
 
         // 실패한 챌린지 개수
-        Long countFailedChallenge = challengeMemberRepository.countByMemberIdAndChallengeStatus(memberId, ChallengeStatus.FAIL);
+        Long countFailedChallenge = challengeMemberRepository.countByMemberIdAndChallengeMemberStatus(memberId, ChallengeMemberStatus.FAIL);
 
         // 찜 개수 : 회원 아이디로 챌린지라이크 테이블 접근해서 카운트
         Long countlike = challengeLikeRepository.countByMemberId(memberId);
