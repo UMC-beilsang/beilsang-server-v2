@@ -6,11 +6,6 @@
     <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
     <property name="FILE_NAME_PATTERN" value="./logs/logfile.%d{yyyy-MM-dd}-%i.log" />
 
-    <!-- 기본 로그 레벨 설정 -->
-    <root level="INFO">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </root>
     <!-- 콘솔(CONSOLE) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -45,4 +40,9 @@
         <immediateFlush>true</immediateFlush>
     </appender>
 
+    <!-- 기본 로그 레벨 설정 -->
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
 </configuration>
