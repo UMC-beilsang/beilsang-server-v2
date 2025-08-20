@@ -55,6 +55,7 @@ public class MemberAssembler {
                 .address(member.getAddress())
                 .gender(member.getGender())
                 .nickName(member.getNickName())
+                .resolution(member.getResolution())
                 .build();
     }
 

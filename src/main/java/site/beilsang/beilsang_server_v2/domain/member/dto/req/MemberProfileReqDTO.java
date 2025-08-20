@@ -11,4 +11,5 @@ public class MemberProfileReqDTO {
     private String birth;
     private String gender;
     private String address;
+    private String resolution;
 }

@@ -13,4 +13,5 @@ public class MemberProfileResDTO {
     private LocalDate birth;
     private Gender gender;
     private String address;
+    private String resolution;
 }
