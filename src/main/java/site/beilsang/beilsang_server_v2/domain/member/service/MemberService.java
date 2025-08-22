@@ -19,13 +19,16 @@ import site.beilsang.beilsang_server_v2.domain.point.dto.PointAssembler;
 import site.beilsang.beilsang_server_v2.domain.point.dto.res.PointLogListResDTO;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
 import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
+import site.beilsang.beilsang_server_v2.domain.point.service.PointService;
 import site.beilsang.beilsang_server_v2.domain.uuid.entity.Uuid;
 import site.beilsang.beilsang_server_v2.domain.uuid.repository.UuidRepository;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
+import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +40,7 @@ public class MemberService {
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final PointLogRepository pointLogRepository;
+    private final PointService pointService;
     private final UuidRepository uuidRepository;
     /**
      * mypage에 필요한 모든 값들을 return
@@ -75,8 +79,13 @@ public class MemberService {
         Member member = memberRepository.findById(memberId).
                 orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
-        List<PointLog> pointLogList = pointLogRepository.findAllByMemberId(memberId);
-        return PointAssembler.toEntities(pointLogList, member);
+        List<PointLog> pointLogList = pointLogRepository.findAllByMemberIdAndStatusNot(memberId, PointStatus.EXPIRE);
+        pointService.expirePointsIfNeeded(pointLogList);
+        
+        List<PointLog> validPointLogList = pointLogList.stream()
+                .filter(pointLog -> pointLog.getStatus() != PointStatus.EXPIRE)
+                .toList();
+        return PointAssembler.toEntities(validPointLogList, member);
     }
 
     public MemberProfileResDTO updateProfile(Long memberId, MemberProfileReqDTO memberProfileReqDTO) {
