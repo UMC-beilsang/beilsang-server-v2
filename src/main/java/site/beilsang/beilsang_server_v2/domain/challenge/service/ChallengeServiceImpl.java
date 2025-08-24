@@ -48,6 +48,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private static final int MAX_INFO_IMAGE = 5;
     private static final int MAX_CERT_IMAGE = 4;
+    private static final int POINT_EXPIRATION_YEARS = 1;
 
     private final MemberRepository memberRepository;
     private final ChallengeRepository challengeRepository;
@@ -91,7 +92,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .pointName(PointName.JOIN_CHALLENGE)
                 .status(PointStatus.USE)
                 .value(joinPoint)
-                .expirationDate(LocalDateTime.now().plusYears(1))
+                .expirationDate(LocalDateTime.now().plusYears(POINT_EXPIRATION_YEARS))
                 .member(member)
                 .challenge(challenge)
                 .build());
