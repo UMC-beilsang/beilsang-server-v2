@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+
+    <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%5level) %cyan(%logger) - %msg%n" />
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+    <property name="FILE_NAME_PATTERN" value="./logs/logfile.%d{yyyy-MM-dd}-%i.log" />
+
+    <!-- 콘솔(CONSOLE) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--  내가 원하는 출력 패턴을 결정하기  -->
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- 로그 파일 설정 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <!-- 로그 출력 포맷 설정 -->
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+
+        <!-- 롤링 정책 설정 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 파일 이름 패턴 (날짜와 인덱스를 포함) -->
+            <FileNamePattern>${FILE_NAME_PATTERN}</FileNamePattern>
+            <!-- 최대 파일 크기 (10MB) -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- 최대 보관할 로그 파일 개수 (30개) -->
+            <maxHistory>30</maxHistory>
+            <!-- 총 로그 파일 크기 제한 (500MB) -->
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+
+
+        <!--로그 메세지 파일 즉시 저장-->
+        <immediateFlush>true</immediateFlush>
+    </appender>
+
+    <!-- 기본 로그 레벨 설정 -->
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

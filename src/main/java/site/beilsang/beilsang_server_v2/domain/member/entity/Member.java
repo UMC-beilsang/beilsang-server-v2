@@ -92,6 +92,9 @@ public class Member {
         if(!memberProfileReqDTO.getAddress().isBlank()){
             this.address = memberProfileReqDTO.getAddress();
         }
+        if(!memberProfileReqDTO.getResolution().isBlank()){
+            this.resolution = memberProfileReqDTO.getResolution();
+        }
     }
 
     public void updateProfileImageUrl(String profileUrl) {
