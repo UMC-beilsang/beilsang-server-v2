@@ -17,15 +17,6 @@ public class PointService {
 
     private final PointLogRepository pointLogRepository;
 
-    public void expirePointIfNeeded(PointLog pointLog) {
-        if (pointLog.getExpirationDate() != null && 
-            pointLog.getExpirationDate().isBefore(LocalDateTime.now()) && 
-            pointLog.getStatus() != PointStatus.EXPIRE) {
-            pointLog.setStatus(PointStatus.EXPIRE);
-            pointLogRepository.save(pointLog);
-        }
-    }
-
     public void expirePointsIfNeeded(List<PointLog> pointLogs) {
         LocalDateTime now = LocalDateTime.now();
         boolean hasChanges = false;
@@ -47,7 +38,7 @@ public class PointService {
     public int calculateValidPoints(Long memberId) {
         List<PointLog> pointLogs = pointLogRepository.findAllByMemberIdAndStatusNot(memberId, PointStatus.EXPIRE);
         expirePointsIfNeeded(pointLogs);
-        
+
         return pointLogs.stream()
                 .filter(p -> p.getStatus() != PointStatus.EXPIRE)
                 .mapToInt(PointLog::getValue)
