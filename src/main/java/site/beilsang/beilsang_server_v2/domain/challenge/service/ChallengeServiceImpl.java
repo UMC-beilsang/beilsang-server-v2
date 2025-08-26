@@ -2,6 +2,7 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMember
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
 import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
+import site.beilsang.beilsang_server_v2.domain.point.service.PointService;
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
@@ -46,12 +48,14 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private static final int MAX_INFO_IMAGE = 5;
     private static final int MAX_CERT_IMAGE = 4;
+    private static final int POINT_EXPIRATION_YEARS = 1;
 
     private final MemberRepository memberRepository;
     private final ChallengeRepository challengeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
     private final ChallengeNoteRepository challengeNoteRepository;
     private final PointLogRepository pointLogRepository;
+    private final PointService pointService;
     private final S3Service s3Service;
     private final ChallengeAssembler challengeAssembler;
 
@@ -76,7 +80,8 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 멤버 포인트 부족 시 예외 처리
         int joinPoint = createChallengeReqDTO.getJoinPoint();
-        if (member.getPoint() < joinPoint) {
+        int validPoints = pointService.calculateValidPoints(memberId);
+        if (validPoints < joinPoint) {
             throw new BaseException(BaseResponseCode.NOT_ENOUGH_POINT);
         }
         // 챌린지 생성
@@ -87,6 +92,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .pointName(PointName.JOIN_CHALLENGE)
                 .status(PointStatus.USE)
                 .value(joinPoint)
+                .expirationDate(LocalDateTime.now().plusYears(POINT_EXPIRATION_YEARS))
                 .member(member)
                 .challenge(challenge)
                 .build());
