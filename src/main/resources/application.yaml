@@ -38,3 +38,12 @@ spring:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+# Swagger/OpenAPI 설정
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
