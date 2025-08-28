@@ -1,6 +1,22 @@
 package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,20 +38,14 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMember
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
 import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
+import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
-import site.beilsang.beilsang_server_v2.global.enums.*;
-import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengePeriod;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
+import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ChallengeService 단위테스트")
@@ -80,75 +90,77 @@ class ChallengeServiceImplTest {
     void setUp() {
         // 테스트용 멤버 데이터 준비
         testMember = Member.builder()
-                .id(1L)
-                .nickName("테스트유저")
-                .point(1000)
-                .build();
+            .id(1L)
+            .nickName("테스트유저")
+            .point(1000)
+            .build();
 
         // 테스트용 챌린지 요청 DTO 준비
         testCreateChallengeReqDTO = createTestChallengeReqDTO();
 
         // 테스트용 챌린지 엔티티 준비 (필수 필드 모두 채움)
         challenge_NOT_YET = Challenge.builder()
-                .id(1L)
-                .title("테스트 챌린지")
-                .category(Category.PLOGGING)
-                .startDate(LocalDate.now().plusDays(1))
-                .finishDate(LocalDate.now().plusDays(8))
-                .joinPoint(100)
-                .period(ChallengePeriod.WEEK)
-                .totalGoalDay(5)
-                .details("테스트 챌린지 설명")
-                .status(ChallengeStatus.NOT_YET)
-                .attendeeCount(1)
-                .countLikes(0)
-                .collectedPoint(100)
-                .infoImages(new ArrayList<>())
-                .certImages(new ArrayList<>())
-                .challengeNotes(new ArrayList<>())
-                .build();
+            .id(1L)
+            .title("테스트 챌린지")
+            .category(Category.PLOGGING)
+            .startDate(LocalDate.now().plusDays(1))
+            .finishDate(LocalDate.now().plusDays(8))
+            .joinPoint(100)
+            .period(ChallengePeriod.WEEK)
+            .totalGoalDay(5)
+            .details("테스트 챌린지 설명")
+            .status(ChallengeStatus.NOT_YET)
+            .attendeeCount(1)
+            .countLikes(0)
+            .collectedPoint(100)
+            .infoImages(new ArrayList<>())
+            .certImages(new ArrayList<>())
+            .challengeNotes(new ArrayList<>())
+            .build();
 
         challenge_ONGOING = Challenge.builder()
-                .id(1L)
-                .title("테스트 챌린지")
-                .category(Category.PLOGGING)
-                .startDate(LocalDate.now().minusDays(1))
-                .finishDate(LocalDate.now().plusDays(5))
-                .joinPoint(100)
-                .period(ChallengePeriod.WEEK)
-                .totalGoalDay(5)
-                .details("테스트 챌린지 설명")
-                .status(ChallengeStatus.IN_PROGRESS)
-                .attendeeCount(1)
-                .countLikes(0)
-                .collectedPoint(100)
-                .infoImages(new ArrayList<>())
-                .certImages(new ArrayList<>())
-                .challengeNotes(new ArrayList<>())
-                .build();
+            .id(1L)
+            .title("테스트 챌린지")
+            .category(Category.PLOGGING)
+            .startDate(LocalDate.now().minusDays(1))
+            .finishDate(LocalDate.now().plusDays(5))
+            .joinPoint(100)
+            .period(ChallengePeriod.WEEK)
+            .totalGoalDay(5)
+            .details("테스트 챌린지 설명")
+            .status(ChallengeStatus.IN_PROGRESS)
+            .attendeeCount(1)
+            .countLikes(0)
+            .collectedPoint(100)
+            .infoImages(new ArrayList<>())
+            .certImages(new ArrayList<>())
+            .challengeNotes(new ArrayList<>())
+            .build();
 
         challenge_ENDED = Challenge.builder()
-                .id(1L)
-                .title("테스트 챌린지")
-                .category(Category.PLOGGING)
-                .startDate(LocalDate.now().minusDays(5))
-                .finishDate(LocalDate.now().minusDays(1))
-                .joinPoint(100)
-                .period(ChallengePeriod.WEEK)
-                .totalGoalDay(5)
-                .details("테스트 챌린지 설명")
-                .status(ChallengeStatus.END)
-                .attendeeCount(1)
-                .countLikes(0)
-                .collectedPoint(100)
-                .infoImages(new ArrayList<>())
-                .certImages(new ArrayList<>())
-                .challengeNotes(new ArrayList<>())
-                .build();
+            .id(1L)
+            .title("테스트 챌린지")
+            .category(Category.PLOGGING)
+            .startDate(LocalDate.now().minusDays(5))
+            .finishDate(LocalDate.now().minusDays(1))
+            .joinPoint(100)
+            .period(ChallengePeriod.WEEK)
+            .totalGoalDay(5)
+            .details("테스트 챌린지 설명")
+            .status(ChallengeStatus.END)
+            .attendeeCount(1)
+            .countLikes(0)
+            .collectedPoint(100)
+            .infoImages(new ArrayList<>())
+            .certImages(new ArrayList<>())
+            .challengeNotes(new ArrayList<>())
+            .build();
 
         // 테스트용 MultipartFile 준비
-        testMainImage = new MockMultipartFile("mainImage", "main.jpg", "image/jpeg", "main image content".getBytes());
-        testCertImage = new MockMultipartFile("certImage", "cert.jpg", "image/jpeg", "cert image content".getBytes());
+        testMainImage = new MockMultipartFile("mainImage", "main.jpg", "image/jpeg",
+            "main image content".getBytes());
+        testCertImage = new MockMultipartFile("certImage", "cert.jpg", "image/jpeg",
+            "cert image content".getBytes());
         testInfoImages = Collections.singletonList(testMainImage);
         testCertImages = Collections.singletonList(testCertImage);
     }
@@ -162,14 +174,15 @@ class ChallengeServiceImplTest {
 
         // when & then
         assertThatThrownBy(() -> challengeService.createChallenge(
-                nonExistentMemberId, testCreateChallengeReqDTO, testInfoImages, testCertImages))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
+            nonExistentMemberId, testCreateChallengeReqDTO, testInfoImages, testCertImages))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
 
         // 멤버 조회만 수행되고 다른 작업은 수행되지 않음을 검증
         verify(memberRepository).findById(nonExistentMemberId);
-        verifyNoInteractions(challengeRepository, challengeNoteRepository, challengeMemberRepository,
-                pointLogRepository);
+        verifyNoInteractions(challengeRepository, challengeNoteRepository,
+            challengeMemberRepository,
+            pointLogRepository);
     }
 
     @Test
@@ -178,24 +191,25 @@ class ChallengeServiceImplTest {
         // given
         Long memberId = 1L;
         Member memberWithLowPoint = Member.builder()
-                .id(memberId)
-                .nickName("포인트부족유저")
-                .point(50) // 요청 포인트(100)보다 적음
-                .build();
+            .id(memberId)
+            .nickName("포인트부족유저")
+            .point(50) // 요청 포인트(100)보다 적음
+            .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(memberWithLowPoint));
         when(pointService.calculateValidPoints(memberId)).thenReturn(50); // 부족한 포인트
 
         // when & then
         assertThatThrownBy(() -> challengeService.createChallenge(
-                memberId, testCreateChallengeReqDTO, testInfoImages, testCertImages))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
+            memberId, testCreateChallengeReqDTO, testInfoImages, testCertImages))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
 
         // 멤버 조회만 수행되고 다른 작업은 수행되지 않음을 검증
         verify(memberRepository).findById(memberId);
-        verifyNoInteractions(challengeRepository, challengeNoteRepository, challengeMemberRepository,
-                pointLogRepository);
+        verifyNoInteractions(challengeRepository, challengeNoteRepository,
+            challengeMemberRepository,
+            pointLogRepository);
     }
 
     @Test
@@ -203,27 +217,33 @@ class ChallengeServiceImplTest {
     void createChallenge_StatusNotYet_WhenStartDateIsInFuture() {
         // given
         Long memberId = 1L;
-        CreateChallengeReqDTO futureStartReqDTO = createTestChallengeReqDTOWithStartDate(LocalDate.now().plusDays(10));
+        CreateChallengeReqDTO futureStartReqDTO = createTestChallengeReqDTOWithStartDate(
+            LocalDate.now().plusDays(10));
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
         when(pointService.calculateValidPoints(memberId)).thenReturn(200); // 충분한 포인트
         when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_NOT_YET);
-        when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
-        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+        when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(List.of());
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
+            mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
         when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
-                .thenReturn("https://s3-url/test.jpg");
+            .thenReturn("https://s3-url/test.jpg");
 
         // when
-        ChallengeResDTO result = challengeService.createChallenge(memberId, futureStartReqDTO, testInfoImages,
-                testCertImages);
+        ChallengeResDTO result = challengeService.createChallenge(memberId, futureStartReqDTO,
+            testInfoImages,
+            testCertImages);
 
         // then
-        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
+        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(
+            ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.NOT_YET);
-        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
+            ChallengeMemberStatus.NOT_YET);
+        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class),
+            any(MultipartFile.class));
     }
 
     @Test
@@ -231,27 +251,33 @@ class ChallengeServiceImplTest {
     void createChallenge_StatusOngoing_WhenStartDateIsToday() {
         // given
         Long memberId = 1L;
-        CreateChallengeReqDTO todayStartReqDTO = createTestChallengeReqDTOWithStartDate(LocalDate.now());
+        CreateChallengeReqDTO todayStartReqDTO = createTestChallengeReqDTOWithStartDate(
+            LocalDate.now());
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
         when(pointService.calculateValidPoints(memberId)).thenReturn(200); // 충분한 포인트
         when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_ONGOING);
-        when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
-        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+        when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(List.of());
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
+            mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
         when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
-                .thenReturn("https://s3-url/test.jpg");
+            .thenReturn("https://s3-url/test.jpg");
 
         // when
-        ChallengeResDTO result = challengeService.createChallenge(memberId, todayStartReqDTO, testInfoImages,
-                testCertImages);
+        ChallengeResDTO result = challengeService.createChallenge(memberId, todayStartReqDTO,
+            testInfoImages,
+            testCertImages);
 
         // then
-        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
+        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(
+            ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.ONGOING);
-        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
+            ChallengeMemberStatus.ONGOING);
+        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class),
+            any(MultipartFile.class));
     }
 
     @Test
@@ -262,27 +288,30 @@ class ChallengeServiceImplTest {
         int initialPoint = 1000;
         int joinPoint = 100;
         Member memberWithPoint = Member.builder()
-                .id(memberId)
-                .nickName("테스트유저")
-                .point(initialPoint)
-                .build();
+            .id(memberId)
+            .nickName("테스트유저")
+            .point(initialPoint)
+            .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(memberWithPoint));
         when(pointService.calculateValidPoints(memberId)).thenReturn(200); // 충분한 포인트
         when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_NOT_YET);
-        when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
-        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+        when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(List.of());
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
+            mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
         when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
-                .thenReturn("https://s3-url/test.jpg");
+            .thenReturn("https://s3-url/test.jpg");
 
         // when
-        ChallengeResDTO result = challengeService.createChallenge(memberId, testCreateChallengeReqDTO, testInfoImages,
-                testCertImages);
+        ChallengeResDTO result = challengeService.createChallenge(memberId,
+            testCreateChallengeReqDTO, testInfoImages,
+            testCertImages);
 
         // then
         assertThat(memberWithPoint.getPoint()).isEqualTo(initialPoint - joinPoint);
-        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class), any(MultipartFile.class));
+        verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class),
+            any(MultipartFile.class));
     }
 
     @Test
@@ -293,7 +322,8 @@ class ChallengeServiceImplTest {
         Long challengeId = 1L;
 
         when(challengeRepository.getChallengeById(challengeId)).thenReturn(challenge_ONGOING);
-        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
+            memberId)).thenReturn(Optional.empty());
 
         // when
         var result = challengeService.getChallengeDetail(challengeId, memberId);
@@ -312,13 +342,15 @@ class ChallengeServiceImplTest {
         Long challengeId = 1L;
         Long memberId = 2L;
         Integer remainingPoint = 900;
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
+            memberId)).thenReturn(Optional.empty());
         when(pointService.calculateValidPoints(memberId)).thenReturn(200, 100); // 충분한 포인트, 참여 후 포인트
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
-        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
+            mock(ChallengeMember.class));
 
         // when
         var result = challengeService.joinChallenge(challengeId, memberId);
@@ -333,15 +365,17 @@ class ChallengeServiceImplTest {
         verify(pointService, times(2)).calculateValidPoints(memberId);
         verify(pointLogRepository).save(any(PointLog.class));
         verify(challengeMemberRepository).save(any(ChallengeMember.class));
-        
+
         // ChallengeMember 저장 시 올바른 상태인지 확인
-        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
+        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(
+            ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        
+
         assertThat(savedChallengeMember.getIsHost()).isFalse();
         assertThat(savedChallengeMember.getSuccessDays()).isEqualTo(0);
-        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.NOT_YET);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
+            ChallengeMemberStatus.NOT_YET);
         assertThat(savedChallengeMember.getIsFeedUpload()).isFalse();
     }
 
@@ -352,13 +386,15 @@ class ChallengeServiceImplTest {
         Long challengeId = 1L;
         Long memberId = 2L;
         Integer remainingPoint = 900;
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_ONGOING));
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
+            memberId)).thenReturn(Optional.empty());
         when(pointService.calculateValidPoints(memberId)).thenReturn(200, 100); // 충분한 포인트, 참여 후 포인트
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
-        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
+            mock(ChallengeMember.class));
 
         // when
         var result = challengeService.joinChallenge(challengeId, memberId);
@@ -368,13 +404,15 @@ class ChallengeServiceImplTest {
 
         // then
         // ChallengeMember 저장 시 올바른 상태인지 확인
-        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
+        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(
+            ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
         ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
-        
+
         assertThat(savedChallengeMember.getIsHost()).isFalse();
         assertThat(savedChallengeMember.getSuccessDays()).isEqualTo(0);
-        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.ONGOING);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
+            ChallengeMemberStatus.ONGOING);
         assertThat(savedChallengeMember.getIsFeedUpload()).isFalse();
     }
 
@@ -384,16 +422,17 @@ class ChallengeServiceImplTest {
         // given
         Long challengeId = 999L;
         Long memberId = 2L;
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_CHALLENGE);
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_CHALLENGE);
 
         verify(challengeRepository).findById(challengeId);
-        verifyNoInteractions(memberRepository, challengeMemberRepository, pointService, pointLogRepository);
+        verifyNoInteractions(memberRepository, challengeMemberRepository, pointService,
+            pointLogRepository);
     }
 
     @Test
@@ -402,14 +441,14 @@ class ChallengeServiceImplTest {
         // given
         Long challengeId = 1L;
         Long memberId = 999L;
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
         when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
 
         verify(challengeRepository).findById(challengeId);
         verify(memberRepository).findById(memberId);
@@ -423,16 +462,17 @@ class ChallengeServiceImplTest {
         Long challengeId = 1L;
         Long memberId = 2L;
         ChallengeMember existingMember = mock(ChallengeMember.class);
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
         when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId))
-                .thenReturn(Optional.of(existingMember));
+            .thenReturn(Optional.of(existingMember));
 
         // when & then
         assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.ALREADY_JOINED_CHALLENGE);
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode",
+                BaseResponseCode.ALREADY_JOINED_CHALLENGE);
 
         verify(challengeRepository).findById(challengeId);
         verify(memberRepository).findById(memberId);
@@ -446,15 +486,16 @@ class ChallengeServiceImplTest {
         // given
         Long challengeId = 1L;
         Long memberId = 2L;
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_ENDED));
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
+            memberId)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.CHALLENGE_ENDED);
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.CHALLENGE_ENDED);
 
         verify(challengeRepository).findById(challengeId);
         verify(memberRepository).findById(memberId);
@@ -468,16 +509,18 @@ class ChallengeServiceImplTest {
         // given
         Long challengeId = 1L;
         Long memberId = 2L;
-        
+
         when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
-        when(pointService.calculateValidPoints(memberId)).thenReturn(50); // 부족한 포인트 (joinPoint는 100)
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
+            memberId)).thenReturn(Optional.empty());
+        when(pointService.calculateValidPoints(memberId)).thenReturn(
+            50); // 부족한 포인트 (joinPoint는 100)
 
         // when & then
         assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
-                .isInstanceOf(BaseException.class)
-                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
 
         verify(challengeRepository).findById(challengeId);
         verify(memberRepository).findById(memberId);
