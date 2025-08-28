@@ -32,6 +32,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 회원 관리 및 마이페이지 관련 비즈니스 로직을 처리하는 서비스
+ * 회원 프로필 관리, 포인트 내역 조회, 챌린지 참여 확인 등의 기능을 제공합니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class MemberService {

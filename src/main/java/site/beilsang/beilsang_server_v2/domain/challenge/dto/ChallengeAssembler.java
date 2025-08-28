@@ -21,11 +21,11 @@ public class ChallengeAssembler {
     public static Challenge toEntity(CreateChallengeReqDTO request) {
         LocalDate today = LocalDate.now();
         LocalDate startDate = request.getStartDate();
-        
+
         // 초기 상태 결정
-        ChallengeStatus initialStatus = today.isBefore(startDate) ? 
+        ChallengeStatus initialStatus = today.isBefore(startDate) ?
             ChallengeStatus.NOT_YET : ChallengeStatus.IN_PROGRESS;
-            
+
         return Challenge.builder()
                 .category(request.getCategory())
                 .status(initialStatus)
