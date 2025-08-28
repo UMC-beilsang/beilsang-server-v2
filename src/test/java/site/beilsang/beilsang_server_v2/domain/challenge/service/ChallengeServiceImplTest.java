@@ -234,6 +234,7 @@ class ChallengeServiceImplTest {
         CreateChallengeReqDTO todayStartReqDTO = createTestChallengeReqDTOWithStartDate(LocalDate.now());
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(pointService.calculateValidPoints(memberId)).thenReturn(200); // 충분한 포인트
         when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_ONGOING);
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
@@ -267,6 +268,7 @@ class ChallengeServiceImplTest {
                 .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(memberWithPoint));
+        when(pointService.calculateValidPoints(memberId)).thenReturn(200); // 충분한 포인트
         when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_NOT_YET);
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
