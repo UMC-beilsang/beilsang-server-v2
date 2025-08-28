@@ -16,6 +16,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallenge
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.JoinChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.service.ChallengeService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
@@ -53,5 +54,13 @@ public class ChallengeController {
             Authentication authentication) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(challengeService.getChallengeDetail(challengeId, memberId));
+    }
+
+    @PostMapping("/{challengeId}/join")
+    public BaseResponse<JoinChallengeResDTO> joinChallenge(
+            @PathVariable Long challengeId,
+            Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.joinChallenge(challengeId, memberId));
     }
 }

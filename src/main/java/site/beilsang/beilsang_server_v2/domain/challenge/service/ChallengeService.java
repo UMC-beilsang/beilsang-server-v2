@@ -8,6 +8,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRe
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.JoinChallengeResDTO;
 
 public interface ChallengeService {
 
@@ -17,4 +18,6 @@ public interface ChallengeService {
     PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO);
 
     ChallengeDetailResDTO getChallengeDetail(Long challengeId, Long memberId);
+
+    JoinChallengeResDTO joinChallenge(Long challengeId, Long memberId);
 }

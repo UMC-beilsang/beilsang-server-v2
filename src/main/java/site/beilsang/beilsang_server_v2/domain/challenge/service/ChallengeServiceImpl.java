@@ -12,6 +12,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.JoinChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeInfoImage;
@@ -239,6 +240,11 @@ public class ChallengeServiceImpl implements ChallengeService {
         return ChallengeAssembler.toChallengeDetailResDTO(
                 challenge, isJoinable, status, progress, usedPoint, earnedPoint
         );
+    }
+
+    @Override
+    public JoinChallengeResDTO joinChallenge(Long challengeId, Long memberId) {
+        return null;
     }
 
     private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {

@@ -86,4 +86,11 @@ public class Challenge extends BaseEntity {
             return ChallengeStatus.IN_PROGRESS;
         }
     }
+
+    /**
+     * 챌린지 참여자 수 증가
+     */
+    public void incrementAttendeeCount() {
+        this.attendeeCount++;
+    }
 }
