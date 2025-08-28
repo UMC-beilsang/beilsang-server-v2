@@ -59,6 +59,10 @@ class ChallengeServiceImplTest {
     @Mock
     private S3Service s3Service;
 
+    @Mock
+    private site.beilsang.beilsang_server_v2.domain.point.service.PointService pointService;
+
+
     @InjectMocks
     private ChallengeServiceImpl challengeService;
 
@@ -180,6 +184,7 @@ class ChallengeServiceImplTest {
                 .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(memberWithLowPoint));
+        when(pointService.calculateValidPoints(memberId)).thenReturn(50); // 부족한 포인트
 
         // when & then
         assertThatThrownBy(() -> challengeService.createChallenge(
@@ -201,6 +206,7 @@ class ChallengeServiceImplTest {
         CreateChallengeReqDTO futureStartReqDTO = createTestChallengeReqDTOWithStartDate(LocalDate.now().plusDays(10));
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(pointService.calculateValidPoints(memberId)).thenReturn(200); // 충분한 포인트
         when(challengeRepository.save(any(Challenge.class))).thenReturn(challenge_NOT_YET);
         when(challengeNoteRepository.saveAll(any(List.class))).thenReturn(Arrays.asList());
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
@@ -295,6 +301,187 @@ class ChallengeServiceImplTest {
         assertThat(result.getIsJoinable()).isTrue();
         assertThat(result.getStatus()).isEqualTo(ChallengeMemberStatus.NOT_JOINED);
         assertThat(result.getProgress()).isNull();
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 성공 - NOT_YET 상태 챌린지")
+    void joinChallenge_Success_NotYetStatus() {
+        // given
+        Long challengeId = 1L;
+        Long memberId = 2L;
+        Integer remainingPoint = 900;
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(pointService.calculateValidPoints(memberId)).thenReturn(200, 100); // 충분한 포인트, 참여 후 포인트
+        when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+
+        // when
+        var result = challengeService.joinChallenge(challengeId, memberId);
+
+        // then
+        assertThat(result).isNotNull();
+
+        // then
+        verify(challengeRepository).findById(challengeId);
+        verify(memberRepository).findById(memberId);
+        verify(challengeMemberRepository).findByChallengeIdAndMemberId(challengeId, memberId);
+        verify(pointService, times(2)).calculateValidPoints(memberId);
+        verify(pointLogRepository).save(any(PointLog.class));
+        verify(challengeMemberRepository).save(any(ChallengeMember.class));
+        
+        // ChallengeMember 저장 시 올바른 상태인지 확인
+        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
+        verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
+        ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
+        
+        assertThat(savedChallengeMember.getIsHost()).isFalse();
+        assertThat(savedChallengeMember.getSuccessDays()).isEqualTo(0);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.NOT_YET);
+        assertThat(savedChallengeMember.getIsFeedUpload()).isFalse();
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 성공 - ONGOING 상태 챌린지")
+    void joinChallenge_Success_OngoingStatus() {
+        // given
+        Long challengeId = 1L;
+        Long memberId = 2L;
+        Integer remainingPoint = 900;
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_ONGOING));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(pointService.calculateValidPoints(memberId)).thenReturn(200, 100); // 충분한 포인트, 참여 후 포인트
+        when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
+        when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(mock(ChallengeMember.class));
+
+        // when
+        var result = challengeService.joinChallenge(challengeId, memberId);
+
+        // then
+        assertThat(result).isNotNull();
+
+        // then
+        // ChallengeMember 저장 시 올바른 상태인지 확인
+        ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(ChallengeMember.class);
+        verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
+        ChallengeMember savedChallengeMember = challengeMemberCaptor.getValue();
+        
+        assertThat(savedChallengeMember.getIsHost()).isFalse();
+        assertThat(savedChallengeMember.getSuccessDays()).isEqualTo(0);
+        assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.ONGOING);
+        assertThat(savedChallengeMember.getIsFeedUpload()).isFalse();
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 실패 - 존재하지 않는 챌린지")
+    void joinChallenge_Fail_ChallengeNotFound() {
+        // given
+        Long challengeId = 999L;
+        Long memberId = 2L;
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
+                .isInstanceOf(BaseException.class)
+                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_CHALLENGE);
+
+        verify(challengeRepository).findById(challengeId);
+        verifyNoInteractions(memberRepository, challengeMemberRepository, pointService, pointLogRepository);
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 실패 - 존재하지 않는 멤버")
+    void joinChallenge_Fail_MemberNotFound() {
+        // given
+        Long challengeId = 1L;
+        Long memberId = 999L;
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
+                .isInstanceOf(BaseException.class)
+                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_FOUND_MEMBER);
+
+        verify(challengeRepository).findById(challengeId);
+        verify(memberRepository).findById(memberId);
+        verifyNoInteractions(challengeMemberRepository, pointService, pointLogRepository);
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 실패 - 이미 참여한 챌린지")
+    void joinChallenge_Fail_AlreadyJoined() {
+        // given
+        Long challengeId = 1L;
+        Long memberId = 2L;
+        ChallengeMember existingMember = mock(ChallengeMember.class);
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId))
+                .thenReturn(Optional.of(existingMember));
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
+                .isInstanceOf(BaseException.class)
+                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.ALREADY_JOINED_CHALLENGE);
+
+        verify(challengeRepository).findById(challengeId);
+        verify(memberRepository).findById(memberId);
+        verify(challengeMemberRepository).findByChallengeIdAndMemberId(challengeId, memberId);
+        verifyNoInteractions(pointService, pointLogRepository);
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 실패 - 종료된 챌린지")
+    void joinChallenge_Fail_ChallengeEnded() {
+        // given
+        Long challengeId = 1L;
+        Long memberId = 2L;
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_ENDED));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
+                .isInstanceOf(BaseException.class)
+                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.CHALLENGE_ENDED);
+
+        verify(challengeRepository).findById(challengeId);
+        verify(memberRepository).findById(memberId);
+        verify(challengeMemberRepository).findByChallengeIdAndMemberId(challengeId, memberId);
+        verifyNoInteractions(pointService, pointLogRepository);
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 실패 - 포인트 부족")
+    void joinChallenge_Fail_NotEnoughPoint() {
+        // given
+        Long challengeId = 1L;
+        Long memberId = 2L;
+        
+        when(challengeRepository.findById(challengeId)).thenReturn(Optional.of(challenge_NOT_YET));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
+        when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)).thenReturn(Optional.empty());
+        when(pointService.calculateValidPoints(memberId)).thenReturn(50); // 부족한 포인트 (joinPoint는 100)
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.joinChallenge(challengeId, memberId))
+                .isInstanceOf(BaseException.class)
+                .hasFieldOrPropertyWithValue("baseResponseCode", BaseResponseCode.NOT_ENOUGH_POINT);
+
+        verify(challengeRepository).findById(challengeId);
+        verify(memberRepository).findById(memberId);
+        verify(challengeMemberRepository).findByChallengeIdAndMemberId(challengeId, memberId);
+        verify(pointService).calculateValidPoints(memberId);
+        verifyNoMoreInteractions(pointLogRepository);
     }
 
     // 테스트 데이터 생성 헬퍼 메서드들
