@@ -6,4 +6,5 @@ import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeInfoIma
 
 @Repository
 public interface ChallengeInfoImageRepository extends JpaRepository<ChallengeInfoImage, Long> {
+
 }

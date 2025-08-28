@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Configuration
 @Getter
 public class AWSConfig {
+
     @Value("${spring.cloud.aws.credentials.accessKey}")
     private String accessKey;
 
@@ -41,9 +42,9 @@ public class AWSConfig {
     @Primary
     public S3Client s3Client() {
         return S3Client.builder()
-                .credentialsProvider(this::awsCredentials)
-                .region(Region.of(region))
-                .build();
+            .credentialsProvider(this::awsCredentials)
+            .region(Region.of(region))
+            .build();
     }
 
 }

@@ -1,10 +1,9 @@
 package site.beilsang.beilsang_server_v2.global.common.exception;
 
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-
-import java.util.Arrays;
 
 @AllArgsConstructor
 @Getter
@@ -39,7 +38,7 @@ public enum BaseResponseCode {
 
     public static BaseResponseCode findByCode(String code) {
         return Arrays.stream(BaseResponseCode.values())
-                .filter(b -> b.getCode().equals(code))
-                .findAny().orElseThrow(() -> new BaseException(BAD_REQUEST));
+            .filter(b -> b.getCode().equals(code))
+            .findAny().orElseThrow(() -> new BaseException(BAD_REQUEST));
     }
 }

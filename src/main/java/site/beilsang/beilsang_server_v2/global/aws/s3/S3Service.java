@@ -51,11 +51,11 @@ public class S3Service {
 
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .contentType(file.getContentType())
-                    .contentLength(file.getSize())
-                    .key(fileName)
-                    .build();
+                .bucket(bucketName)
+                .contentType(file.getContentType())
+                .contentLength(file.getSize())
+                .key(fileName)
+                .build();
             RequestBody requestBody = RequestBody.fromBytes(file.getBytes());
             s3Client.putObject(putObjectRequest, requestBody);
         } catch (IOException e) {
@@ -63,9 +63,9 @@ public class S3Service {
         }
 
         GetUrlRequest getUrlRequest = GetUrlRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build();
+            .bucket(bucketName)
+            .key(fileName)
+            .build();
 
         return s3Client.utilities().getUrl(getUrlRequest).toString();
     }

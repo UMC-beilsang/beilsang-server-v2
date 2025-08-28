@@ -1,5 +1,8 @@
 package site.beilsang.beilsang_server_v2.global.oauth;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,10 +17,6 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -40,31 +39,32 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         Provider provider = Provider.getByName(registrationId);
 
         String userNameAttributeName = userRequest.getClientRegistration() // OAuth2 로그인 시 키(PK)가 되는 값
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+            .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
         Map<String, Object> attributes = oAuth2User.getAttributes(); // 소셜 로그인에서 API가 제공하는 userInfo의 Json 값(유저 정보들)
 
         // 소셜 종류에 따라 유저 정보를 통해 OAuthAttributes 객체 생성
-        OAuthAttributes oAuthAttributes = OAuthAttributes.of(provider, userNameAttributeName, attributes);
+        OAuthAttributes oAuthAttributes = OAuthAttributes.of(provider, userNameAttributeName,
+            attributes);
         Member member = getMember(oAuthAttributes, provider);
 
         return new CustomOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),
-                attributes,
-                oAuthAttributes.getNameAttributesKey(),
-                member.getSocialId(),
-                member.getEmail(),
-                member.getRole()
+            Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),
+            attributes,
+            oAuthAttributes.getNameAttributesKey(),
+            member.getSocialId(),
+            member.getEmail(),
+            member.getRole()
         );
     }
 
     /**
-     * SocialType과 attributes에 들어있는 소셜 로그인의 식별값 id를 통해 회원을 찾아 반환하는 메소드
-     * 만약 찾은 회원이 있다면, 그대로 반환하고 없다면 save()를 호출하여 회원을 저장한다.
+     * SocialType과 attributes에 들어있는 소셜 로그인의 식별값 id를 통해 회원을 찾아 반환하는 메소드 만약 찾은 회원이 있다면, 그대로 반환하고 없다면
+     * save()를 호출하여 회원을 저장한다.
      */
     private Member getMember(OAuthAttributes attributes, Provider provider) {
         Optional<Member> member = memberRepository.findBySocialIdAndProvider(
-                attributes.getOAuth2UserInfo().getId(), provider);
+            attributes.getOAuth2UserInfo().getId(), provider);
 
         if (member.isEmpty()) {
             log.info("존재하지 않는 유저, 추가하여 return");

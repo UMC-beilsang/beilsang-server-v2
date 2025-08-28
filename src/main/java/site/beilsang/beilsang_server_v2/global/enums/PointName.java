@@ -14,8 +14,7 @@ public enum PointName {
 
     // 이벤트 관련
     NEW_MEMBER("신규 회원"),
-    ATTENDANCE("출석 보상")
-    ;
+    ATTENDANCE("출석 보상");
 
     private final String description;
 }

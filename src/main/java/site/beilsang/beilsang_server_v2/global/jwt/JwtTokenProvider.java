@@ -1,10 +1,18 @@
 package site.beilsang.beilsang_server_v2.global.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Date;
+import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +23,6 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2User;
-
-import javax.crypto.SecretKey;
-import java.io.IOException;
-import java.util.Date;
 
 @Slf4j
 @Component
@@ -60,7 +64,7 @@ public class JwtTokenProvider {
         String refreshToken = createToken(socialId, email, REFRESH_TOKEN_EXPIRE_TIME);
 
         Member member = memberRepository.findBySocialIdAndEmail(socialId, email)
-                .orElseThrow();
+            .orElseThrow();
         member.setRefreshToken(refreshToken);
         memberRepository.save(member);
 
@@ -76,16 +80,16 @@ public class JwtTokenProvider {
      */
     private String createToken(String socialId, String email, long expireTime) {
         Claims claims = Jwts.claims()
-                .setSubject(email);
+            .setSubject(email);
         claims.put("socialId", socialId);
         Date now = new Date();
         Date expiration = new Date(now.getTime() + expireTime);
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setClaims(claims)
+            .setIssuedAt(now)
+            .setExpiration(expiration)
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     /**
@@ -96,9 +100,9 @@ public class JwtTokenProvider {
     public Boolean validateToken(String token) {
         try {
             Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
             return !claimsJws.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException exception) {
             return false;
@@ -116,19 +120,19 @@ public class JwtTokenProvider {
         try {
             if ("email".equals(claimKey)) {
                 return Jwts.parserBuilder()
-                        .setSigningKey(key)
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .getSubject();
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
             }
             if ("socialId".equals(claimKey)) {
                 return (String) Jwts.parserBuilder()
-                        .setSigningKey(key)
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .get(claimKey);
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get(claimKey);
             }
             return null;
         } catch (ExpiredJwtException e) {
@@ -140,10 +144,12 @@ public class JwtTokenProvider {
         }
     }
 
-    public void sendToken(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
+    public void sendToken(HttpServletResponse response, CustomOAuth2User oAuth2User)
+        throws IOException {
         String accessToken = createAccessToken(oAuth2User.getSocialId(), oAuth2User.getEmail());
         String refreshToken = createRefreshToken(oAuth2User.getSocialId(), oAuth2User.getEmail());
-        MemberLoginResDTO memberLoginResDTO = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, oAuth2User.getRole());
+        MemberLoginResDTO memberLoginResDTO = MemberAssembler.toMemberLoginResDTO(accessToken,
+            refreshToken, oAuth2User.getRole());
         response.getWriter().write(objectMapper.writeValueAsString(memberLoginResDTO));
     }
 }

@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @DiscriminatorValue("D")
-public class CommonNotification extends AppNotification{
+public class CommonNotification extends AppNotification {
+
 }
 

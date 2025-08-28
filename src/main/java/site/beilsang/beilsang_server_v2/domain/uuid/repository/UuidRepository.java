@@ -6,4 +6,5 @@ import site.beilsang.beilsang_server_v2.domain.uuid.entity.Uuid;
 
 @Repository
 public interface UuidRepository extends JpaRepository<Uuid, Long> {
+
 }

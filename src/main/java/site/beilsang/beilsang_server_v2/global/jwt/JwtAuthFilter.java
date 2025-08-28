@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,19 +18,18 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.enums.Role;
 
-import java.io.IOException;
-import java.util.Collections;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+        FilterChain filterChain) throws ServletException, IOException {
         // HTTP 요청 헤더에서 access token을 추출
         String token = extractToken(request);
 
@@ -70,24 +71,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String email = jwtTokenProvider.getClaimFromToken(token, "email");
         //TODO
         Member member = memberRepository.findBySocialIdAndEmail(socialId, email)
-                .orElseThrow(() -> new RuntimeException());
+            .orElseThrow(() -> new RuntimeException());
 
         // 인증 토큰을 받아 SecurityContext에 저장
         SecurityContextHolder.getContext().setAuthentication(getUserAuth(member));
     }
 
     /**
-     * 멤버 정보를 바탕으로 인증 토큰 생성,
-     * Controller에서 Authentication.getPrincipal로 값 받아올 수 있음
+     * 멤버 정보를 바탕으로 인증 토큰 생성, Controller에서 Authentication.getPrincipal로 값 받아올 수 있음
      *
      * @param member
      * @return UsernamePasswordAuthenticationToken
      */
     private UsernamePasswordAuthenticationToken getUserAuth(Member member) {
         return new UsernamePasswordAuthenticationToken(
-                member.getId(), //member가 아닌 memberId를 넣어 최소한의 정보만 갖도록 설정
-                member.getSocialId(),
-                Collections.singleton(new SimpleGrantedAuthority(Role.USER.getRole()))
+            member.getId(), //member가 아닌 memberId를 넣어 최소한의 정보만 갖도록 설정
+            member.getSocialId(),
+            Collections.singleton(new SimpleGrantedAuthority(Role.USER.getRole()))
         );
     }
 }
