@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.JoinChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
@@ -128,5 +129,9 @@ public class ChallengeAssembler {
                 .usedPoint(usedPoint)
                 .earnedPoint(earnedPoint)
                 .build();
+    }
+
+    public static JoinChallengeResDTO toJoinChallengeResDTO(Challenge challenge) {
+        return JoinChallengeResDTO.builder().build();
     }
 }
