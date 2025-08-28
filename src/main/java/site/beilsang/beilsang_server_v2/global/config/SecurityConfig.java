@@ -44,37 +44,46 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+        HandlerMappingIntrospector introspector) throws Exception {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
 
         // white list
         MvcRequestMatcher[] permitWhiteList = {
-                mvc.pattern("/oauth/**"),
-                mvc.pattern("/favicon.ico"),
+            mvc.pattern("/oauth/**"),
+            mvc.pattern("/favicon.ico"),
+            mvc.pattern("/error"),
+            // Swagger UI 접근 허용
+            mvc.pattern("/swagger-ui/**"),
+            mvc.pattern("/swagger-ui.html"),
+            mvc.pattern("/v3/api-docs/**"),
+            mvc.pattern("/swagger-resources/**"),
+            mvc.pattern("/webjars/**")
         };
 
         // http request 인증 설정
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(permitWhiteList).permitAll()
-                .anyRequest().authenticated()
+            .requestMatchers(permitWhiteList).permitAll()
+            .anyRequest().authenticated()
         );
 
         http.oauth2Login(oauth -> oauth
-                .userInfoEndpoint(userInfo -> userInfo
-                        .userService(customOAuth2UserService))
-                .redirectionEndpoint(redirection -> redirection // 기본 리다이렉션 경로 변경
-                        .baseUri("/oauth/redirect/*"))
-                .successHandler(oAuth2LoginSuccessHandler) // oauth2 로그인 과정 인증
-                .failureHandler(oAuth2LoginFailureHandler) // oauth2 로그인 과정 인증 실패
+            .userInfoEndpoint(userInfo -> userInfo
+                .userService(customOAuth2UserService))
+            .redirectionEndpoint(redirection -> redirection // 기본 리다이렉션 경로 변경
+                .baseUri("/oauth/redirect/*"))
+            .successHandler(oAuth2LoginSuccessHandler) // oauth2 로그인 과정 인증
+            .failureHandler(oAuth2LoginFailureHandler) // oauth2 로그인 과정 인증 실패
         );
 
         // jwt 방식 사용 -> 아래의 4개 미사용 설정
-        http.httpBasic(AbstractHttpConfigurer::disable); // jwt 토큰(Bearer 방식) 사용하기 위해 httpBasic disable
+        http.httpBasic(
+            AbstractHttpConfigurer::disable); // jwt 토큰(Bearer 방식) 사용하기 위해 httpBasic disable
         http.formLogin(AbstractHttpConfigurer::disable); // oauth2만 사용하기 때문에 diable
         http.logout(AbstractHttpConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(session -> session // 세션을 사용하지 않기 때문에 stateless로 설정
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // 토큰 검증 filter
         // header로부터 전달받는 토큰 검사, valid하면 authentication에 user 등록
@@ -83,10 +92,10 @@ public class SecurityConfig {
 
         // jwt를 포함한 exception handler
         http.exceptionHandling(conf -> conf
-                // 인증 예외 처리
-                .authenticationEntryPoint(customAuthenticationEntryPointHandler)
-                // 인가 예외 처리
-                .accessDeniedHandler(customAccessDeniedHandler));
+            // 인증 예외 처리
+            .authenticationEntryPoint(customAuthenticationEntryPointHandler)
+            // 인가 예외 처리
+            .accessDeniedHandler(customAccessDeniedHandler));
         return http.build();
     }
 }
