@@ -300,8 +300,11 @@ public class ChallengeServiceImpl implements ChallengeService {
         // 챌린지 참여자 수 증가
         challenge.incrementAttendeeCount();
 
+        // 참여 후 남은 포인트 계산
+        Integer remainingPoint = pointService.calculateValidPoints(memberId);
+
         // 응답 DTO 생성 및 반환
-        return ChallengeAssembler.toJoinChallengeResDTO(challenge);
+        return ChallengeAssembler.toJoinChallengeResDTO(challenge, memberId, remainingPoint);
     }
 
     private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {

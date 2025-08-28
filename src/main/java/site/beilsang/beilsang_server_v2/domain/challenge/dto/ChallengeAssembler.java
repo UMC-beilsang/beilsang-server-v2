@@ -131,7 +131,12 @@ public class ChallengeAssembler {
                 .build();
     }
 
-    public static JoinChallengeResDTO toJoinChallengeResDTO(Challenge challenge) {
-        return JoinChallengeResDTO.builder().build();
+    public static JoinChallengeResDTO toJoinChallengeResDTO(Challenge challenge, Long memberId, Integer remainingPoint) {
+        return JoinChallengeResDTO.builder()
+                .challengeId(challenge.getId())
+                .memberId(memberId)
+                .joinDate(java.time.LocalDateTime.now())
+                .remainingPoint(remainingPoint)
+                .build();
     }
 }
