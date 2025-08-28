@@ -45,3 +45,6 @@ out/
 ### Claude Code ###
 CLAUDE.md
 claude/*
+
+### Logs ###
+logs
