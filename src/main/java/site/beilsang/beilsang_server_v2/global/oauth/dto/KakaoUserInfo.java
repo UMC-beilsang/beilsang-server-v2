@@ -1,8 +1,7 @@
 package site.beilsang.beilsang_server_v2.global.oauth.dto;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class KakaoUserInfo extends OAuth2UserInfo {

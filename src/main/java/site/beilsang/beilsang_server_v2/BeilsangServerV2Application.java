@@ -11,8 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class BeilsangServerV2Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BeilsangServerV2Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(BeilsangServerV2Application.class, args);
+    }
 
 }

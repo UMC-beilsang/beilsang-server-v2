@@ -7,5 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Builder
 public class MemberProfileImageReqDTO {
+
     private MultipartFile profileImage;
 }

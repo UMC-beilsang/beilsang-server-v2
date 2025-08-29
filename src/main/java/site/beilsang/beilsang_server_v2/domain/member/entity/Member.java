@@ -1,7 +1,23 @@
 package site.beilsang.beilsang_server_v2.domain.member.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.FeedLike;
 import site.beilsang.beilsang_server_v2.domain.like.entity.ChallengeLike;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
@@ -11,17 +27,13 @@ import site.beilsang.beilsang_server_v2.global.enums.Gender;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.enums.Role;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id", nullable = false)
@@ -80,19 +92,20 @@ public class Member {
     private List<ChallengeLike> challengeLikes = new ArrayList<>();
 
     public void updateProfile(MemberProfileReqDTO memberProfileReqDTO) {
-        if(!memberProfileReqDTO.getNickName().isBlank()){
+        if (!memberProfileReqDTO.getNickName().isBlank()) {
             this.nickName = memberProfileReqDTO.getNickName();
         }
-        if(!memberProfileReqDTO.getBirth().isBlank()){
-            this.birth = LocalDate.parse(memberProfileReqDTO.getBirth(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (!memberProfileReqDTO.getBirth().isBlank()) {
+            this.birth = LocalDate.parse(memberProfileReqDTO.getBirth(),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
-        if(!memberProfileReqDTO.getGender().isBlank()){
+        if (!memberProfileReqDTO.getGender().isBlank()) {
             this.gender = Gender.valueOf(memberProfileReqDTO.getGender());
         }
-        if(!memberProfileReqDTO.getAddress().isBlank()){
+        if (!memberProfileReqDTO.getAddress().isBlank()) {
             this.address = memberProfileReqDTO.getAddress();
         }
-        if(!memberProfileReqDTO.getResolution().isBlank()){
+        if (!memberProfileReqDTO.getResolution().isBlank()) {
             this.resolution = memberProfileReqDTO.getResolution();
         }
     }

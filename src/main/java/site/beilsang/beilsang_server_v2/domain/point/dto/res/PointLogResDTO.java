@@ -1,10 +1,9 @@
 package site.beilsang.beilsang_server_v2.domain.point.dto.res;
 
+import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
-
-import java.time.LocalDate;
 
 @Getter
 @Builder

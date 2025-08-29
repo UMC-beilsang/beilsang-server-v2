@@ -2,7 +2,7 @@ spring:
   application:
     name: beilsang-server-v2
   profiles:
-    active: local-mysql
+    active: local-h2
   security:
     oauth2: # OAuth
       client:
@@ -38,3 +38,12 @@ spring:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+# Swagger/OpenAPI 설정
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha

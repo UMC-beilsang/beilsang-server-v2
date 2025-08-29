@@ -10,6 +10,7 @@ import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode
 @Setter
 @JsonPropertyOrder({"statusCode", "code", "message", "data"}) // 변수 순서 지정
 public class BaseResponse<T> {
+
     public final int statusCode; //커스텀 상태코드
     public final String code;  //Http 상태코드
     public final String message;

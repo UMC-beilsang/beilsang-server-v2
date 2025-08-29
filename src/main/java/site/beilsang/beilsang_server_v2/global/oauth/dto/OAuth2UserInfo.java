@@ -1,8 +1,7 @@
 package site.beilsang.beilsang_server_v2.global.oauth.dto;
 
-import lombok.AllArgsConstructor;
-
 import java.util.Map;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public abstract class OAuth2UserInfo {
