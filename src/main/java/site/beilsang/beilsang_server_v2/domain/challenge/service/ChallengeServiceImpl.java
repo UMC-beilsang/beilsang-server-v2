@@ -12,6 +12,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.JoinChallengeResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeInfoImage;
@@ -49,6 +50,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private static final int MAX_INFO_IMAGE = 5;
     private static final int MAX_CERT_IMAGE = 4;
     private static final int POINT_EXPIRATION_YEARS = 1;
+    private static final int INIT_SUCCESS_DAYS = 0;
 
     private final MemberRepository memberRepository;
     private final ChallengeRepository challengeRepository;
@@ -119,7 +121,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         // ChallengeMember 생성
         challengeMemberRepository.save(ChallengeMember.builder()
                 .isHost(true)
-                .successDays(0)
+                .successDays(INIT_SUCCESS_DAYS)
                 .challengeMemberStatus(challengeMemberStatus)
                 .isFeedUpload(false)
                 .member(member)
@@ -239,6 +241,70 @@ public class ChallengeServiceImpl implements ChallengeService {
         return ChallengeAssembler.toChallengeDetailResDTO(
                 challenge, isJoinable, status, progress, usedPoint, earnedPoint
         );
+    }
+
+    @Override
+    public JoinChallengeResDTO joinChallenge(Long challengeId, Long memberId) {
+        // 챌린지 조회
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
+                () -> new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE));
+
+        // 멤버 조회
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        // 이미 참여한 챌린지인지 확인
+        if (challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId).isPresent()) {
+            throw new BaseException(BaseResponseCode.ALREADY_JOINED_CHALLENGE);
+        }
+
+        // 종료된 챌린지인지 확인
+        if (challenge.getStatus() == ChallengeStatus.END) {
+            throw new BaseException(BaseResponseCode.CHALLENGE_ENDED);
+        }
+
+        // 참여 포인트 확인 및 차감
+        int joinPoint = challenge.getJoinPoint();
+        int validPoints = pointService.calculateValidPoints(memberId);
+        if (validPoints < joinPoint) {
+            throw new BaseException(BaseResponseCode.NOT_ENOUGH_POINT);
+        }
+
+        // 포인트 로그 생성
+        pointLogRepository.save(PointLog.builder()
+                .pointName(PointName.JOIN_CHALLENGE)
+                .status(PointStatus.USE)
+                .value(joinPoint)
+                .expirationDate(LocalDateTime.now().plusYears(POINT_EXPIRATION_YEARS))
+                .member(member)
+                .challenge(challenge)
+                .build());
+        
+        // 멤버 포인트 차감
+        member.subPoint(joinPoint);
+
+        // 챌린지 멤버 상태 결정
+        ChallengeMemberStatus challengeMemberStatus = challenge.getStatus() == ChallengeStatus.NOT_YET ? 
+                ChallengeMemberStatus.NOT_YET : ChallengeMemberStatus.ONGOING;
+
+        // 챌린지 멤버 생성
+        challengeMemberRepository.save(ChallengeMember.builder()
+                .isHost(false)
+                .successDays(INIT_SUCCESS_DAYS)
+                .challengeMemberStatus(challengeMemberStatus)
+                .isFeedUpload(false)
+                .member(member)
+                .challenge(challenge)
+                .build());
+
+        // 챌린지 참여자 수 증가
+        challenge.incrementAttendeeCount();
+
+        // 참여 후 남은 포인트 계산
+        Integer remainingPoint = pointService.calculateValidPoints(memberId);
+
+        // 응답 DTO 생성 및 반환
+        return ChallengeAssembler.toJoinChallengeResDTO(challenge, memberId, remainingPoint);
     }
 
     private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {

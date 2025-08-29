@@ -29,7 +29,9 @@ public enum BaseResponseCode {
     INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "C0001", "유효하지 않은 이미지 파일입니다"),
     INVALID_CHALLENGE_PERIOD(HttpStatus.BAD_REQUEST, "C0002", "목표 실천일수가 챌린지 기간을 초과할 수 없습니다"),
     INVALID_START_DATE(HttpStatus.BAD_REQUEST, "C0003", "시작 날짜는 오늘 이후여야 합니다"),
-    NOT_FOUND_CHALLENGE(HttpStatus.BAD_REQUEST, "C0004", "존재하지 않는 챌린지입니다");
+    NOT_FOUND_CHALLENGE(HttpStatus.BAD_REQUEST, "C0004", "존재하지 않는 챌린지입니다"),
+    ALREADY_JOINED_CHALLENGE(HttpStatus.BAD_REQUEST, "C0005", "이미 참여한 챌린지입니다"),
+    CHALLENGE_ENDED(HttpStatus.BAD_REQUEST, "C0006", "종료된 챌린지입니다");
 
     private final HttpStatus status; // 커스텀 상태코드
     private final String code; // Http 상태코드
