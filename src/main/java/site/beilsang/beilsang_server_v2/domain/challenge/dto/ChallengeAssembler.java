@@ -139,13 +139,4 @@ public class ChallengeAssembler {
             .remainingPoint(remainingPoint)
             .build();
     }
-
-    public static JoinChallengeResDTO toJoinChallengeResDTO(Challenge challenge, Long memberId, Integer remainingPoint) {
-        return JoinChallengeResDTO.builder()
-                .challengeId(challenge.getId())
-                .memberId(memberId)
-                .joinDate(java.time.LocalDateTime.now())
-                .remainingPoint(remainingPoint)
-                .build();
-    }
 }
