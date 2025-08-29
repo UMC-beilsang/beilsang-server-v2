@@ -278,6 +278,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 포인트 로그 생성
         pointLogRepository.save(PointLog.builder()
+
             .pointName(PointName.JOIN_CHALLENGE)
             .status(PointStatus.USE)
             .value(joinPoint)

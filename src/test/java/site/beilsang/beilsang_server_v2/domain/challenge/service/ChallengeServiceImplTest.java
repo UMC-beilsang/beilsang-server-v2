@@ -404,6 +404,7 @@ class ChallengeServiceImplTest {
 
         // then
         // ChallengeMember 저장 시 올바른 상태인지 확인
+
         ArgumentCaptor<ChallengeMember> challengeMemberCaptor = ArgumentCaptor.forClass(
             ChallengeMember.class);
         verify(challengeMemberRepository).save(challengeMemberCaptor.capture());
