@@ -1,4 +1,4 @@
-package site.beilsang.beilsang_server_v2.domain.achivement.dto.res;
+package site.beilsang.beilsang_server_v2.domain.challenge.dto.res;
 
 import lombok.Builder;
 import lombok.Getter;

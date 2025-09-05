@@ -5,11 +5,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.JoinChallengeResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.*;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
+import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeInfoImage;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
@@ -137,6 +135,25 @@ public class ChallengeAssembler {
             .memberId(memberId)
             .joinDate(java.time.LocalDateTime.now())
             .remainingPoint(remainingPoint)
+            .build();
+    }
+
+    public static HallOfFameResDTO toHallOfFameResDTO(Challenge challenge, int rank) {
+        List<String> infoImageUrls = challenge.getInfoImages().stream()
+            .map(ChallengeInfoImage::getImageUrl)
+            .toList();
+
+        return HallOfFameResDTO.builder()
+            .challengeId(challenge.getId())
+            .title(challenge.getTitle())
+            .category(challenge.getCategory())
+            .categoryName(challenge.getCategory().getKorName())
+            .startDate(challenge.getStartDate())
+            .finishDate(challenge.getFinishDate())
+            .likeCount(challenge.getCountLikes())
+            .attendeeCount(challenge.getAttendeeCount())
+            .rank(rank)
+            .infoImageUrls(infoImageUrls)
             .build();
     }
 }

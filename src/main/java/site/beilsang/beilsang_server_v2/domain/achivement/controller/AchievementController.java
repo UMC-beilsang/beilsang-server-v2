@@ -6,10 +6,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import site.beilsang.beilsang_server_v2.domain.achivement.dto.res.HallOfFameListResDto;
-import site.beilsang.beilsang_server_v2.domain.achivement.service.HallOfFameService;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.HallOfFameListResDto;
+import site.beilsang.beilsang_server_v2.domain.achivement.service.AchievementService;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedListResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 
@@ -20,8 +19,7 @@ import site.beilsang.beilsang_server_v2.global.enums.Category;
 @RequestMapping("/api/achievement")
 public class AchievementController {
 
-    private final HallOfFameService hallOfFameService;
-    private final FeedService feedService;
+    private final AchievementService achievementService;
 
     @GetMapping("/hall-of-fame/{category}")
     @Operation(summary = "카테고리별 명예의 전당 조회 API",
@@ -33,7 +31,7 @@ public class AchievementController {
         @Parameter(description = "카테고리 (ALL, TUMBLER, REFILL_STATION, MULTIPLE_CONTAINERS, ECO_PRODUCT, PLOGGING, VEGAN, PUBLIC_TRANSPORT, BIKE, RECYCLE)")
         @PathVariable Category category
     ) {
-        HallOfFameListResDto response = hallOfFameService.getCategoryHallOfFame(category);
+        HallOfFameListResDto response = achievementService.getCategoryHallOfFame(category);
         return new BaseResponse<>(response);
     }
 
@@ -47,6 +45,6 @@ public class AchievementController {
         @PathVariable(name = "category") Category category,
         @RequestParam("page") Integer page
     ){
-        return new BaseResponse<>( feedService.getFeedsByCategory(category,page));
+        return new BaseResponse<>( achievementService.getFeedsByCategory(category,page));
     }
 }
