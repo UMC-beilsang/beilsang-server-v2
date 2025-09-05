@@ -22,12 +22,9 @@ public class FeedAssembler {
         return feedList.stream().map(FeedAssembler::toEntity).toList();
     }
     public static PreviewFeedListResDTO toPreviewFeedListResDTO(List<Feed> feedList, Boolean hasNext) {
-        List<PreviewFeedResDTO> feedResDTOList = feedList.stream().map(FeedAssembler::toEntity).toList();
         return PreviewFeedListResDTO.builder()
-            .feeds(feedResDTOList)
+            .feeds(toEntities(feedList))
             .hasNext(hasNext)
             .build();
     }
-
-
 }
