@@ -4,6 +4,12 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedUpdateReqDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDeleteResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 
 /**
@@ -18,7 +24,7 @@ public interface FeedService {
      * @param requestDTO 피드 목록 조회 요청 DTO (카테고리, 페이징 정보)
      * @return 페이지네이션된 피드 목록
      */
-    PageResponseDTO<FeedListResDTO> getFeedList(Long memberId, FeedListReqDTO requestDTO);
+    PageResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId, FeedListReqDTO requestDTO);
 
     /**
      * 피드 상세 정보를 조회합니다.
@@ -87,5 +93,5 @@ public interface FeedService {
      * @param size     페이지 크기
      * @return 페이지네이션된 내 피드 목록
      */
-    PageResponseDTO<MyFeedResDTO> getMyFeedList(Long memberId, int page, int size);
+    PageResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size);
 }

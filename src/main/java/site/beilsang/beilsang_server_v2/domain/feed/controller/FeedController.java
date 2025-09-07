@@ -9,12 +9,26 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedUpdateReqDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.*;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDeleteResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
@@ -34,7 +48,7 @@ public class FeedController {
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping
-    public BaseResponse<PageResponseDTO<FeedListResDTO>> getFeedList(
+    public BaseResponse<PageResponseDTO<PreviewFeedResDTO>> getFeedList(
         Authentication authentication,
         @Parameter(description = "피드 목록 조회 필터 조건") @ModelAttribute FeedListReqDTO requestDTO) {
         Long memberId = (Long) authentication.getPrincipal();
@@ -89,7 +103,8 @@ public class FeedController {
         @Parameter(description = "피드 수정 요청 데이터") @RequestPart("data") FeedUpdateReqDTO updateReqDTO,
         @Parameter(description = "새로운 피드 이미지 파일") @RequestPart(value = "feedImage", required = false) MultipartFile feedImage) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(feedService.updateFeed(feedId, memberId, updateReqDTO, feedImage));
+        return new BaseResponse<>(
+            feedService.updateFeed(feedId, memberId, updateReqDTO, feedImage));
     }
 
     @Operation(summary = "피드 삭제", description = "피드를 삭제합니다. (작성자만 가능)")
@@ -147,7 +162,7 @@ public class FeedController {
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping("/my")
-    public BaseResponse<PageResponseDTO<MyFeedResDTO>> getMyFeedList(
+    public BaseResponse<PageResponseDTO<PreviewFeedResDTO>> getMyFeedList(
         Authentication authentication,
         @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20") @RequestParam(defaultValue = "20") int size) {
