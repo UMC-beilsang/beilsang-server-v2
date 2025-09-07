@@ -2,7 +2,7 @@ spring:
   application:
     name: beilsang-server-v2
   profiles:
-    active: local-mysql
+    active: local-h2
   security:
     oauth2: # OAuth
       client:
