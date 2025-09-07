@@ -13,8 +13,8 @@ public class PreviewMemberInfoDTO {
     private Long memberId;
 
     @Schema(description = "작성자 닉네임", example = "사용자1")
-    private String memberNickname;
+    private String nickName;
 
     @Schema(description = "작성자 프로필 이미지 URL")
-    private String memberProfileImage;
+    private String profileImage;
 }

@@ -27,9 +27,6 @@ public class FeedDetailResDTO {
     @Schema(description = "챌린지 카테고리", example = "EXERCISE")
     private String challengeCategory;
 
-    @Schema(description = "챌린지 진행 일수", example = "15")
-    private Long challengeDay;
-
     @Schema(description = "피드 후기", example = "오늘도 열심히 운동했어요!")
     private String review;
 
