@@ -32,6 +32,7 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
 @RestController
 @RequestMapping("/feed")
@@ -165,7 +166,8 @@ public class FeedController {
     public BaseResponse<PageResponseDTO<PreviewFeedResDTO>> getMyFeedList(
         Authentication authentication,
         @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
-        @Parameter(description = "페이지 크기", example = "20") @RequestParam(defaultValue = "20") int size) {
+        @Parameter(description = "페이지 크기", example = "20") @RequestParam(defaultValue = "20") int size,
+        @Parameter(description = "챌린지 상태", example = "IN_PROGRESS") @RequestParam(defaultValue = "IN_PROGRESS") ChallengeStatus status) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(feedService.getMyFeedList(memberId, page, size));
     }
