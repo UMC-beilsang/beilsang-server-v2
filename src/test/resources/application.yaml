@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: beilsang-server-v2
+  profiles:
+    active: test
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+  jpa:
+    database: h2
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            client-authentication-method: client_secret_post
+            redirect-uri: http://localhost:8080/oauth/redirect/kakao
+            authorization-grant-type: authorization_code
+            client-name: Kakao
+            scope:
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+  cloud:
+    aws:
+      credentials:
+        accessKey: test-access-key
+        secretKey: test-secret-key
+      region:
+        static: ap-northeast-2
+      s3:
+        bucket: test-bucket
+        path:
+          challenge-main: challenge/main
+          challenge-cert: challenge/cert
+          member-profile: member/profile
+
+jwt:
+  secret-key: test-jwt-secret-key-for-testing-purposes-only
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    site.beilsang: DEBUG
