@@ -21,8 +21,11 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
-import site.beilsang.beilsang_server_v2.domain.member.dto.res.PreviewMemberInfoDTO;
+import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
+import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
+import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,8 @@ import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 public class FeedServiceImpl implements FeedService {
 
     private final FeedRepository feedRepository;
+    private final ChallengeMemberRepository challengeMemberRepository;
+    private final S3Service s3Service;
 
     @Override
     public PageResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId,
@@ -82,31 +87,45 @@ public class FeedServiceImpl implements FeedService {
             feed.getUploadDate()
         ) + 1; // 1일차부터 시작
 
-        // FeedDetailResDTO 생성
-        return FeedDetailResDTO.builder()
-            .feedId(feed.getId())
-            .memberInfo(PreviewMemberInfoDTO.builder()
-                .memberId(feed.getChallengeMember().getMember().getId())
-                .nickName(feed.getChallengeMember().getMember().getNickName())
-                .profileImage(feed.getChallengeMember().getMember().getProfileUrl())
-                .build())
-            .challengeId(feed.getChallenge().getId())
-            .challengeTitle(feed.getChallenge().getTitle())
-            .challengeCategory(feed.getChallenge().getCategory().name())
-            .review(feed.getReview())
-            .feedUrl(feed.getFeedUrl())
-            .uploadDate(feed.getUploadDate())
-            .likeCount(likeCount)
-            .isLiked(isLiked)
-            .createdAt(feed.getCreatedAt())
-            .updatedAt(feed.getUpdatedAt())
-            .build();
+        // FeedAssembler를 사용하여 FeedDetailResDTO 생성
+        return FeedAssembler.toFeedDetailResDTO(feed, isLiked);
     }
 
     @Override
+    @Transactional
     public FeedCreateResDTO createFeed(Long memberId, FeedCreateReqDTO createReqDTO,
         MultipartFile feedImage) {
-        throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
+        // ChallengeMember 조회 및 권한 검증
+        ChallengeMember challengeMember = challengeMemberRepository.findById(
+                createReqDTO.getChallengeMemberId())
+            .orElseThrow(() -> new IllegalArgumentException(
+                "챌린지 멤버를 찾을 수 없습니다. ID: " + createReqDTO.getChallengeMemberId()));
+
+        // 작성자가 해당 챌린지의 참여자인지 확인
+        if (!challengeMember.getMember().getId().equals(memberId)) {
+            throw new IllegalArgumentException("해당 챌린지의 참여자만 피드를 작성할 수 있습니다.");
+        }
+
+        // 파일이 없거나 빈 파일인 경우 예외 발생
+        if (feedImage == null || feedImage.isEmpty()) {
+            throw new IllegalArgumentException("이미지가 비어 있습니다.");
+        }
+        String feedUrl = s3Service.uploadFile(UploadPath.FEED, feedImage);
+
+        // Feed 엔티티 생성
+        Feed feed = Feed.builder()
+            .review(createReqDTO.getReview())
+            .uploadDate(createReqDTO.getUploadDate())
+            .feedUrl(feedUrl)
+            .challenge(challengeMember.getChallenge())
+            .challengeMember(challengeMember)
+            .build();
+
+        // Feed 저장
+        Feed savedFeed = feedRepository.save(feed);
+
+        // FeedAssembler를 사용하여 FeedCreateResDTO 생성 및 반환
+        return FeedAssembler.toFeedCreateResDTO(savedFeed);
     }
 
     @Override
