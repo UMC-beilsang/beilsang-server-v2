@@ -3,16 +3,32 @@ package site.beilsang.beilsang_server_v2.domain.feed.dto;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedListResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.PreviewMemberInfoDTO;
+import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
+import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 
 public class FeedAssembler {
 
-    public static PreviewFeedResDTO toEntity(Feed feed) {
+    public static Feed toEntity(FeedCreateReqDTO createReqDTO, String feedUrl, Challenge challenge,
+        ChallengeMember challengeMember) {
+        return Feed.builder()
+            .review(createReqDTO.getReview())
+            .uploadDate(LocalDate.now())
+            .feedUrl(feedUrl)
+            .challenge(challenge)
+            .challengeMember(challengeMember)
+            .build();
+    }
+
+    public static PreviewFeedResDTO toPreviewFeedResDTO(Feed feed) {
         return PreviewFeedResDTO.builder()
             .feedId(feed.getId())
             .feedUrl(feed.getFeedUrl())
@@ -20,14 +36,14 @@ public class FeedAssembler {
             .build();
     }
 
-    public static List<PreviewFeedResDTO> toEntities(List<Feed> feedList) {
-        return feedList.stream().map(FeedAssembler::toEntity).toList();
+    public static List<PreviewFeedResDTO> toPreviewFeedResDTOList(List<Feed> feedList) {
+        return feedList.stream().map(FeedAssembler::toPreviewFeedResDTO).toList();
     }
 
     public static PreviewFeedListResDTO toPreviewFeedListResDTO(List<Feed> feedList,
         Boolean hasNext) {
         return PreviewFeedListResDTO.builder()
-            .feeds(toEntities(feedList))
+            .feeds(toPreviewFeedResDTOList(feedList))
             .hasNext(hasNext)
             .build();
     }
@@ -63,6 +79,21 @@ public class FeedAssembler {
             .feedUrl(feed.getFeedUrl())
             .uploadDate(feed.getUploadDate())
             .createdAt(feed.getCreatedAt())
+            .build();
+    }
+
+    /**
+     * Spring Data Page를 PageResponseDTO로 변환
+     */
+    public static PageResponseDTO<PreviewFeedResDTO> toPageResponseDTO(Page<Feed> feedPage) {
+        List<PreviewFeedResDTO> feedDtoList = toPreviewFeedResDTOList(feedPage.getContent());
+        return PageResponseDTO.<PreviewFeedResDTO>builder()
+            .content(feedDtoList)
+            .page(feedPage.getNumber())
+            .size(feedPage.getSize())
+            .totalElements(feedPage.getTotalElements())
+            .totalPages(feedPage.getTotalPages())
+            .hasNext(feedPage.hasNext())
             .build();
     }
 

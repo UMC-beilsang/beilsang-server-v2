@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Schema(description = "피드 작성 요청 DTO")
 @Getter
 @Setter
@@ -20,8 +18,4 @@ public class FeedCreateReqDTO {
     @Schema(description = "피드 후기", example = "오늘도 열심히 운동했어요!", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "피드 후기는 필수입니다.")
     private String review;
-
-    @Schema(description = "업로드 날짜", example = "2024-01-15", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "업로드 날짜는 필수입니다.")
-    private LocalDate uploadDate;
 }

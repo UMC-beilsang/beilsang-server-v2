@@ -41,7 +41,7 @@ public class MemberAssembler {
         Long countSuccessChallenge, Long countChallenge, Long countFailedChallenge,
         Long countLike) {
         MyPageResDTO myPageResDTO = MyPageResDTO.builder()
-            .feedDTOs(FeedAssembler.toEntities(feedList))
+            .feedDTOs(FeedAssembler.toPreviewFeedResDTOList(feedList))
             .countFeed(countFeed)
             .successChallenge(countSuccessChallenge)
             .challenges(countChallenge)

@@ -1,6 +1,5 @@
 package site.beilsang.beilsang_server_v2.domain.feed.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,19 +52,8 @@ public class FeedServiceImpl implements FeedService {
             feedPage = feedRepository.findAll(pageable);
         }
 
-        // 피드 리스트를 DTO로 변환
-        List<Feed> feedList = feedPage.getContent();
-        List<PreviewFeedResDTO> feedDtoList = FeedAssembler.toEntities(feedList);
-
         // PageResponseDTO로 변환
-        return PageResponseDTO.<PreviewFeedResDTO>builder()
-            .content(feedDtoList)
-            .page(feedPage.getNumber())
-            .size(feedPage.getSize())
-            .totalElements(feedPage.getTotalElements())
-            .totalPages(feedPage.getTotalPages())
-            .hasNext(feedPage.hasNext())
-            .build();
+        return FeedAssembler.toPageResponseDTO(feedPage);
     }
 
     // TODO: 나머지 메소드들은 순차적으로 구현 예정
@@ -77,15 +65,6 @@ public class FeedServiceImpl implements FeedService {
 
         // 좋아요 여부 확인 (TODO: FeedLike 레포지토리 구현 후 실제 로직 추가)
         boolean isLiked = false; // 임시로 false 처리
-
-        // 좋아요 수 계산
-        long likeCount = feed.getFeedLikes().size();
-
-        // 챌린지 진행 일수 계산 (업로드 날짜 기준)
-        long challengeDay = java.time.temporal.ChronoUnit.DAYS.between(
-            feed.getChallenge().getStartDate(),
-            feed.getUploadDate()
-        ) + 1; // 1일차부터 시작
 
         // FeedAssembler를 사용하여 FeedDetailResDTO 생성
         return FeedAssembler.toFeedDetailResDTO(feed, isLiked);
@@ -112,14 +91,13 @@ public class FeedServiceImpl implements FeedService {
         }
         String feedUrl = s3Service.uploadFile(UploadPath.FEED, feedImage);
 
-        // Feed 엔티티 생성
-        Feed feed = Feed.builder()
-            .review(createReqDTO.getReview())
-            .uploadDate(createReqDTO.getUploadDate())
-            .feedUrl(feedUrl)
-            .challenge(challengeMember.getChallenge())
-            .challengeMember(challengeMember)
-            .build();
+        // Feed 엔티티 생성 (FeedAssembler 오버로딩 메서드 활용)
+        Feed feed = FeedAssembler.toEntity(
+            createReqDTO,
+            feedUrl,
+            challengeMember.getChallenge(),
+            challengeMember
+        );
 
         // Feed 저장
         Feed savedFeed = feedRepository.save(feed);
