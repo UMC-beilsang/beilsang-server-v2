@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -22,12 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedUpdateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDeleteResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
@@ -86,42 +82,6 @@ public class FeedController {
         @Parameter(description = "피드 이미지 파일") @RequestPart(value = "feedImage", required = false) MultipartFile feedImage) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(feedService.createFeed(memberId, createReqDTO, feedImage));
-    }
-
-    @Operation(summary = "피드 수정", description = "기존 피드를 수정합니다. (작성자만 가능)")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "피드 수정 성공",
-            content = @Content(schema = @Schema(implementation = FeedUpdateResDTO.class))),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-        @ApiResponse(responseCode = "401", description = "인증 실패"),
-        @ApiResponse(responseCode = "403", description = "피드 수정 권한 없음"),
-        @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음")
-    })
-    @PutMapping("/{feedId}")
-    public BaseResponse<FeedUpdateResDTO> updateFeed(
-        @Parameter(description = "수정할 피드 ID", example = "1") @PathVariable Long feedId,
-        Authentication authentication,
-        @Parameter(description = "피드 수정 요청 데이터") @RequestPart("data") FeedUpdateReqDTO updateReqDTO,
-        @Parameter(description = "새로운 피드 이미지 파일") @RequestPart(value = "feedImage", required = false) MultipartFile feedImage) {
-        Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(
-            feedService.updateFeed(feedId, memberId, updateReqDTO, feedImage));
-    }
-
-    @Operation(summary = "피드 삭제", description = "피드를 삭제합니다. (작성자만 가능)")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "피드 삭제 성공",
-            content = @Content(schema = @Schema(implementation = FeedDeleteResDTO.class))),
-        @ApiResponse(responseCode = "401", description = "인증 실패"),
-        @ApiResponse(responseCode = "403", description = "피드 삭제 권한 없음"),
-        @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음")
-    })
-    @DeleteMapping("/{feedId}")
-    public BaseResponse<FeedDeleteResDTO> deleteFeed(
-        @Parameter(description = "삭제할 피드 ID", example = "1") @PathVariable Long feedId,
-        Authentication authentication) {
-        Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(feedService.deleteFeed(feedId, memberId));
     }
 
     @Operation(summary = "피드 좋아요 추가", description = "피드에 좋아요를 추가합니다.")

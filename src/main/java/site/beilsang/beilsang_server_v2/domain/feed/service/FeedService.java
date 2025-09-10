@@ -3,12 +3,9 @@ package site.beilsang.beilsang_server_v2.domain.feed.service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedUpdateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDeleteResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 
@@ -45,27 +42,6 @@ public interface FeedService {
      */
     FeedCreateResDTO createFeed(Long memberId, FeedCreateReqDTO createReqDTO,
         MultipartFile feedImage);
-
-    /**
-     * 기존 피드를 수정합니다. 작성자만 수정 가능합니다.
-     *
-     * @param feedId       수정할 피드 ID
-     * @param memberId     요청한 사용자 ID
-     * @param updateReqDTO 피드 수정 요청 DTO
-     * @param feedImage    새로운 피드 이미지 파일 (선택사항)
-     * @return 수정된 피드 정보
-     */
-    FeedUpdateResDTO updateFeed(Long feedId, Long memberId, FeedUpdateReqDTO updateReqDTO,
-        MultipartFile feedImage);
-
-    /**
-     * 피드를 삭제합니다. 작성자만 삭제 가능합니다.
-     *
-     * @param feedId   삭제할 피드 ID
-     * @param memberId 요청한 사용자 ID
-     * @return 삭제된 피드 정보
-     */
-    FeedDeleteResDTO deleteFeed(Long feedId, Long memberId);
 
     /**
      * 피드에 좋아요를 추가합니다. 이미 좋아요를 누른 경우 예외가 발생합니다.

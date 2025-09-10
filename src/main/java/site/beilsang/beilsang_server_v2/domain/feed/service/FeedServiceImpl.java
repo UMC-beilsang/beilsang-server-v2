@@ -11,12 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedUpdateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDeleteResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
@@ -24,6 +21,7 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @Service
@@ -38,25 +36,24 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public SliceResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId,
         FeedListReqDTO requestDTO) {
-        // 페이징 처리 (최신순 정렬) 
+        // 페이징 처리 (최신순 정렬)
         Pageable pageable = PageRequest.of(requestDTO.getPage(), requestDTO.getSize(),
             Sort.by("createdAt").descending());
 
         Slice<Feed> feedSlice;
-        if (requestDTO.getCategory() != null) {
+        if (requestDTO.getCategory() == Category.ALL) {
+            // 전체 조회
+            feedSlice = feedRepository.findAll(pageable);
+        } else {
             // 카테고리별 조회
             feedSlice = feedRepository.findAllByChallenge_Category(requestDTO.getCategory(),
                 pageable);
-        } else {
-            // 전체 조회
-            feedSlice = feedRepository.findAll(pageable);
         }
 
         // SliceResponseDTO로 변환
         return FeedAssembler.toSliceResponseDTO(feedSlice);
     }
 
-    // TODO: 나머지 메소드들은 순차적으로 구현 예정
     @Override
     public FeedDetailResDTO getFeedDetail(Long feedId, Long memberId) {
         // 피드 조회 (존재하지 않으면 예외 발생)
@@ -104,17 +101,6 @@ public class FeedServiceImpl implements FeedService {
 
         // FeedAssembler를 사용하여 FeedCreateResDTO 생성 및 반환
         return FeedAssembler.toFeedCreateResDTO(savedFeed);
-    }
-
-    @Override
-    public FeedUpdateResDTO updateFeed(Long feedId, Long memberId, FeedUpdateReqDTO updateReqDTO,
-        MultipartFile feedImage) {
-        throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
-    }
-
-    @Override
-    public FeedDeleteResDTO deleteFeed(Long feedId, Long memberId) {
-        throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
     }
 
     @Override
