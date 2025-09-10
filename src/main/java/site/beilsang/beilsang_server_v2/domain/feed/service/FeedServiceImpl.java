@@ -16,9 +16,13 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
+import site.beilsang.beilsang_server_v2.domain.feed.entity.FeedLike;
+import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedLikeRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
+import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
+import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
@@ -30,7 +34,9 @@ import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 public class FeedServiceImpl implements FeedService {
 
     private final FeedRepository feedRepository;
+    private final FeedLikeRepository feedLikeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
+    private final MemberRepository memberRepository;
     private final S3Service s3Service;
 
     @Override
@@ -60,8 +66,8 @@ public class FeedServiceImpl implements FeedService {
         Feed feed = feedRepository.findById(feedId)
             .orElseThrow(() -> new IllegalArgumentException("피드를 찾을 수 없습니다. ID: " + feedId));
 
-        // 좋아요 여부 확인 (TODO: FeedLike 레포지토리 구현 후 실제 로직 추가)
-        boolean isLiked = false; // 임시로 false 처리
+        // 좋아요 여부 확인
+        boolean isLiked = feedLikeRepository.existsByFeed_IdAndMember_Id(feedId, memberId);
 
         // FeedAssembler를 사용하여 FeedDetailResDTO 생성
         return FeedAssembler.toFeedDetailResDTO(feed, isLiked);
@@ -104,13 +110,63 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
+    @Transactional
     public FeedLikeResDTO addFeedLike(Long feedId, Long memberId) {
-        throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
+        // 피드 존재 여부 확인
+        Feed feed = feedRepository.findById(feedId)
+            .orElseThrow(() -> new IllegalArgumentException("피드를 찾을 수 없습니다. ID: " + feedId));
+
+        // 사용자 존재 여부 확인
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + memberId));
+
+        // 이미 좋아요를 누른 상태인지 확인
+        boolean alreadyLiked = feedLikeRepository.existsByFeed_IdAndMember_Id(feedId, memberId);
+        if (alreadyLiked) {
+            throw new IllegalArgumentException("이미 좋아요를 누른 피드입니다.");
+        }
+
+        // 좋아요 생성 및 저장
+        FeedLike feedLike = FeedLike.builder()
+            .feed(feed)
+            .member(member)
+            .build();
+        feedLikeRepository.save(feedLike);
+
+        // 현재 좋아요 수 계산
+        long currentLikeCount = feedLikeRepository.countByFeed_Id(feedId);
+
+        // 응답 DTO 생성
+        return FeedLikeResDTO.builder()
+            .feedId(feedId)
+            .likeCount(currentLikeCount)
+            .isLiked(true)
+            .build();
     }
 
     @Override
+    @Transactional
     public FeedLikeResDTO removeFeedLike(Long feedId, Long memberId) {
-        throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
+        // 피드 존재 여부 확인
+        feedRepository.findById(feedId)
+            .orElseThrow(() -> new IllegalArgumentException("피드를 찾을 수 없습니다. ID: " + feedId));
+
+        // 좋아요 존재 여부 확인
+        FeedLike feedLike = feedLikeRepository.findByFeed_IdAndMember_Id(feedId, memberId)
+            .orElseThrow(() -> new IllegalArgumentException("좋아요를 누르지 않은 피드입니다."));
+
+        // 좋아요 삭제
+        feedLikeRepository.delete(feedLike);
+
+        // 현재 좋아요 수 계산
+        long currentLikeCount = feedLikeRepository.countByFeed_Id(feedId);
+
+        // 응답 DTO 생성
+        return FeedLikeResDTO.builder()
+            .feedId(feedId)
+            .likeCount(currentLikeCount)
+            .isLiked(false)
+            .build();
     }
 
     @Override
