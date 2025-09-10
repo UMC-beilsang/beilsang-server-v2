@@ -5,11 +5,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.HallOfFameListResDto;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.achivement.service.AchievementService;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedListResDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.HallOfFameListResDto;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
+import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 @Tag(name = "Achievement", description = "발견 api")
@@ -37,14 +42,15 @@ public class AchievementController {
 
     @GetMapping("/feeds/{category}")
     @Operation(summary = "카테고리로 필터링한 챌린지 피드 조회 API",
-        description = "선택된 카테고리에 해당하는 피드를 조회하는 API 입니다.")
+        description = "선택된 카테고리에 해당하는 피드를 조회하는 API입니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "성공")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공")
     })
-    public BaseResponse<PreviewFeedListResDTO> getFeedByCategory(
+    public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getFeedByCategory(
         @PathVariable(name = "category") Category category,
+        @RequestParam(defaultValue = "4") Integer size,
         @RequestParam("page") Integer page
-    ){
-        return new BaseResponse<>( achievementService.getFeedsByCategory(category,page));
+    ) {
+        return new BaseResponse<>(achievementService.getFeedsByCategory(category, page, size));
     }
 }
