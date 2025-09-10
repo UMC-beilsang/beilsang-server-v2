@@ -31,7 +31,7 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
-import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
 @RestController
@@ -45,11 +45,11 @@ public class FeedController {
     @Operation(summary = "피드 목록 조회", description = "카테고리별로 필터링된 피드 목록을 페이지네이션으로 조회합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "피드 목록 조회 성공",
-            content = @Content(schema = @Schema(implementation = PageResponseDTO.class))),
+            content = @Content(schema = @Schema(implementation = SliceResponseDTO.class))),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping
-    public BaseResponse<PageResponseDTO<PreviewFeedResDTO>> getFeedList(
+    public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getFeedList(
         Authentication authentication,
         @Parameter(description = "피드 목록 조회 필터 조건") @ModelAttribute FeedListReqDTO requestDTO) {
         Long memberId = (Long) authentication.getPrincipal();
@@ -159,11 +159,11 @@ public class FeedController {
     @Operation(summary = "내 피드 목록 조회", description = "현재 사용자가 작성한 피드 목록을 조회합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "내 피드 목록 조회 성공",
-            content = @Content(schema = @Schema(implementation = PageResponseDTO.class))),
+            content = @Content(schema = @Schema(implementation = SliceResponseDTO.class))),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping("/my")
-    public BaseResponse<PageResponseDTO<PreviewFeedResDTO>> getMyFeedList(
+    public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getMyFeedList(
         Authentication authentication,
         @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20") @RequestParam(defaultValue = "20") int size,

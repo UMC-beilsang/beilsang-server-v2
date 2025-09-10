@@ -1,9 +1,9 @@
 package site.beilsang.beilsang_server_v2.domain.feed.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,7 @@ import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
-import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @Service
@@ -36,24 +36,24 @@ public class FeedServiceImpl implements FeedService {
     private final S3Service s3Service;
 
     @Override
-    public PageResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId,
+    public SliceResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId,
         FeedListReqDTO requestDTO) {
-        // 페이징 처리 (최신순 정렬)
+        // 페이징 처리 (최신순 정렬) 
         Pageable pageable = PageRequest.of(requestDTO.getPage(), requestDTO.getSize(),
             Sort.by("createdAt").descending());
 
-        Page<Feed> feedPage;
+        Slice<Feed> feedSlice;
         if (requestDTO.getCategory() != null) {
             // 카테고리별 조회
-            feedPage = feedRepository.findAllByChallenge_Category(requestDTO.getCategory(),
+            feedSlice = feedRepository.findAllByChallenge_Category(requestDTO.getCategory(),
                 pageable);
         } else {
             // 전체 조회
-            feedPage = feedRepository.findAll(pageable);
+            feedSlice = feedRepository.findAll(pageable);
         }
 
-        // PageResponseDTO로 변환
-        return FeedAssembler.toPageResponseDTO(feedPage);
+        // SliceResponseDTO로 변환
+        return FeedAssembler.toSliceResponseDTO(feedSlice);
     }
 
     // TODO: 나머지 메소드들은 순차적으로 구현 예정
@@ -128,7 +128,7 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    public PageResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size) {
+    public SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size) {
         throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
     }
 }

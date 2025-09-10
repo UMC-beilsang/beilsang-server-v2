@@ -10,7 +10,7 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedUpdateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
-import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 
 /**
  * 피드 서비스 인터페이스 피드 관련 비즈니스 로직을 정의합니다.
@@ -18,13 +18,13 @@ import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 public interface FeedService {
 
     /**
-     * 피드 목록을 조회합니다. 카테고리별 필터링 및 페이지네이션을 지원합니다.
+     * 피드 목록을 조회합니다. 카테고리별 필터링 및 무한 스크롤을 지원합니다.
      *
      * @param memberId   요청한 사용자 ID (좋아요 상태 확인용)
      * @param requestDTO 피드 목록 조회 요청 DTO (카테고리, 페이징 정보)
-     * @return 페이지네이션된 피드 목록
+     * @return 슬라이스된 피드 목록
      */
-    PageResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId, FeedListReqDTO requestDTO);
+    SliceResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId, FeedListReqDTO requestDTO);
 
     /**
      * 피드 상세 정보를 조회합니다.
@@ -91,7 +91,7 @@ public interface FeedService {
      * @param memberId 조회할 사용자 ID
      * @param page     페이지 번호
      * @param size     페이지 크기
-     * @return 페이지네이션된 내 피드 목록
+     * @return 슬라이스된 내 피드 목록 (무한 스크롤용)
      */
-    PageResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size);
+    SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size);
 }

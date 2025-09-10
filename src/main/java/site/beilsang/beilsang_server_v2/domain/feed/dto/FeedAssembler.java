@@ -3,17 +3,16 @@ package site.beilsang.beilsang_server_v2.domain.feed.dto;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedListResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.PreviewMemberInfoDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
-import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
+import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 
 public class FeedAssembler {
 
@@ -40,13 +39,6 @@ public class FeedAssembler {
         return feedList.stream().map(FeedAssembler::toPreviewFeedResDTO).toList();
     }
 
-    public static PreviewFeedListResDTO toPreviewFeedListResDTO(List<Feed> feedList,
-        Boolean hasNext) {
-        return PreviewFeedListResDTO.builder()
-            .feeds(toPreviewFeedResDTOList(feedList))
-            .hasNext(hasNext)
-            .build();
-    }
 
     /**
      * Feed 엔티티를 FeedDetailResDTO로 변환
@@ -83,17 +75,16 @@ public class FeedAssembler {
     }
 
     /**
-     * Spring Data Page를 PageResponseDTO로 변환
+     * Spring Data Slice를 SliceResponseDTO로 변환
      */
-    public static PageResponseDTO<PreviewFeedResDTO> toPageResponseDTO(Page<Feed> feedPage) {
-        List<PreviewFeedResDTO> feedDtoList = toPreviewFeedResDTOList(feedPage.getContent());
-        return PageResponseDTO.<PreviewFeedResDTO>builder()
+    public static SliceResponseDTO<PreviewFeedResDTO> toSliceResponseDTO(Slice<Feed> feedSlice) {
+        List<PreviewFeedResDTO> feedDtoList = toPreviewFeedResDTOList(feedSlice.getContent());
+        return SliceResponseDTO.<PreviewFeedResDTO>builder()
             .content(feedDtoList)
-            .page(feedPage.getNumber())
-            .size(feedPage.getSize())
-            .totalElements(feedPage.getTotalElements())
-            .totalPages(feedPage.getTotalPages())
-            .hasNext(feedPage.hasNext())
+            .number(feedSlice.getNumber())
+            .size(feedSlice.getSize())
+            .numberOfElements(feedSlice.getNumberOfElements())
+            .hasNext(feedSlice.hasNext())
             .build();
     }
 
