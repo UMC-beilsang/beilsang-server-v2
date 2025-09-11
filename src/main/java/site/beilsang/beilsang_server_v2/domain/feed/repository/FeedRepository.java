@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
@@ -14,5 +15,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
 
     List<Feed> findTop4ByChallengeMember_IdInOrderByCreatedAtDesc(List<Long> challengeMemberIds);
 
-    Page<Feed> findAllByChallenge_Category(Category category, Pageable pageable);
+    Slice<Feed> findAllByChallenge_Category(Category category, Pageable pageable);
+    
+    Slice<Feed> findAllByChallengeMember_Member_IdOrderByCreatedAtDesc(Long memberId, Pageable pageable);
 }

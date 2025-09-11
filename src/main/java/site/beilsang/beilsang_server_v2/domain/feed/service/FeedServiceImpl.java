@@ -171,6 +171,18 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size) {
-        throw new UnsupportedOperationException("아직 구현되지 않았습니다.");
+        // 사용자 존재 여부 확인
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + memberId));
+
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 사용자의 피드 목록 조회 (최신순)
+        Slice<Feed> feedSlice = feedRepository.findAllByChallengeMember_Member_IdOrderByCreatedAtDesc(
+            memberId, pageable);
+
+        // SliceResponseDTO로 변환하여 반환
+        return FeedAssembler.toSliceResponseDTO(feedSlice);
     }
 }
