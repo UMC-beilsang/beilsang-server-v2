@@ -28,7 +28,6 @@ public class AchievementServiceImpl implements AchievementService {
 
     private final ChallengeRepository challengeRepository;
     private final FeedRepository feedRepository;
-    private static final Integer PAGE_SIZE = 4;
 
     @Override
     public HallOfFameListResDto getCategoryHallOfFame(Category category) {

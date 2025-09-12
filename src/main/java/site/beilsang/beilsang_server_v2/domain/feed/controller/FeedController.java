@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +31,6 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
 @RestController
 @RequestMapping("/feed")
@@ -47,7 +49,7 @@ public class FeedController {
     @GetMapping
     public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getFeedList(
         Authentication authentication,
-        @Parameter(description = "피드 목록 조회 필터 조건") @ModelAttribute FeedListReqDTO requestDTO) {
+        @Parameter(description = "피드 목록 조회 필터 조건") @Valid @ModelAttribute FeedListReqDTO requestDTO) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(feedService.getFeedList(memberId, requestDTO));
     }
@@ -125,9 +127,8 @@ public class FeedController {
     @GetMapping("/my")
     public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getMyFeedList(
         Authentication authentication,
-        @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
-        @Parameter(description = "페이지 크기", example = "20") @RequestParam(defaultValue = "20") int size,
-        @Parameter(description = "챌린지 상태", example = "IN_PROGRESS") @RequestParam(defaultValue = "IN_PROGRESS") ChallengeStatus status) {
+        @Parameter(description = "페이지 번호", example = "0") @Min(0) @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "10") @Min(1) @Max(10) @RequestParam(defaultValue = "4") int size) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(feedService.getMyFeedList(memberId, page, size));
     }
