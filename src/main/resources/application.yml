@@ -2,7 +2,7 @@ spring:
   application:
     name: beilsang-server-v2
   profiles:
-    active: local-h2
+    active: ${SPRING_PROFILES_ACTIVE:local-mysql} # 배포시 github aciotns에서 환경변수로 stage/prod 설정
   security:
     oauth2: # OAuth
       client:
@@ -35,7 +35,7 @@ spring:
           challenge-main: challenge/main
           challenge-cert: challenge/cert
           member-profile: member/profile
-          feed: feed
+
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
