@@ -35,19 +35,6 @@
 2. "New repository secret" 클릭
 3. 위의 Secret 이름과 값을 각각 추가
 
-## SSH 키 생성 방법
-
-```bash
-# SSH 키 페어 생성
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/deploy_key
-
-# 공개키를 서버에 등록
-ssh-copy-id -i ~/.ssh/deploy_key.pub user@server-ip
-
-# 개인키 내용을 GitHub Secret에 등록
-cat ~/.ssh/deploy_key
-```
-
 ## 서버 사전 준비사항
 
 ### Docker 설치
@@ -55,9 +42,9 @@ cat ~/.ssh/deploy_key
 ```bash
 sudo apt update
 sudo apt install docker.io
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker $USER
+sudo systemctl start docker # 설치된 Docker 데몬을 즉시 기동한다. 현재 세션에서 docker ps 같은 명령이 동작하도록 만든다.
+sudo systemctl enable docker # 부팅 시 Docker 서비스가 자동으로 올라오도록 등록한다. 재부팅 후에도 컨테이너 운영을 지속하기 위한 설정이다.
+sudo usermod -aG docker $USER # 현재 계정을 docker 그룹에 추가해 sudo 없이 docker 명령을 실행할 수 있게 한다. 적용을 위해 로그아웃/로그인을 하거나 newgrp docker를 한 번 실행해야 한다.
 ```
 
 ### 배포 디렉토리 생성
