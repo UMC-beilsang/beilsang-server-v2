@@ -1,5 +1,7 @@
 package site.beilsang.beilsang_server_v2.domain.achivement.service;
 
+import java.util.List;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,13 +15,11 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.HallOfFameResDT
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
-import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedListResDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
+import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
-
-import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,15 +28,15 @@ public class AchievementServiceImpl implements AchievementService {
 
     private final ChallengeRepository challengeRepository;
     private final FeedRepository feedRepository;
-    private static final Integer PAGE_SIZE = 4;
 
     @Override
     public HallOfFameListResDto getCategoryHallOfFame(Category category) {
         List<Challenge> topChallenges;
         if (category == Category.ALL) {
             topChallenges = challengeRepository.findTop10ByOrderByCountLikesDescStartDateDesc();
-        }else{
-            topChallenges = challengeRepository.findTop10ByCategoryOrderByCountLikesDescStartDateDesc(category);
+        } else {
+            topChallenges = challengeRepository.findTop10ByCategoryOrderByCountLikesDescStartDateDesc(
+                category);
         }
 
         List<HallOfFameResDTO> hallOfFameItems = IntStream.range(0, topChallenges.size())
@@ -52,15 +52,17 @@ public class AchievementServiceImpl implements AchievementService {
             .build();
     }
 
-    public PreviewFeedListResDTO getFeedsByCategory(Category category, Integer page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
+    @Override
+    public SliceResponseDTO<PreviewFeedResDTO> getFeedsByCategory(Category category, Integer page,
+        Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Slice<Feed> feedsPage;
         if (category == Category.ALL) {
             feedsPage = feedRepository.findAll(pageable);
-        }else{
+        } else {
             feedsPage = feedRepository.findAllByChallenge_Category(category, pageable);
         }
-        return FeedAssembler.toPreviewFeedListResDTO(feedsPage.getContent(), feedsPage.hasNext());
+        return FeedAssembler.toSliceResponseDTO(feedsPage);
     }
 }

@@ -2,7 +2,7 @@ spring:
   application:
     name: beilsang-server-v2
   profiles:
-    active: local-mysql
+    active: local-h2
   security:
     oauth2: # OAuth
       client:
@@ -35,6 +35,7 @@ spring:
           challenge-main: challenge/main
           challenge-cert: challenge/cert
           member-profile: member/profile
+          feed: feed
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}

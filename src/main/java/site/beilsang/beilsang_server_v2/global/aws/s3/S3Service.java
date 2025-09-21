@@ -33,6 +33,9 @@ public class S3Service {
     @Value("${spring.cloud.aws.s3.path.member-profile}")
     private String memberProfilePath;
 
+    @Value("${spring.cloud.aws.s3.path.feed}")
+    private String feedPath;
+
     public String uploadFile(UploadPath uploadPath, MultipartFile file) {
 
         if (file.isEmpty()) {
@@ -44,6 +47,7 @@ public class S3Service {
             case CHALLENGE_MAIN -> mainPath;
             case CHALLENGE_CERT -> certPath;
             case MEMBER_PROFILE -> memberProfilePath;
+            case FEED -> feedPath;
         };
 
         // 파일 이름 설정
