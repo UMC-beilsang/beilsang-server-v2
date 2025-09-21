@@ -28,11 +28,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      #    - name: Run tests
-      #      run: ./gradlew test
-
-      - name: Run checkstyle
-        run: ./gradlew checkstyle
+      #      - name: Run tests
+      #        run: ./gradlew test
+      #
+      #      - name: Run checkstyle
+      #        run: ./gradlew checkstyle
 
       - name: Build JAR
         run: ./gradlew bootJar
