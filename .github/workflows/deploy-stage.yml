@@ -1,0 +1,93 @@
+name: Deploy to Stage
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      #    - name: Run tests
+      #      run: ./gradlew test
+      #
+      #    - name: Run checkstyle
+      #      run: ./gradlew checkstyle
+
+      - name: Build JAR
+        run: ./gradlew bootJar
+
+      - name: Build Docker image
+        run: |
+          docker build -t beilsang-server:stage .
+
+      - name: Save Docker image
+        run: |
+          docker save beilsang-server:stage | gzip > beilsang-server-stage.tar.gz
+
+      - name: Deploy to Stage Server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          source: "beilsang-server-stage.tar.gz"
+          target: "/home/${{ secrets.STAGE_USER }}/deploy"
+
+      - name: Run deployment on Stage Server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.STAGE_USER }}/deploy
+            docker load < beilsang-server-stage.tar.gz
+            docker stop beilsang-server || true
+            docker rm beilsang-server || true
+            docker run -d \
+              --name beilsang-server \
+              -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=stage \
+              -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
+              -e KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+              -e KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
+              -e KAKAO_REDIRECT_URI="${{ secrets.KAKAO_REDIRECT_URI }}" \
+              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+              -e DB_URL="${{ secrets.STAGE_DB_URL }}" \
+              -e DB_USER="${{ secrets.STAGE_DB_USER }}" \
+              -e DB_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}" \
+              --restart unless-stopped \
+              beilsang-server:stage
+
+      - name: Health Check
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          script: |
+            sleep 30
+            curl -f http://localhost:8080/actuator/health || exit 1
+            echo "Stage deployment successful!"
