@@ -149,7 +149,7 @@ public class JwtTokenProvider {
         String accessToken = createAccessToken(oAuth2User.getSocialId(), oAuth2User.getEmail());
         String refreshToken = createRefreshToken(oAuth2User.getSocialId(), oAuth2User.getEmail());
         MemberLoginResDTO memberLoginResDTO = MemberAssembler.toMemberLoginResDTO(accessToken,
-            refreshToken, oAuth2User.getRole());
+            refreshToken, oAuth2User.getIsExistMember());
         response.getWriter().write(objectMapper.writeValueAsString(memberLoginResDTO));
     }
 }

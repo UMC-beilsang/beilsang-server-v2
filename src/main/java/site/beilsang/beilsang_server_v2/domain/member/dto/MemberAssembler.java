@@ -29,11 +29,11 @@ public class MemberAssembler {
     }
 
     public static MemberLoginResDTO toMemberLoginResDTO(String accessToken, String refreshToken,
-        Role role) {
+        Boolean isExistMember) {
         return MemberLoginResDTO.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .role(role)
+            .isExistMember(isExistMember)
             .build();
     }
 
