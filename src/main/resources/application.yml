@@ -36,9 +36,14 @@ spring:
           challenge-cert: challenge/cert
           member-profile: member/profile
 
-
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+apple:
+  client-id: ${APPLE_CLIENT_ID}
+  key-id: ${APPLE_KEY_ID}
+  team-id: ${APPLE_TEAM_ID}
+  private-key-path: ${APPLE_PRIVATE_KEY_PATH}
 
 # Swagger/OpenAPI 설정
 springdoc:
