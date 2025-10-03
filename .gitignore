@@ -4,6 +4,9 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+/src/main/generated/site/beilsang/beilsang_server_v2/
+src/main/generated/
+**/generated/
 
 ### STS ###
 .apt_generated

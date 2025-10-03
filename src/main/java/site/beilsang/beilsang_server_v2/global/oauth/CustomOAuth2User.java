@@ -15,14 +15,16 @@ public class CustomOAuth2User extends DefaultOAuth2User {
     private final String socialId;
     private final String email;
     private final Role role;
+    private final Boolean isExistMember;
 
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
         Map<String, Object> attributes, String nameAttributeKey,
         String socialId,
-        String email, Role role) {
+        String email, Role role, Boolean isExistMember) {
         super(authorities, attributes, nameAttributeKey);
         this.socialId = socialId;
         this.email = email;
         this.role = role;
+        this.isExistMember = isExistMember;
     }
 }

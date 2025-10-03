@@ -3,6 +3,7 @@ package site.beilsang.beilsang_server_v2.global.oauth;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,33 +47,34 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 소셜 종류에 따라 유저 정보를 통해 OAuthAttributes 객체 생성
         OAuthAttributes oAuthAttributes = OAuthAttributes.of(provider, userNameAttributeName,
             attributes);
-        Member member = getMember(oAuthAttributes, provider);
-
-        return new CustomOAuth2User(
-            Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),
-            attributes,
-            oAuthAttributes.getNameAttributesKey(),
-            member.getSocialId(),
-            member.getEmail(),
-            member.getRole()
-        );
+        return getMember(attributes, oAuthAttributes, provider);
     }
 
     /**
      * SocialType과 attributes에 들어있는 소셜 로그인의 식별값 id를 통해 회원을 찾아 반환하는 메소드 만약 찾은 회원이 있다면, 그대로 반환하고 없다면
      * save()를 호출하여 회원을 저장한다.
      */
-    private Member getMember(OAuthAttributes attributes, Provider provider) {
-        Optional<Member> member = memberRepository.findBySocialIdAndProvider(
+    private OAuth2User getMember(Map<String, Object> userInfo, OAuthAttributes attributes, Provider provider) {
+        Optional<Member> memberOpt = memberRepository.findBySocialIdAndProvider(
             attributes.getOAuth2UserInfo().getId(), provider);
-
-        if (member.isEmpty()) {
-            log.info("존재하지 않는 유저, 추가하여 return");
-            Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
-            return memberRepository.save(newMember);
-        } else {
+        boolean isExistMember = memberOpt.isPresent();
+        Member member;
+        if (isExistMember) {
             log.info("이미 존재하는 user, findUser return");
-            return member.get();
+            member = memberOpt.get();
+        } else {
+            log.info("존재하지 않는 유저, 추가하여 return");
+            member = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
+            memberRepository.save(member);
         }
+        return new CustomOAuth2User(
+            Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),
+            userInfo,
+            attributes.getNameAttributesKey(),
+            member.getSocialId(),
+            member.getEmail(),
+            member.getRole(),
+            isExistMember
+        );
     }
 }

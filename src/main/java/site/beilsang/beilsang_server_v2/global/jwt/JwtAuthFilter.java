@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.Role;
 
 @Component
@@ -71,7 +73,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String email = jwtTokenProvider.getClaimFromToken(token, "email");
         //TODO
         Member member = memberRepository.findBySocialIdAndEmail(socialId, email)
-            .orElseThrow(() -> new RuntimeException());
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
         // 인증 토큰을 받아 SecurityContext에 저장
         SecurityContextHolder.getContext().setAuthentication(getUserAuth(member));
