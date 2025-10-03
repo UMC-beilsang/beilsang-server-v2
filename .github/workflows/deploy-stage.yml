@@ -79,6 +79,7 @@ jobs:
               -e DB_URL="${{ secrets.STAGE_DB_URL }}" \
               -e DB_USER="${{ secrets.STAGE_DB_USER }}" \
               -e DB_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}" \
+              -v /home/${{ secrets.STAGE_USER }}/deploy/logs:/app/logs \
               --restart unless-stopped \
               beilsang-server:stage
 
