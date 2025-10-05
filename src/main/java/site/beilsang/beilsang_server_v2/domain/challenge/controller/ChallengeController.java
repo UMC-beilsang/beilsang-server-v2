@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -43,12 +44,12 @@ public class ChallengeController {
         @ApiResponse(responseCode = "400", description = "잘못된 요청"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<ChallengeResDTO> createChallenge(
         Authentication authentication,
         @Parameter(description = "챌린지 생성 요청 데이터") @RequestPart("data") CreateChallengeReqDTO createChallengeReqDTO,
-        @Parameter(description = "챌린지 정보 이미지들") @RequestPart("infoImages") List<MultipartFile> infoImages,
-        @Parameter(description = "인증 방법 이미지들") @RequestPart("certImages") List<MultipartFile> certImages) {
+        @Parameter(description = "챌린지 정보 이미지들") @RequestPart(value = "infoImages") List<MultipartFile> infoImages,
+        @Parameter(description = "인증 방법 이미지들") @RequestPart(value = "certImages") List<MultipartFile> certImages) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(
             challengeService.createChallenge(memberId, createChallengeReqDTO, infoImages,
