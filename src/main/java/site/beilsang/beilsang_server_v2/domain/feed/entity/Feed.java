@@ -48,6 +48,7 @@ public class Feed extends BaseEntity {
     @JoinColumn(name = "challenge_member_id")
     private ChallengeMember challengeMember;
 
+    @Builder.Default
     @OneToMany(mappedBy = "feed", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FeedLike> feedLikes = new ArrayList<>();
 

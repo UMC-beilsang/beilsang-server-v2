@@ -84,6 +84,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         // 멤버 포인트 부족 시 예외 처리
         int joinPoint = createChallengeReqDTO.getJoinPoint();
         int validPoints = pointService.calculateValidPoints(memberId);
+        System.out.println("=============================");
+        System.out.println(validPoints);
+        System.out.println("=============================");
         if (validPoints < joinPoint) {
             throw new BaseException(BaseResponseCode.NOT_ENOUGH_POINT);
         }
@@ -94,7 +97,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         pointLogRepository.save(PointLog.builder()
             .pointName(PointName.JOIN_CHALLENGE)
             .status(PointStatus.USE)
-            .value(joinPoint)
+            .points(joinPoint)
             .expirationDate(LocalDateTime.now().plusYears(POINT_EXPIRATION_YEARS))
             .member(member)
             .challenge(challenge)
@@ -281,7 +284,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
             .pointName(PointName.JOIN_CHALLENGE)
             .status(PointStatus.USE)
-            .value(joinPoint)
+            .points(joinPoint)
             .expirationDate(LocalDateTime.now().plusYears(POINT_EXPIRATION_YEARS))
             .member(member)
             .challenge(challenge)
@@ -318,7 +321,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {
         return pointLogs.stream()
             .filter(pointLog -> pointLog.getStatus() == targetStatus)
-            .mapToInt(PointLog::getValue)
+            .mapToInt(PointLog::getPoints)
             .sum();
     }
 }

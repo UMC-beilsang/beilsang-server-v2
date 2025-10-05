@@ -52,21 +52,27 @@ public class Challenge extends BaseEntity {
 
     private String details;
 
+    @Builder.Default
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChallengeInfoImage> infoImages = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChallengeCertImage> certImages = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeNote> challengeNotes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeLike> challengeLikes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Feed> feeds = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeMember> challengeMembers = new ArrayList<>();
 
