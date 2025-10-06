@@ -66,6 +66,7 @@ jobs:
             docker stop beilsang-server || true
             docker rm beilsang-server || true
             mkdir -p /home/${{ secrets.STAGE_USER }}/deploy/logs
+            chmod 777 /home/${{ secrets.STAGE_USER }}/deploy/logs
             docker run -d \
               --name beilsang-server \
               -p 8080:8080 \

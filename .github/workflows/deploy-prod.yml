@@ -65,7 +65,9 @@ jobs:
             docker load < beilsang-server-prod.tar.gz
             docker stop beilsang-server || true
             docker rm beilsang-server || true
-            mkdir -p /home/${{ secrets.STAGE_USER }}/deploy/logs
+            mkdir -p /home/${{ secrets.PROD_USER }}/deploy/logs
+            chown -R 1000:1000 /home/${{ secrets.PROD_USER }}/deploy/logs
+            chmod 755 /home/${{ secrets.PROD_USER }}/deploy/logs
             docker run -d \
               --name beilsang-server \
               -p 8080:8080 \
