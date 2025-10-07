@@ -64,15 +64,9 @@ public class SwaggerConfig {
             .description("JWT 토큰을 입력하세요 (Bearer 접두사 제외)");
     }
 
-    /**
-     * This method is needed to allow sending multipart requests. For example, when an item is
-     * created together with an image. If this is not set the request will return an exception with:
-     * Resolved [org.springframework.web.HttpMediaTypeNotSupportedException: Content-Type
-     * 'application/octet-stream' is not supported]
-     */
     public SwaggerConfig(MappingJackson2HttpMessageConverter converter) {
         var supportedMediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
-        supportedMediaTypes.add(new MediaType("application", "octet-stream"));
+        supportedMediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
         converter.setSupportedMediaTypes(supportedMediaTypes);
     }
 }

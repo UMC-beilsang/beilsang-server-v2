@@ -84,9 +84,6 @@ public class ChallengeServiceImpl implements ChallengeService {
         // 멤버 포인트 부족 시 예외 처리
         int joinPoint = createChallengeReqDTO.getJoinPoint();
         int validPoints = pointService.calculateValidPoints(memberId);
-        System.out.println("=============================");
-        System.out.println(validPoints);
-        System.out.println("=============================");
         if (validPoints < joinPoint) {
             throw new BaseException(BaseResponseCode.NOT_ENOUGH_POINT);
         }
