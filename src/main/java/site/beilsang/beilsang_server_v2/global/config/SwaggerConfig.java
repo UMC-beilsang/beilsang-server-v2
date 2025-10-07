@@ -7,8 +7,11 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import java.util.ArrayList;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 /**
  * Swagger/OpenAPI 3 설정 클래스 API 문서화를 위한 기본 정보 및 보안 스키마를 정의합니다.
@@ -59,5 +62,11 @@ public class SwaggerConfig {
             .scheme("bearer")
             .bearerFormat("JWT")
             .description("JWT 토큰을 입력하세요 (Bearer 접두사 제외)");
+    }
+
+    public SwaggerConfig(MappingJackson2HttpMessageConverter converter) {
+        var supportedMediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
+        supportedMediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
+        converter.setSupportedMediaTypes(supportedMediaTypes);
     }
 }

@@ -21,7 +21,7 @@ public class PointAssembler {
     public static PointLogResDTO toEntity(PointLog pointLog) {
         return PointLogResDTO.builder()
             .id(pointLog.getId())
-            .value(pointLog.getValue())
+            .value(pointLog.getPoints())
 //                .name(pointLog.getName())
 //                .period(pointLog.getPeriod())
             .date(pointLog.getCreatedAt().toLocalDate())

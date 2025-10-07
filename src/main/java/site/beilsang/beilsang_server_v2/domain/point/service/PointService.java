@@ -41,7 +41,7 @@ public class PointService {
 
         return pointLogs.stream()
             .filter(p -> p.getStatus() != PointStatus.EXPIRE)
-            .mapToInt(PointLog::getValue)
+            .mapToInt(PointLog::getPoints)
             .sum();
     }
 }

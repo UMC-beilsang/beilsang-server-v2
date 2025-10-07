@@ -78,16 +78,19 @@ public class Member {
 
     private String deviceToken;
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PointLog> pointLogs = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeMember> challengeMembers = new ArrayList<>();
 
-
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FeedLike> feedLikes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChallengeLike> challengeLikes = new ArrayList<>();
 

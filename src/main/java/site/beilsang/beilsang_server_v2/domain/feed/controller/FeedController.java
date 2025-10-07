@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,7 +78,7 @@ public class FeedController {
         @ApiResponse(responseCode = "401", description = "인증 실패"),
         @ApiResponse(responseCode = "403", description = "챌린지 참여자가 아님")
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<FeedCreateResDTO> createFeed(
         Authentication authentication,
         @Parameter(description = "피드 작성 요청 데이터") @RequestPart("data") FeedCreateReqDTO createReqDTO,

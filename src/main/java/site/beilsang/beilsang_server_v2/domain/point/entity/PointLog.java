@@ -41,7 +41,7 @@ public class PointLog extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PointStatus status;
 
-    private int value;
+    private int points;
 
     private LocalDateTime expirationDate;
 
