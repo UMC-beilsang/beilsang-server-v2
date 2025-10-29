@@ -51,7 +51,7 @@ jobs:
           host: ${{ secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
-          source: "beilsang-server-stage.tar.gz"
+          source: "beilsang-server-stage.tar.gz,docker-compose.yml,docker-compose.stage.yml,nginx"
           target: "/home/${{ secrets.STAGE_USER }}/deploy"
 
       - name: Run deployment on Stage Server
@@ -63,26 +63,32 @@ jobs:
           script: |
             cd /home/${{ secrets.STAGE_USER }}/deploy
             docker load < beilsang-server-stage.tar.gz
-            docker stop beilsang-server || true
-            docker rm beilsang-server || true
-            mkdir -p /home/${{ secrets.STAGE_USER }}/deploy/logs
-            chmod 777 /home/${{ secrets.STAGE_USER }}/deploy/logs
-            docker run -d \
-              --name beilsang-server \
-              -p 8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=stage \
-              -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-              -e KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
-              -e KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}" \
-              -e KAKAO_REDIRECT_URI="${{ secrets.KAKAO_REDIRECT_URI }}" \
-              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-              -e DB_URL="${{ secrets.STAGE_DB_URL }}" \
-              -e DB_USER="${{ secrets.STAGE_DB_USER }}" \
-              -e DB_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}" \
-              -v /home/${{ secrets.STAGE_USER }}/deploy/logs:/app/logs \
-              --restart unless-stopped \
-              beilsang-server:stage
+
+            # 환경변수 파일 생성
+            cat > .env << EOF
+            SPRING_PROFILES_ACTIVE=prod
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            DB_URL=${{ secrets.PROD_DB_URL }}
+            DB_USER=${{ secrets.PROD_DB_USER }}
+            DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
+            EOF
+
+            # 필요한 디렉토리 생성
+            mkdir -p logs certbot/conf certbot/www nginx/conf.d
+            chown -R 1000:1000 logs
+            chmod 755 logs
+
+            # Docker Compose로 배포 (무중단 배포)
+            docker-compose up -d --no-deps --build beilsang-server
+            docker-compose up -d nginx certbot
+
+            # 이전 이미지 정리
+            docker image prune -f
 
       - name: Health Check
         uses: appleboy/ssh-action@v1.0.0
