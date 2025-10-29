@@ -73,9 +73,9 @@ jobs:
             KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            DB_URL=${{ secrets.PROD_DB_URL }}
-            DB_USER=${{ secrets.PROD_DB_USER }}
-            DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
+            DB_URL=${{ secrets.STAGE_DB_URL }}
+            DB_USER=${{ secrets.STAGE_DB_USER }}
+            DB_PASSWORD=${{ secrets.STAGE_DB_PASSWORD }}
             EOF
 
             # 필요한 디렉토리 생성
