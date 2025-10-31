@@ -80,6 +80,25 @@ jobs:
               echo "✅ Docker Compose already installed."
             fi
             docker compose version || docker-compose version
+  setup-network:
+    name: Setup Docker Network on Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Docker Network if missing
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          script: |
+            echo "🌐 Checking if app-network exists..."
+            if ! docker network ls | grep -q "app-network"; then
+              echo "⚙️ Creating Docker network: app-network"
+              docker network create app-network
+            else
+              echo "✅ Docker network 'app-network' already exists."
+            fi
+
   deploy:
     runs-on: ubuntu-latest
     needs: setup-docker-compose
