@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Nginx 리버스 프록시
   nginx:
-    image: nginx:alpine
+    image: nginx:latest
     container_name: nginx
     ports:
       - "80:80"
@@ -12,8 +12,6 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
-    depends_on:
-      - beilsang-server
     networks:
       - app-network
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
@@ -32,3 +30,4 @@ services:
 networks:
   app-network:
     driver: bridge
+    name: app-network
