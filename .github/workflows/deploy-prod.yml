@@ -175,9 +175,9 @@ jobs:
             EOF
 
             # 필요한 디렉토리 생성
-            mkdir -p logs certbot/conf certbot/www nginx/conf.d
-            chown -R 1000:1000 logs
-            chmod 755 logs
+            sudo mkdir -p logs certbot/conf certbot/www nginx/conf.d
+            sudo chown -R 1000:1000 logs
+            sudo chmod 755 logs
 
             # Docker Compose로 배포 (무중단 배포)
             make prod-deploy

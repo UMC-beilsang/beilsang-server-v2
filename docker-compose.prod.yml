@@ -2,6 +2,7 @@ services:
   beilsang-server:
     image: beilsang-server:prod
     container_name: beilsang-server
+    user: "1000:1000"
     expose:
       - "8080"
     environment:

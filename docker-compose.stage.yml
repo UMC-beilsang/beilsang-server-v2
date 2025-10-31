@@ -3,6 +3,7 @@ services:
   beilsang-server:
     image: beilsang-server:stage  # 빌드된 이미지 사용
     container_name: beilsang-server
+    user: "1000:1000"
     expose:
       - "8080"  # 내부 네트워크에만 노출
     environment:
