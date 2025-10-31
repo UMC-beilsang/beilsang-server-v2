@@ -107,8 +107,8 @@ jobs:
             chmod 755 logs
 
             # Docker Compose로 배포 (무중단 배포)
-            docker-compose up -d --no-deps --build beilsang-server
-            docker-compose up -d nginx certbot
+            docker compose up -d --no-deps --build beilsang-server
+            docker compose up -d nginx certbot
 
             # 이전 이미지 정리
             docker image prune -f
