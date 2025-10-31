@@ -37,7 +37,7 @@ stage-logs:
 # Stage 환경 배포
 stage-deploy:
 	@echo "📦 Stage 이미지 배포 중..."
-	docker compose -f docker-compose.yml -f docker-compose.stage.yml up -d --no-deps beilsang-server
+	docker compose -f docker-compose.stage.yml up -d beilsang-server
 	@echo "✅ Stage 배포 완료!"
 
 # Prod 환경 시작
@@ -62,7 +62,7 @@ prod-logs:
 # Prod 환경 배포
 prod-deploy:
 	@echo "📦 Prod 이미지 배포 중..."
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps beilsang-server
+	docker compose -f docker-compose.prod.yml up -d beilsang-server
 	@echo "✅ Prod 배포 완료!"
 
 

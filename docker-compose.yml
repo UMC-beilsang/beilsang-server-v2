@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Nginx 리버스 프록시
   nginx:
@@ -29,5 +27,4 @@ services:
 
 networks:
   app-network:
-    driver: bridge
-    name: app-network
+    external: true
