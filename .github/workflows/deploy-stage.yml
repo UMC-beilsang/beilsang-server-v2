@@ -5,8 +5,61 @@ on:
     branches: [ dev ]
 
 jobs:
+  setup-make:
+    name: Setup Make on Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Make plugin if missing
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          script: |
+            echo "🔍 Checking make installation..."
+
+            if ! command -v make &> /dev/null; then
+              echo "⚙️ Installing make..."
+              sudo apt-get update
+              sudo apt-get install -y make
+            else
+              echo "✅ make already installed."
+            fi
+            make --version
+  setup-docker:
+    name: Setup Docker on Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Docker plugin if missing
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_HOST }}
+          username: ${{ secrets.STAGE_USER }}
+          key: ${{ secrets.STAGE_SSH_KEY }}
+          script: |
+            echo "🔍 Checking docker installation..."
+
+            if ! command -v docker &> /dev/null; then
+              echo "⚙️ Installing Docker..."
+              sudo apt-get update
+              sudo apt-get install -y ca-certificates curl gnupg lsb-release
+              sudo mkdir -p /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              echo \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+                https://download.docker.com/linux/ubuntu \
+                $(lsb_release -cs) stable" | \
+                sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+              sudo apt-get update
+              sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              sudo systemctl enable docker
+              sudo systemctl start docker
+            else
+              echo "✅ Docker already installed."
+            fi
+            docker --version
   setup-docker-compose:
-    name: Setup Docker Compose on Stage Server
+    name: Setup Docker Compose on Server
     runs-on: ubuntu-latest
     steps:
       - name: Install Docker Compose plugin if missing
@@ -74,7 +127,7 @@ jobs:
           host: ${{ secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
-          source: "beilsang-server-stage.tar.gz,docker-compose.yml,docker-compose.stage.yml,nginx"
+          source: "beilsang-server-stage.tar.gz,docker-compose.yml,docker-compose.stage.yml,nginx,Makefile"
           target: "/home/${{ secrets.STAGE_USER }}/deploy"
 
       - name: Run deployment on Stage Server
