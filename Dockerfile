@@ -15,7 +15,7 @@ COPY src ./src
 RUN gradle bootJar --no-daemon
 
 # 실행 이미지 생성
-FROM openjdk:17-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
