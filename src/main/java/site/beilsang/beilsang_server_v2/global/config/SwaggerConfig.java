@@ -11,11 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import io.swagger.v3.oas.models.servers.Server;
-import org.springframework.beans.factory.annotation.Value;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.stereotype.Component;
 
 /**
  * Swagger/OpenAPI 3 설정 클래스 API 문서화를 위한 기본 정보 및 보안 스키마를 정의합니다.
@@ -30,23 +31,11 @@ public class SwaggerConfig {
      */
     @Bean
     public OpenAPI openAPI() {
-        Server localServer = new Server();
-        localServer.setUrl("http://localhost:8080");
-        localServer.setDescription("Local 개발 서버");
-
-        Server stageServer = new Server();
-        stageServer.setUrl("https://stage.beilsang.site");
-        stageServer.setDescription("Stage 서버");
-
-        Server prodServer = new Server();
-        prodServer.setUrl("https://prod.beilsang.site");
-        prodServer.setDescription("Production 서버");
         return new OpenAPI()
             .info(getApiInfo())
             .components(new Components()
                 .addSecuritySchemes("bearer-token", getSecurityScheme()))
-            .addSecurityItem(new SecurityRequirement().addList("bearer-token"))
-            .servers(Arrays.asList(localServer, stageServer, prodServer));
+            .addSecurityItem(new SecurityRequirement().addList("bearer-token"));
     }
 
     /**
