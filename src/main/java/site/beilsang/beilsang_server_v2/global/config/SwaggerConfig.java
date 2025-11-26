@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +23,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 @Configuration
 public class SwaggerConfig {
 
-    @Value("${swagger.server-url}")
-    private String serverUrl;
-
     /**
      * OpenAPI 스펙 정의
      *
@@ -33,14 +30,23 @@ public class SwaggerConfig {
      */
     @Bean
     public OpenAPI openAPI() {
+        Server localServer = new Server();
+        localServer.setUrl("http://localhost:8080");
+        localServer.setDescription("Local 개발 서버");
+
+        Server stageServer = new Server();
+        stageServer.setUrl("https://stage.beilsang.site");
+        stageServer.setDescription("Stage 서버");
+
+        Server prodServer = new Server();
+        prodServer.setUrl("https://prod.beilsang.site");
+        prodServer.setDescription("Production 서버");
         return new OpenAPI()
             .info(getApiInfo())
             .components(new Components()
                 .addSecuritySchemes("bearer-token", getSecurityScheme()))
             .addSecurityItem(new SecurityRequirement().addList("bearer-token"))
-            .servers(List.of(
-                new Server().url(serverUrl)
-            ));
+            .servers(Arrays.asList(localServer, stageServer, prodServer));
     }
 
     /**
