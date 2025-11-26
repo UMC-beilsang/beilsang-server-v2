@@ -54,10 +54,3 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: alpha
     tags-sorter: alpha
-
-# Swagger API docs API 서버 URL 설정
-swagger:
-  server-url: ${SWAGGER_SERVER_URL}
-
-server:
-  forward-headers-strategy: framework

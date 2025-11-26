@@ -172,7 +172,6 @@ jobs:
             DB_URL=${{ secrets.PROD_DB_URL }}
             DB_USER=${{ secrets.PROD_DB_USER }}
             DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
-            SWAGGER_SERVER_URL=${{ secrets.PROD_SWAGGER_SERVER_URL }}
             EOF
 
             # 필요한 디렉토리 생성
