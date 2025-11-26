@@ -17,6 +17,7 @@ services:
       - DB_URL=${DB_URL}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - SWAGGER_SERVER_URL=${SWAGGER_SERVER_URL}
     volumes:
       - ./logs/prod:/app/logs
     networks:
