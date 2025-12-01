@@ -33,43 +33,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        // HTTP 요청 헤더에서 access token을 추출
-//        String token = extractToken(request);
-//
-////        // access token이 존재하지 않거나 토큰이 유효하지 않으면 401 코드 반환
-////        if (!jwtTokenProvider.validateToken(token) || !StringUtils.hasText(token)) {
-////
-////            //토큰이 없을 경우
-////            doFilter(request, response, filterChain);
-////            return;
-////        }
-////        setSecurityContextHolder(token);
-////        filterChain.doFilter(request, response);
-//        // ① 토큰이 아예 없는 경우
-//        if (!StringUtils.hasText(token)) {
-//            request.setAttribute("exception", "NO_JWT");
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
-//
-//        // ② 토큰이 있는데 검증 실패 (만료, 위조, 포맷 오류)
-//        try {
-//            jwtTokenProvider.validateToken(token);
-//        } catch (ExpiredJwtException e) {
-//            request.setAttribute("exception", "EXPIRED_JWT");
-//            filterChain.doFilter(request, response);
-//        } catch (Exception e) {
-//            request.setAttribute("exception", "INVALID_JWT");
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
-//        // ③ 정상 토큰 → SecurityContext 적용
-//        setSecurityContextHolder(token);
-//        filterChain.doFilter(request, response);
-//    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
