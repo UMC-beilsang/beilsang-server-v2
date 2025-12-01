@@ -8,12 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.AppleLoginReqDto;
 import site.beilsang.beilsang_server_v2.domain.oauth.service.OAuthService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
-import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 
 @Slf4j
 @RestController
@@ -58,12 +58,78 @@ public class OAuthController {
         )
     )
     @PostMapping("/login/apple")
-    public BaseResponse<BaseResponse<MemberLoginResDTO>> appleLogin(@RequestBody AppleLoginReqDto request) {
-        try {
-            return new BaseResponse<>(oAuthService.loginWithApple(request));
-        } catch (Exception e) {
-            log.error("Apple login failed", e);
-            return new BaseResponse<>(BaseResponseCode.BAD_REQUEST);
-        }
+    public BaseResponse<MemberLoginResDTO> loginWithApple(@RequestBody AppleLoginReqDto request) {
+        return new BaseResponse<>(oAuthService.loginWithApple(request));
+    }
+
+    @Operation(
+        summary = "카카오 로그아웃",
+        description = """
+        사용자를 카카오 계정에서 로그아웃 처리합니다.
+
+        - 서버에 저장된 Refresh Token을 제거하여 재로그인을 요구합니다.
+        - Kakao API(`/v1/user/logout`)를 호출하여 카카오 서버에서도 로그아웃이 처리됩니다.
+        - Access Token은 클라이언트 단에서 제거해야 합니다.
+        """
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "카카오 로그아웃 성공",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = BaseResponse.class),
+            examples = @ExampleObject(
+                name = "카카오 로그아웃 성공 예시",
+                value = """
+                {
+                  "isSuccess": true,
+                  "code": "200",
+                  "message": "요청에 성공하였습니다."
+                }
+                """
+            )
+        )
+    )
+    @PostMapping("/logout/kakao")
+    public BaseResponse<Void> logoutWithKakao(
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        oAuthService.logoutWithKakao(memberId);
+        return new BaseResponse<>();
+    }
+    @Operation(
+        summary = "카카오 연동 해제(탈퇴)",
+        description = """
+        사용자의 카카오 계정을 서비스와 완전히 연동 해제합니다.
+
+        - Kakao API(`/v1/user/unlink`) 호출로 카카오 측에서 서비스 연결이 제거됩니다.
+        - 서버에서는 회원의 provider 정보 및 socialId 기반으로 처리합니다.
+        - 이 작업은 돌이킬 수 없으며, 사용자가 다시 카카오 로그인이 필요합니다.
+        """
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "카카오 탈퇴(연동 해제) 성공",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = BaseResponse.class),
+            examples = @ExampleObject(
+                name = "카카오 탈퇴 성공 예시",
+                value = """
+                {
+                  "isSuccess": true,
+                  "code": "200",
+                  "message": "요청에 성공하였습니다."
+                }
+                """
+            )
+        )
+    )
+    @PostMapping("/unlink/kakao")
+    public BaseResponse<Void> unlinkWithKakao(
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        oAuthService.unlinkWithKakao(memberId);
+        return new BaseResponse<>();
     }
 }

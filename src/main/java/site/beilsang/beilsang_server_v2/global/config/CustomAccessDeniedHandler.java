@@ -19,7 +19,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.info("[CustomAccessDeniedHandler] :: {}", accessDeniedException.getMessage());
         log.info("[CustomAccessDeniedHandler] :: {}", request.getRequestURL());
-        log.info("[CustomAccessDeniedHandler] :: 토근 정보가 만료되었거나 존재하지 않음");
+        log.info("[CustomAccessDeniedHandler] :: 토큰 정보가 만료되었거나 존재하지 않음");
 
         //TODO - 에러 핸들링
     }

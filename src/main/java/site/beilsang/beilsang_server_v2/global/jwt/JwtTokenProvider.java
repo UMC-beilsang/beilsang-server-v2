@@ -97,16 +97,11 @@ public class JwtTokenProvider {
      *
      * @param token
      */
-    public Boolean validateToken(String token) {
-        try {
-            Jws<Claims> claimsJws = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
-            return !claimsJws.getBody().getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException exception) {
-            return false;
-        }
+    public void validateToken(String token) {
+        Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token);
     }
 
     /**

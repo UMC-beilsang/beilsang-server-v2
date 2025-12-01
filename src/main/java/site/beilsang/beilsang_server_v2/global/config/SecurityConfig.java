@@ -50,8 +50,8 @@ public class SecurityConfig {
 
         // white list
         MvcRequestMatcher[] permitWhiteList = {
-            mvc.pattern("/oauth/**"),
-            mvc.pattern("/api/oauth/**"),
+            mvc.pattern("/oauth/login/**"),
+            mvc.pattern("/api/oauth/login/**"),
             mvc.pattern("/favicon.ico"),
             mvc.pattern("/error"),
             // Swagger UI 접근 허용
