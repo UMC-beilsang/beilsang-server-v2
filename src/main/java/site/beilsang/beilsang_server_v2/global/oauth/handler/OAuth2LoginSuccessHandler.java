@@ -1,17 +1,18 @@
 package site.beilsang.beilsang_server_v2.global.oauth.handler;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.jwt.JwtTokenProvider;
 import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2User;
+
+import static site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode.BAD_REQUEST;
 
 @Slf4j
 @Component
@@ -22,7 +23,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-        Authentication authentication) throws IOException, ServletException {
+        Authentication authentication) {
         log.info("OAuth2LoginSuccessHandler 로그인 성공");
 
         try {
@@ -30,7 +31,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             jwtTokenProvider.sendToken(response, oAuth2User);
         } catch (Exception e) {
-
+            throw new BaseException(BAD_REQUEST);
         }
     }
 }

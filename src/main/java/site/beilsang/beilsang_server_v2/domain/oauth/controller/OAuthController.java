@@ -8,12 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.AppleLoginReqDto;
 import site.beilsang.beilsang_server_v2.domain.oauth.service.OAuthService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
-import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 
 @Slf4j
 @RestController
@@ -58,12 +58,23 @@ public class OAuthController {
         )
     )
     @PostMapping("/login/apple")
-    public BaseResponse<BaseResponse<MemberLoginResDTO>> appleLogin(@RequestBody AppleLoginReqDto request) {
-        try {
-            return new BaseResponse<>(oAuthService.loginWithApple(request));
-        } catch (Exception e) {
-            log.error("Apple login failed", e);
-            return new BaseResponse<>(BaseResponseCode.BAD_REQUEST);
-        }
+    public BaseResponse<MemberLoginResDTO> LoginWithApple(@RequestBody AppleLoginReqDto request) {
+        return new BaseResponse<>(oAuthService.loginWithApple(request));
+    }
+
+    @PostMapping("/logout/kakao")
+    public BaseResponse<Void> logoutWithKakao(
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        oAuthService.logoutWithKakao(memberId);
+        return new BaseResponse<>();
+    }
+
+    @PostMapping("/unlink/kakao")
+    public BaseResponse<Void> unlink(
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        oAuthService.unlinkWithKakao(memberId);
+        return new BaseResponse<>();
     }
 }

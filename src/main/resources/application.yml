@@ -46,6 +46,9 @@ apple:
   team-id: ${APPLE_TEAM_ID}
   private-key-path: ${APPLE_PRIVATE_KEY_PATH}
 
+kakao:
+    admin-key: ${KAKAO_ADMIN_KEY}
+
 # Swagger/OpenAPI 설정
 springdoc:
   api-docs:

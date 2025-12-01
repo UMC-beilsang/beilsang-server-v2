@@ -25,6 +25,10 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
     public void commence(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException authException) throws IOException {
 
+        log.info("[CustomAccessDeniedHandler] :: {}", authException.getMessage());
+        log.info("[CustomAccessDeniedHandler] :: {}", request.getRequestURL());
+        log.info("[CustomAccessDeniedHandler] :: 토근 정보가 만료되었거나 존재하지 않음");
+
         String exception = (String) request.getAttribute("exception");
         BaseResponseCode errorCode;
 
