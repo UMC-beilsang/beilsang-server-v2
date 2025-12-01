@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.oauth.service;
 
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,16 +82,20 @@ public class OAuthService {
     public void logoutWithKakao(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(NOT_FOUND_MEMBER));
+        if (!Provider.KAKAO.equals(member.getProvider())) {
+            throw new BaseException(INVALID_PROVIDER);
+        }
+
         try {
+            // 리프레시 토큰 초기화
+            member.setRefreshToken(null);
+            memberRepository.flush();
+
             // 카카오 로그아웃
             kakaoUnlinkClient.logoutUser(
                 KAKAO_PREFIX + kakaoAdminKey, KAKAO_TARGET_TYPE,
                 Long.valueOf(member.getSocialId())
             );
-
-            // 리프레시 토큰 초기화
-            member.setRefreshToken(null);
-            memberRepository.save(member);
             log.info("Kakao account successfully logged out: {}", member.getSocialId());
 
         } catch (Exception e) {
@@ -103,20 +108,22 @@ public class OAuthService {
     public void unlinkWithKakao(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(NOT_FOUND_MEMBER));
+        if (!Provider.KAKAO.equals(member.getProvider())) {
+            throw new BaseException(INVALID_PROVIDER);
+        }
         try {
             // 카카오 연결 해제
             kakaoUnlinkClient.unlinkUser(
                 KAKAO_PREFIX + kakaoAdminKey, KAKAO_TARGET_TYPE,
                 Long.valueOf(member.getSocialId())
             );
-
-            // 회원 삭제
-            memberRepository.delete(member);
-            log.info("Member successfully deleted: {}", member.getSocialId());
-
+        } catch (FeignException e) {
+            // 카카오 API 연동 실패
+            log.error("Kakao unlink failed: {}", e.contentUTF8());
+            throw new BaseException(KAKAO_UNLINK_FAILED);
         } catch (Exception e) {
             log.error("Failed to unlink Kakao account", e);
-            throw new BaseException(KAKAO_UNLINK_FAILED);
+            throw new BaseException(INTERNAL_SERVER_ERROR);
         }
 
         // 연동 해제 후 회원 탈퇴 처리
@@ -125,5 +132,6 @@ public class OAuthService {
     }
 
     // Member와 isExisting을 함께 반환하는 record 클래스
-    private record MemberResult(Member member, boolean isExist) {}
+    private record MemberResult(Member member, boolean isExist) {
+    }
 }

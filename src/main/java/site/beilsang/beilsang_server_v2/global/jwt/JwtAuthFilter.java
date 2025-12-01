@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.security.SignatureException;
 import java.util.Collections;
 
 import lombok.RequiredArgsConstructor;
@@ -89,7 +88,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private void setSecurityContextHolder(String token) {
         String socialId = jwtTokenProvider.getClaimFromToken(token, "socialId");
         String email = jwtTokenProvider.getClaimFromToken(token, "email");
-        //TODO
         Member member = memberRepository.findBySocialIdAndEmail(socialId, email)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 

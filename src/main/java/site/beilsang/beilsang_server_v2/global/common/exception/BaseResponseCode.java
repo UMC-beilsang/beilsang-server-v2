@@ -17,13 +17,15 @@ public enum BaseResponseCode {
     NULL_REQUEST_PARAM(HttpStatus.BAD_REQUEST, "GL002", "쿼리 파라미터가 없습니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "GL003", "잘못된 요청입니다."),
     CONTENT_NULL(HttpStatus.BAD_REQUEST, "GL004", "내용을 입력해 주세요."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "GL005", "서버 내부 오류입니다."),
 
     //oauth
-    EXPIRED_JWT(HttpStatus.BAD_REQUEST, "O0001", "토큰이 만료되었습니다"),
-    INVALID_JWT(HttpStatus.BAD_REQUEST, "O0002", "유효하지 않은 토큰입니다"),
-    NOT_FOUND_JWT(HttpStatus.BAD_REQUEST, "O0003", "토큰이 존재하지 않습니다"),
+    EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "O0001", "토큰이 만료되었습니다"),
+    INVALID_JWT(HttpStatus.UNAUTHORIZED, "O0002", "유효하지 않은 토큰입니다"),
+    NOT_FOUND_JWT(HttpStatus.UNAUTHORIZED, "O0003", "토큰이 존재하지 않습니다"),
     KAKAO_LOGOUT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0004", "카카오 로그아웃에 실패했습니다"),
     KAKAO_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0005", "카카오 연결 해제에 실패했습니다"),
+    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "O0006", "유효하지 않은 소셜 로그인 제공자입니다"),
 
 
     // member
