@@ -52,6 +52,8 @@ public class Member {
 
     private String socialId;
 
+    private String appleRefreshToken;
+
     private String nickName;
 
     private LocalDate birth;
@@ -119,5 +121,9 @@ public class Member {
 
     public void subPoint(int point) {
         this.point -= point;
+    }
+
+    public void updateAppleRefreshToken(String refreshToken) {
+        this.appleRefreshToken = refreshToken;
     }
 }

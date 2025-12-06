@@ -44,10 +44,11 @@ apple:
   client-id: ${APPLE_CLIENT_ID}
   key-id: ${APPLE_KEY_ID}
   team-id: ${APPLE_TEAM_ID}
-  private-key-path: ${APPLE_PRIVATE_KEY_PATH}
+  private-key: ${APPLE_PRIVATE_KEY}
 
 kakao:
-    admin-key: ${KAKAO_ADMIN_KEY}
+  admin-key: ${KAKAO_ADMIN_KEY}
+  app-key: ${KAKAO_APP_KEY}
 
 # Swagger/OpenAPI 설정
 springdoc:

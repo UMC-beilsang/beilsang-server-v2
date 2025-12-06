@@ -2,22 +2,36 @@ package site.beilsang.beilsang_server_v2.global.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import feign.FeignException;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
+import site.beilsang.beilsang_server_v2.global.feign.AppleClient;
+import site.beilsang.beilsang_server_v2.global.oauth.dto.ApplePublicKeyRes;
+import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleRevokeReq;
+import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleTokenRes;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
-import java.util.Map;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+import static site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode.*;
 
 /**
  * Apple 로그인 시 JWT 토큰 생성 및 검증을 담당하는 컴포넌트
@@ -30,8 +44,76 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AppleTokenConfig {
 
+    @Value("${apple.client-id}")
+    private String clientId;
+
+    @Value("${apple.key-id}")
+    private String keyId;
+
+    @Value("${apple.team-id}")
+    private String teamId;
+
+    @Value("${apple.private-key}")
+    private String privateKey;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final AppleClient appleClient;
+    private static final String REFRESH_TOKEN = "refresh_token";
+
+    // ==================== Client Secret 생성 ====================
+
+    /**
+     * Apple Client Secret (JWT) 생성
+     * Apple API 호출 시 인증에 사용되는 JWT 토큰 생성
+     *
+     * @return Apple Client Secret JWT
+     */
+    public String generateClientSecret() {
+        try {
+
+            PrivateKey privateKey = getPrivateKey();
+            log.info("Private key loaded successfully: {}", privateKey.getAlgorithm());
+            log.info("Private key loaded successfully: {}", privateKey);
+            Date now = new Date();
+            Date expiration = Date.from(Instant.now().plus(30, ChronoUnit.DAYS));
+            return Jwts.builder()
+                .setHeaderParam("kid", keyId)
+                .setHeaderParam("alg", "ES256")
+                .setIssuer(teamId)
+                .setAudience("https://appleid.apple.com")
+                .setSubject(clientId)
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
+                .compact();
+
+        } catch (Exception e) {
+            log.error("Failed to generate Apple client secret", e);
+            throw new BaseException(INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Apple Private Key 로드
+     * .p8 파일 내용을 PrivateKey 객체로 변환
+     *
+     * @return PrivateKey
+     */
+    private PrivateKey getPrivateKey() {
+
+        try {
+            Reader pemReader = new StringReader(privateKey.replace("\\n", "\n"));
+            PEMParser pemParser = new PEMParser(pemReader);
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            PrivateKeyInfo object = (PrivateKeyInfo) pemParser.readObject();
+            return converter.getPrivateKey(object);
+        } catch (IOException e) {
+            log.error("Failed to load Apple Private Key", e);
+            throw new BaseException(INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // ==================== Identity Token 검증 ====================
 
     /**
      * identityToken에서 사용자 정보 추출
@@ -43,9 +125,14 @@ public class AppleTokenConfig {
     public Map<String, Object> getUserInfoFromToken(String identityToken) {
         Claims claims = verifyIdentityToken(identityToken);
 
-        return Map.of(
-            "sub", claims.getSubject(),
-            "email", claims.get("email", String.class));
+        Map<String, Object> result = new HashMap<>();
+        result.put("sub", claims.getSubject());
+
+        String email = claims.get("email", String.class);
+        if (email != null) {
+            result.put("email", email);
+        }
+        return result;
     }
 
     /**
@@ -72,14 +159,20 @@ public class AppleTokenConfig {
 
             // JWT 검증 및 Claims 추출
             return Jwts.parserBuilder()
-                    .setSigningKey(publicKey)
-                    .build()
-                    .parseClaimsJws(identityToken)
-                    .getBody();
+                .setSigningKey(publicKey)
+                .build()
+                .parseClaimsJws(identityToken)
+                .getBody();
 
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.error("identity Token is expired", e);
+            throw new BaseException(EXPIRED_JWT);
+        } catch (MalformedJwtException | SignatureException | UnsupportedJwtException e) {
+            log.error("Invalid Apple identity token: {}", e.getMessage());
+            throw new BaseException(INVALID_JWT);
         } catch (Exception e) {
             log.error("Failed to verify Apple identity token", e);
-            throw new RuntimeException("Invalid Apple identity token", e);
+            throw new BaseException(INVALID_JWT);
         }
     }
 
@@ -91,15 +184,14 @@ public class AppleTokenConfig {
      */
     private PublicKey getApplePublicKey(String kid) throws Exception {
         // Apple 공개키 엔드포인트에서 키 정보 가져오기
-        String appleKeysUrl = "https://appleid.apple.com/auth/keys";
-        ResponseEntity<String> response = restTemplate.getForEntity(appleKeysUrl, String.class);
+        ApplePublicKeyRes response = appleClient.getAppleAuthPublicKeys();
 
-        JsonNode keysJson = objectMapper.readTree(response.getBody());
-        JsonNode keys = keysJson.get("keys");
+        // 응답에서 keys 리스트 바로 가져오기
+        List<ApplePublicKeyRes.ApplePublicKey> keys = response.getKeys();
 
         // kid에 해당하는 키 찾기
-        for (JsonNode key : keys) {
-            if (kid.equals(key.get("kid").asText())) {
+        for (ApplePublicKeyRes.ApplePublicKey key : keys) {
+            if (kid.equals(key.getKid())) {
                 return createPublicKey(key);
             }
         }
@@ -113,9 +205,9 @@ public class AppleTokenConfig {
      * @param key JWK
      * @return PublicKey
      */
-    private PublicKey createPublicKey(JsonNode key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String n = key.get("n").asText();
-        String e = key.get("e").asText();
+    private PublicKey createPublicKey(ApplePublicKeyRes.ApplePublicKey key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String n = key.getN();
+        String e = key.getE();
 
         byte[] nBytes = Base64.getUrlDecoder().decode(n);
         byte[] eBytes = Base64.getUrlDecoder().decode(e);
@@ -127,5 +219,78 @@ public class AppleTokenConfig {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
         return keyFactory.generatePublic(spec);
+    }
+
+    // ==================== Apple Token 발급/폐기 ====================
+
+    public AppleTokenRes getAppleToken(String authorizationCode) {
+        try {
+            log.info("Requesting Apple token with authorization code");
+
+            String clientSecret = generateClientSecret();
+
+            log.info("Generated client secret (first 50 chars): {}",
+                clientSecret);
+            log.info("Client ID: {}", clientId);
+            log.info("Key ID: {}", keyId);
+            log.info("Team ID: {}", teamId);
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("client_id", clientId);
+            body.add("client_secret", clientSecret);
+            body.add("code", authorizationCode);
+            body.add("grant_type", "authorization_code");
+
+            AppleTokenRes response = appleClient.getAppleToken(body);
+            System.out.println(response.toString());
+            if (response.error() != null || response.refreshToken() == null) {
+                log.error("Failed to get Apple refresh token: {}", response.error());
+                throw new BaseException(INTERNAL_SERVER_ERROR);
+            }
+
+            return response;
+
+        } catch (FeignException.BadRequest e) {
+
+            String body = e.contentUTF8();
+            log.error("Apple returned BadRequest: {}", body);
+
+            if (body.contains("invalid_grant")) {
+                throw new BaseException(INVALID_APPLE_AUTHORIZATION_CODE);
+            }
+
+            throw new BaseException(INTERNAL_SERVER_ERROR);
+
+        } catch (Exception e) {
+            log.error("Failed to get Apple token", e);
+            log.error(e.getMessage());
+            throw new BaseException(INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Apple Refresh Token 폐기 (연동 해제)
+     * 사용자의 Apple 계정 연동을 완전히 해제
+     *
+     * @param refreshToken Apple refresh token
+     */
+    public void revoke(String refreshToken) {
+        try {
+            log.info("Revoking Apple refresh token");
+
+            AppleRevokeReq revokeRequest = AppleRevokeReq.builder()
+                .client_id(clientId)
+                .client_secret(generateClientSecret())
+                .token(refreshToken)
+                .token_type_hint(REFRESH_TOKEN)
+                .build();
+
+            appleClient.revoke(revokeRequest);
+            log.info("Apple token revoked successfully");
+
+        } catch (Exception e) {
+            log.error("Failed to revoke Apple token", e);
+            throw new BaseException(APPLE_REVOKE_FAILED);
+        }
     }
 }

@@ -22,10 +22,14 @@ public enum BaseResponseCode {
     //oauth
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "O0001", "토큰이 만료되었습니다"),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "O0002", "유효하지 않은 토큰입니다"),
-    NOT_FOUND_JWT(HttpStatus.UNAUTHORIZED, "O0003", "토큰이 존재하지 않습니다"),
-    KAKAO_LOGOUT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0004", "카카오 로그아웃에 실패했습니다"),
-    KAKAO_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0005", "카카오 연결 해제에 실패했습니다"),
-    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "O0006", "유효하지 않은 소셜 로그인 제공자입니다"),
+    NOT_FOUND_JWT(HttpStatus.UNAUTHORIZED, "O0003", "액세스 토큰이 존재하지 않습니다"),
+    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "O0004", "유효하지 않은 소셜 로그인 제공자입니다"),
+    KAKAO_LOGIN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0005", "카카오 로그인에 실패했습니다"),
+    KAKAO_LOGOUT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0006", "카카오 로그아웃에 실패했습니다"),
+    KAKAO_UNLINK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0007", "카카오 연결 해제에 실패했습니다"),
+    APPLE_LOGOUT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0008", "애플 로그아웃에 실패했습니다"),
+    APPLE_REVOKE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0009", "애플 탈퇴에 실패했습니다"),
+    INVALID_APPLE_AUTHORIZATION_CODE(HttpStatus.UNAUTHORIZED, "O0010", "유효하지 않거나 만료된 인증 코드입니다."),
 
 
     // member
