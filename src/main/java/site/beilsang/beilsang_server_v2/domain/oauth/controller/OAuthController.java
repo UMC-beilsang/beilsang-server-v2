@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.AppleLoginReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.KakaoLoginReqDTO;
+import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.RefreshTokenReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.service.OAuthService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 
@@ -168,5 +169,39 @@ public class OAuthController {
         Long memberId = (Long) authentication.getPrincipal();
         oAuthService.unlinkWithApple(memberId);
         return new BaseResponse<>();
+    }
+    @Operation(
+        summary = "JWT 토큰 재발급",
+        description = """
+        만료된 Access Token 대신 새로운 Access Token과 Refresh Token을 발급합니다.
+        """
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "토큰 재발급 성공",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = MemberLoginResDTO.class),
+            examples = @ExampleObject(
+                name = "성공 응답 예시",
+                value = """
+            {
+              "isSuccess": true,
+              "code": "200",
+              "message": "요청에 성공하였습니다.",
+              "result": {
+                "accessToken": "eyJhbGciOiJIUzI1NiIsInR...",
+                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR...",
+                "Role": "Guest"
+              }
+            }
+            """
+            )
+        )
+    )
+    @PostMapping("/refresh")
+    public BaseResponse<MemberLoginResDTO> refreshToken(
+        RefreshTokenReqDTO refreshTokenReqDTO) {
+        return new BaseResponse<>(oAuthService.refreshToken(refreshTokenReqDTO.refreshToken()));
     }
 }

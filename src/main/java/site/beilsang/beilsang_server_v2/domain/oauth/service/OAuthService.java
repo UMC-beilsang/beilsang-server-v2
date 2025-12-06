@@ -13,6 +13,7 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepositor
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.AppleLoginReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.KakaoLoginReqDTO;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.config.KakaoTokenConfig;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.config.AppleTokenConfig;
@@ -240,6 +241,35 @@ public class OAuthService {
             log.error("Failed to unlink Apple account", e);
             throw new BaseException(APPLE_REVOKE_FAILED);
         }
+    }
+
+    public MemberLoginResDTO refreshToken(String refreshToken) {
+
+        // 1. RefreshToken 유효성 검증
+        jwtTokenProvider.validateToken(refreshToken);
+
+        // 2. RefreshToken에서 정보 추출
+        String socialId = jwtTokenProvider.getClaimFromToken(refreshToken, "socialId");
+        String email = jwtTokenProvider.getClaimFromToken(refreshToken, "email");
+
+        // 3. DB에서 회원 조회
+        Member member = memberRepository.findBySocialIdAndEmail(socialId, email)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        // 4. DB에 저장된 RefreshToken과 비교
+        if (!refreshToken.equals(member.getRefreshToken())) {
+            log.warn("RefreshToken mismatch for user: {}", email);
+            throw new BaseException(BaseResponseCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 5. 새로운 AccessToken과 RefreshToken 발급
+        String newAccessToken = jwtTokenProvider.createAccessToken(socialId, email);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(socialId, email);
+
+        log.info("Tokens reissued for user: {}", email);
+        return MemberAssembler.toMemberLoginResDTO(
+            newAccessToken, newRefreshToken, true
+        );
     }
 
     // Member와 isExisting을 함께 반환하는 record 클래스

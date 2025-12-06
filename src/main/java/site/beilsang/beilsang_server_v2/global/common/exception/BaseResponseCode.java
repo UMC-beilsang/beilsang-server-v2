@@ -30,6 +30,7 @@ public enum BaseResponseCode {
     APPLE_LOGOUT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0008", "애플 로그아웃에 실패했습니다"),
     APPLE_REVOKE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0009", "애플 탈퇴에 실패했습니다"),
     INVALID_APPLE_AUTHORIZATION_CODE(HttpStatus.UNAUTHORIZED, "O0010", "유효하지 않거나 만료된 인증 코드입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "O0011", "유효하지 않은 리프레시 토큰입니다."),
 
 
     // member
