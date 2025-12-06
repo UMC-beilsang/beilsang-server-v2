@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -203,5 +204,18 @@ public class OAuthController {
     public BaseResponse<MemberLoginResDTO> refreshToken(
         RefreshTokenReqDTO refreshTokenReqDTO) {
         return new BaseResponse<>(oAuthService.refreshToken(refreshTokenReqDTO.refreshToken()));
+    }
+
+    /**
+     * 토큰 업데이트, 회원가입과 관련된 컨트롤러
+     */
+    @Operation(summary = "닉네임 유효성 검사", description = "회원가입 시 닉네임 유효성을 검사합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "닉네임 유효성 검사 완료"),
+        @ApiResponse(responseCode = "400", description = "유효하지 않은 닉네임")
+    })
+    @GetMapping("/nickname")
+    public BaseResponse<Void> validateNickname(@RequestParam String nickname) {
+        return new BaseResponse<>(oAuthService.validateNickname(nickname));
     }
 }

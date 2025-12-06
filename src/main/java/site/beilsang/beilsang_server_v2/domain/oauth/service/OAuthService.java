@@ -39,6 +39,7 @@ public class OAuthService {
 
     private static final String KAKAO_PREFIX = "KakaoAK ";
     private static final String KAKAO_TARGET_TYPE = "user_id";
+    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣_]{2,10}$";
 
     @Value("${kakao.admin-key}")
     private String kakaoAdminKey;
@@ -270,6 +271,21 @@ public class OAuthService {
         return MemberAssembler.toMemberLoginResDTO(
             newAccessToken, newRefreshToken, true
         );
+    }
+
+    public Void validateNickname(String nickname) {
+        // 1. 형식 검증
+        if (!nickname.matches(NICKNAME_REGEX)) {
+            throw new BaseException(INVALID_NICKNAME_FORMAT);
+        }
+
+        // 2. 중복 검증
+        if (memberRepository.existsByNickName(nickname)) {
+            throw new BaseException(DUPLICATE_NICKNAME);
+        }
+
+        // 사용 가능
+        return null;
     }
 
     // Member와 isExisting을 함께 반환하는 record 클래스
