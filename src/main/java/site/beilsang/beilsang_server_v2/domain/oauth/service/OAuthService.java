@@ -39,7 +39,7 @@ public class OAuthService {
 
     private static final String KAKAO_PREFIX = "KakaoAK ";
     private static final String KAKAO_TARGET_TYPE = "user_id";
-    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣_]{2,10}$";
+    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣]{2,10}$";
 
     @Value("${kakao.admin-key}")
     private String kakaoAdminKey;
@@ -58,12 +58,11 @@ public class OAuthService {
             Provider.KAKAO, "id", userInfo
         );
 
-        System.out.println("OAuthAttributes created for Kakao user: " + oAuthAttributes.getOAuth2UserInfo().getId());
+        log.info("OAuthAttributes created for Kakao user: {}", oAuthAttributes.getOAuth2UserInfo().getId());
 
         // 3. 기존 사용자 확인 또는 새 사용자 생성
         MemberResult result = getOrCreateMember(oAuthAttributes, Provider.KAKAO);
         Member member = result.member();
-        System.out.println(member.getSocialId());
         boolean isExistMember = result.isExist();
 
         // 4. JWT 토큰 생성
@@ -246,6 +245,10 @@ public class OAuthService {
 
     public MemberLoginResDTO refreshToken(String refreshToken) {
 
+        if (refreshToken == null || refreshToken.trim().isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_REFRESH_TOKEN);
+        }
+
         // 1. RefreshToken 유효성 검증
         jwtTokenProvider.validateToken(refreshToken);
 
@@ -273,19 +276,15 @@ public class OAuthService {
         );
     }
 
-    public Void validateNickname(String nickname) {
-        // 1. 형식 검증
-        if (!nickname.matches(NICKNAME_REGEX)) {
+    public void validateNickname(String nickname) {
+        // 닉네임 형식 검사 및 중복 검사
+        if (nickname == null || nickname.isEmpty()) {
+            throw new BaseException(BaseResponseCode.NULL_REQUEST_PARAM);
+        } else if (!nickname.matches(NICKNAME_REGEX)) {
             throw new BaseException(INVALID_NICKNAME_FORMAT);
-        }
-
-        // 2. 중복 검증
-        if (memberRepository.existsByNickName(nickname)) {
+        } else if (memberRepository.existsByNickName(nickname)) {
             throw new BaseException(DUPLICATE_NICKNAME);
         }
-
-        // 사용 가능
-        return null;
     }
 
     // Member와 isExisting을 함께 반환하는 record 클래스

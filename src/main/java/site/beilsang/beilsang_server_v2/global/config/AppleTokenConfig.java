@@ -72,8 +72,6 @@ public class AppleTokenConfig {
         try {
 
             PrivateKey privateKey = getPrivateKey();
-            log.info("Private key loaded successfully: {}", privateKey.getAlgorithm());
-            log.info("Private key loaded successfully: {}", privateKey);
             Date now = new Date();
             Date expiration = Date.from(Instant.now().plus(30, ChronoUnit.DAYS));
             return Jwts.builder()
@@ -229,12 +227,6 @@ public class AppleTokenConfig {
 
             String clientSecret = generateClientSecret();
 
-            log.info("Generated client secret (first 50 chars): {}",
-                clientSecret);
-            log.info("Client ID: {}", clientId);
-            log.info("Key ID: {}", keyId);
-            log.info("Team ID: {}", teamId);
-
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("client_id", clientId);
             body.add("client_secret", clientSecret);
@@ -242,7 +234,6 @@ public class AppleTokenConfig {
             body.add("grant_type", "authorization_code");
 
             AppleTokenRes response = appleClient.getAppleToken(body);
-            System.out.println(response.toString());
             if (response.error() != null || response.refreshToken() == null) {
                 log.error("Failed to get Apple refresh token: {}", response.error());
                 throw new BaseException(INTERNAL_SERVER_ERROR);
@@ -279,10 +270,10 @@ public class AppleTokenConfig {
             log.info("Revoking Apple refresh token");
 
             AppleRevokeReq revokeRequest = AppleRevokeReq.builder()
-                .client_id(clientId)
-                .client_secret(generateClientSecret())
+                .clientId(clientId)
+                .clientSecret(generateClientSecret())
                 .token(refreshToken)
-                .token_type_hint(REFRESH_TOKEN)
+                .tokenTypeHint(REFRESH_TOKEN)
                 .build();
 
             appleClient.revoke(revokeRequest);
