@@ -1,13 +1,16 @@
 package site.beilsang.beilsang_server_v2.global.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-//KakaoUnlinkClient
-@FeignClient(name = "KakaoUnlinkClient", url = "https://kapi.kakao.com")
-public interface KakaoUnlinkClient {
+@FeignClient(name = "KakaoClient", url = "https://kapi.kakao.com")
+public interface KakaoClient {
+
+    @GetMapping("/.well-known/jwks.json")
+    String getJwks();
 
     @PostMapping(value = "/v1/user/logout", consumes = "application/x-www-form-urlencoded")
     void logoutUser(

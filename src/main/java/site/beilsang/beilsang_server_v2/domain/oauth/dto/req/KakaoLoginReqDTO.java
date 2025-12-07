@@ -5,6 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class AppleLoginReqDto {
-    private String identityToken;
+public class KakaoLoginReqDTO {
+    String idToken;
 }

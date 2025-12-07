@@ -28,6 +28,8 @@ public class OAuthAttributes {
         Map<String, Object> attributes) {
         if (provider.equals(Provider.KAKAO)) {
             return new KakaoUserInfo(attributes);
+        } else if (provider.equals(Provider.APPLE)) {
+            return new AppleUserInfo(attributes);
         }
         return null;
     }

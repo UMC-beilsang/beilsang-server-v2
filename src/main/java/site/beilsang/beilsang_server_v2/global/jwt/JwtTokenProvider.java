@@ -3,7 +3,6 @@ package site.beilsang.beilsang_server_v2.global.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,7 +21,9 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.oauth.CustomOAuth2User;
+import static site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode.*;
 
 @Slf4j
 @Component
@@ -98,10 +99,18 @@ public class JwtTokenProvider {
      * @param token
      */
     public void validateToken(String token) {
-        Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token);
+        try {
+            Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 토큰입니다.");
+            throw new BaseException(EXPIRED_JWT);
+        } catch (JwtException e) {
+            log.info("유효하지 않은 토큰입니다.");
+            throw new BaseException(INVALID_JWT);
+        }
     }
 
     /**
