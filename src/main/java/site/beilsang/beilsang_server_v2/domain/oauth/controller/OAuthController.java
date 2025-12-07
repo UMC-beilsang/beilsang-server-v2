@@ -43,7 +43,7 @@ public class OAuthController {
         )
     )
     @PostMapping("/login/kakao")
-    public BaseResponse<MemberLoginResDTO> loginWithApple(@RequestBody KakaoLoginReqDTO request) {
+    public BaseResponse<MemberLoginResDTO> loginWithKakao(@RequestBody KakaoLoginReqDTO request) {
         return new BaseResponse<>(oAuthService.loginWithKakao(request));
     }
 
@@ -171,11 +171,12 @@ public class OAuthController {
         oAuthService.unlinkWithApple(memberId);
         return new BaseResponse<>();
     }
+
     @Operation(
         summary = "JWT 토큰 재발급",
         description = """
-        만료된 Access Token 대신 새로운 Access Token과 Refresh Token을 발급합니다.
-        """
+            만료된 Access Token 대신 새로운 Access Token과 Refresh Token을 발급합니다.
+            """
     )
     @ApiResponse(
         responseCode = "200",
@@ -186,23 +187,23 @@ public class OAuthController {
             examples = @ExampleObject(
                 name = "성공 응답 예시",
                 value = """
-            {
-              "isSuccess": true,
-              "code": "200",
-              "message": "요청에 성공하였습니다.",
-              "result": {
-                "accessToken": "eyJhbGciOiJIUzI1NiIsInR...",
-                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR...",
-                "Role": "Guest"
-              }
-            }
-            """
+                    {
+                      "isSuccess": true,
+                      "code": "200",
+                      "message": "요청에 성공하였습니다.",
+                      "result": {
+                        "accessToken": "eyJhbGciOiJIUzI1NiIsInR...",
+                        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR...",
+                        "Role": "Guest"
+                      }
+                    }
+                    """
             )
         )
     )
     @PostMapping("/refresh")
     public BaseResponse<MemberLoginResDTO> refreshToken(
-        RefreshTokenReqDTO refreshTokenReqDTO) {
+        @RequestBody RefreshTokenReqDTO refreshTokenReqDTO) {
         return new BaseResponse<>(oAuthService.refreshToken(refreshTokenReqDTO.refreshToken()));
     }
 
@@ -216,6 +217,7 @@ public class OAuthController {
     })
     @GetMapping("/nickname")
     public BaseResponse<Void> validateNickname(@RequestParam String nickname) {
-        return new BaseResponse<>(oAuthService.validateNickname(nickname));
+        oAuthService.validateNickname(nickname);
+        return new BaseResponse<>();
     }
 }

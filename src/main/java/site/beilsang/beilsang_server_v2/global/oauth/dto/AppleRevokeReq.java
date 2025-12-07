@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.global.oauth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -8,8 +9,15 @@ import lombok.ToString;
 @Builder
 @ToString
 public class AppleRevokeReq {
-    private String client_id;
-    private String client_secret;
+    @JsonProperty("client_id")
+    private String clientId;
+
+    @JsonProperty("client_secret")
+    private String clientSecret;
+
+    @JsonProperty("token")
     private String token;
-    private String token_type_hint;
+
+    @JsonProperty("token_type_hint")
+    private String tokenTypeHint;
 }

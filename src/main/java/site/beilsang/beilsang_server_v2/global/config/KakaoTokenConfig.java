@@ -61,6 +61,9 @@ public class KakaoTokenConfig {
         } catch (JwtException e) {
             log.error("Invalid ID Token", e);
             throw new BaseException(INVALID_JWT);
+        } catch (Exception e) {
+            log.error("Kakao login failed", e);
+            throw new BaseException(INVALID_JWT);
         }
     }
 
