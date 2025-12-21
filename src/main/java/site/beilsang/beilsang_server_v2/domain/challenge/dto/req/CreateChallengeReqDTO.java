@@ -14,7 +14,7 @@ public class CreateChallengeReqDTO {
     @Schema(description = "챌린지 제목", example = "매일 물 8잔 마시기")
     private String title;
 
-    @Schema(description = "챌린지 시작 날짜", example = "2024-01-01")
+    @Schema(description = "챌린지 시작 날짜", example = "2025-12-20")
     private LocalDate startDate;
 
     @Schema(description = "챌린지 기간", example = "WEEK")
