@@ -197,8 +197,6 @@ jobs:
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
-            ssh -i ${{ secrets.STAGE_SSH_KEY }} ${{ secrets.STAGE_USER }}@${{ secrets.STAGE_HOST }} << 'EOF'
             sleep 30
             curl -f http://localhost:8080/actuator/health || exit 1
             echo "Stage deployment successful!"
-            EOF
