@@ -123,6 +123,10 @@ public class Member {
         this.point -= point;
     }
 
+    public void addPoint(int point) {
+        this.point += point;
+    }
+
     public void updateAppleRefreshToken(String refreshToken) {
         this.appleRefreshToken = refreshToken;
     }

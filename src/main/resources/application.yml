@@ -54,6 +54,11 @@ kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
   app-key: ${KAKAO_APP_KEY}
 
+# 포인트 관련 비즈니스 로직 설정
+point:
+  reward:
+    new-member: 1000  # 신규 가입 시 지급 포인트
+
 # Swagger/OpenAPI 설정
 springdoc:
   api-docs:
