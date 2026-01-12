@@ -3,7 +3,6 @@ package site.beilsang.beilsang_server_v2.global.oauth;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +12,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
@@ -25,6 +25,7 @@ import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     // 유저 정보를 가져와 회원 정보가 없다면 저장
 
@@ -59,7 +60,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      * SocialType과 attributes에 들어있는 소셜 로그인의 식별값 id를 통해 회원을 찾아 반환하는 메소드 만약 찾은 회원이 있다면, 그대로 반환하고 없다면
      * save()를 호출하여 회원을 저장한다.
      */
-    private OAuth2User getMember(Map<String, Object> userInfo, OAuthAttributes attributes, Provider provider) {
+    private OAuth2User getMember(Map<String, Object> userInfo, OAuthAttributes attributes,
+        Provider provider) {
         Optional<Member> memberOpt = memberRepository.findBySocialIdAndProvider(
             attributes.getOAuth2UserInfo().getId(), provider);
         boolean isExistMember = memberOpt.isPresent();
