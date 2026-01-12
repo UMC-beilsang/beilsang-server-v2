@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
+import site.beilsang.beilsang_server_v2.domain.point.service.PointService;
+import site.beilsang.beilsang_server_v2.global.config.PointProperties;
+import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
 
@@ -26,6 +29,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     // 유저 정보를 가져와 회원 정보가 없다면 저장
 
     private final MemberRepository memberRepository;
+    private final PointService pointService;
+    private final PointProperties pointProperties;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -66,6 +71,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             log.info("존재하지 않는 유저, 추가하여 return");
             member = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
             memberRepository.save(member);
+
+            // 신규 가입 보상 지급
+            int newMemberReward = pointProperties.getNewMemberReward();
+            pointService.grantPoints(member, newMemberReward, PointName.NEW_MEMBER);
+            log.info("신규 회원 가입 보상 지급 완료: {} 포인트", newMemberReward);
         }
         return new CustomOAuth2User(
             Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),

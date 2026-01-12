@@ -50,8 +50,8 @@ public class PointService {
     /**
      * 회원에게 포인트를 지급하고 포인트 로그를 생성합니다.
      *
-     * @param member 포인트를 지급받을 회원
-     * @param points 지급할 포인트 금액
+     * @param member    포인트를 지급받을 회원
+     * @param points    지급할 포인트 금액
      * @param pointName 포인트 지급 사유
      */
     public void grantPoints(Member member, int points, PointName pointName) {
@@ -60,7 +60,7 @@ public class PointService {
             .pointName(pointName)
             .status(PointStatus.EARN)
             .points(points)
-            .expirationDate(LocalDateTime.now().plusYears(1))
+            .expirationDate(LocalDateTime.now().plusYears(1))       // 포인트 만료 기한 설정
             .member(member)
             .build();
 
