@@ -8,6 +8,7 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 /**
  * 피드 서비스 인터페이스 피드 관련 비즈니스 로직을 정의합니다.
