@@ -170,7 +170,8 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    public SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size) {
+    public SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, Category category,
+        int page, int size) {
         // 사용자 존재 여부 확인
         memberRepository.findById(memberId)
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + memberId));
@@ -178,9 +179,18 @@ public class FeedServiceImpl implements FeedService {
         // Pageable 객체 생성
         Pageable pageable = PageRequest.of(page, size);
 
-        // 사용자의 피드 목록 조회 (최신순)
-        Slice<Feed> feedSlice = feedRepository.findAllByChallengeMember_Member_IdOrderByCreatedAtDesc(
-            memberId, pageable);
+        Slice<Feed> feedSlice;
+
+        // 카테고리 필터링 처리
+        if (category == null || category == Category.ALL) {
+            // 카테고리가 null이거나 ALL인 경우 전체 피드 조회
+            feedSlice = feedRepository.findAllByChallengeMember_Member_IdOrderByCreatedAtDesc(
+                memberId, pageable);
+        } else {
+            // 특정 카테고리의 피드만 조회
+            feedSlice = feedRepository.findAllByChallengeMember_Member_IdAndChallenge_CategoryOrderByCreatedAtDesc(
+                memberId, category, pageable);
+        }
 
         // SliceResponseDTO로 변환하여 반환
         return FeedAssembler.toSliceResponseDTO(feedSlice);

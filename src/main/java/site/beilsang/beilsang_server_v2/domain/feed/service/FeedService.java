@@ -63,12 +63,14 @@ public interface FeedService {
     FeedLikeResDTO removeFeedLike(Long feedId, Long memberId);
 
     /**
-     * 내가 작성한 피드 목록을 조회합니다.
+     * 내가 작성한 피드 목록을 조회합니다. 카테고리별 필터링을 지원합니다.
      *
      * @param memberId 조회할 사용자 ID
+     * @param category 필터링할 카테고리 (null 또는 ALL인 경우 전체 조회)
      * @param page     페이지 번호
      * @param size     페이지 크기
      * @return 슬라이스된 내 피드 목록 (무한 스크롤용)
      */
-    SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, int page, int size);
+    SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, Category category, int page,
+        int size);
 }
