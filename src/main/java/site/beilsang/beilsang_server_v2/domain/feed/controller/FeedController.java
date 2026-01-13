@@ -32,6 +32,7 @@ import site.beilsang.beilsang_server_v2.domain.feed.dto.res.PreviewFeedResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.service.FeedService;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 @RestController
 @RequestMapping("/feed")
@@ -119,7 +120,7 @@ public class FeedController {
         return new BaseResponse<>(feedService.removeFeedLike(feedId, memberId));
     }
 
-    @Operation(summary = "내 피드 목록 조회", description = "현재 사용자가 작성한 피드 목록을 조회합니다.")
+    @Operation(summary = "내 피드 목록 조회", description = "현재 사용자가 작성한 피드 목록을 조회합니다. 카테고리별 필터링을 지원합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "내 피드 목록 조회 성공",
             content = @Content(schema = @Schema(implementation = SliceResponseDTO.class))),
@@ -128,9 +129,11 @@ public class FeedController {
     @GetMapping("/my")
     public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getMyFeedList(
         Authentication authentication,
+        @Parameter(description = "카테고리 필터 (선택사항, 미입력 시 전체 조회)", example = "PLOGGING")
+        @RequestParam(required = false) Category category,
         @Parameter(description = "페이지 번호", example = "0") @Min(0) @RequestParam(defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "10") @Min(1) @Max(10) @RequestParam(defaultValue = "4") int size) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(feedService.getMyFeedList(memberId, page, size));
+        return new BaseResponse<>(feedService.getMyFeedList(memberId, category, page, size));
     }
 }
