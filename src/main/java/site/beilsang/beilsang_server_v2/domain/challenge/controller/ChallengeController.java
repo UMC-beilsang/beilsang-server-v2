@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,5 +98,37 @@ public class ChallengeController {
         Authentication authentication) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(challengeService.joinChallenge(challengeId, memberId));
+    }
+
+    @Operation(summary = "챌린지 찜하기", description = "특정 챌린지를 찜합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "챌린지 찜하기 성공"),
+        @ApiResponse(responseCode = "400", description = "이미 찜한 챌린지"),
+        @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PostMapping("/{challengeId}/like")
+    public BaseResponse<Void> likeChallenge(
+        @Parameter(description = "찜할 챌린지 ID", example = "1") @PathVariable Long challengeId,
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        challengeService.likeChallenge(challengeId, memberId);
+        return new BaseResponse<>();
+    }
+
+    @Operation(summary = "챌린지 찜 취소", description = "특정 챌린지의 찜을 취소합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "챌린지 찜 취소 성공"),
+        @ApiResponse(responseCode = "400", description = "찜하지 않은 챌린지"),
+        @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @DeleteMapping("/{challengeId}/like")
+    public BaseResponse<Void> unlikeChallenge(
+        @Parameter(description = "찜 취소할 챌린지 ID", example = "1") @PathVariable Long challengeId,
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        challengeService.unlikeChallenge(challengeId, memberId);
+        return new BaseResponse<>();
     }
 }
