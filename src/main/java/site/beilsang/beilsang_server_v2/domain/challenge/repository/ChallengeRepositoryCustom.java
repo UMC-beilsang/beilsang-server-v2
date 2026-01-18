@@ -4,8 +4,32 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
+import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 
 public interface ChallengeRepositoryCustom {
 
     Page<Challenge> findChallenges(ChallengeListReqDTO requestDTO, Pageable pageable);
+
+    /**
+     * 모집 마감 챌린지 검색
+     * - 시작일이 오늘 이전인 챌린지를 검색
+     * - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
+     *
+     * @param keyword  검색 키워드 (챌린지 제목)
+     * @param pageable 페이징 정보
+     * @return 검색 결과
+     */
+    Page<Challenge> searchClosedChallenges(String keyword, Pageable pageable);
+
+    /**
+     * 모집 중인 챌린지 검색
+     * - 시작일이 오늘 이후인 챌린지를 검색
+     * - 정렬: 마감 임박순(DEADLINE_SOON) 또는 최신순(NEWEST)
+     *
+     * @param keyword  검색 키워드 (챌린지 제목)
+     * @param sortType 정렬 타입
+     * @param pageable 페이징 정보
+     * @return 검색 결과
+     */
+    Page<Challenge> searchOpenChallenges(String keyword, SearchSortType sortType, Pageable pageable);
 }
