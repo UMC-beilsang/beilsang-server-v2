@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.QChallenge;
+import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 import site.beilsang.beilsang_server_v2.global.enums.SortDirection;
 
 @RequiredArgsConstructor
@@ -123,5 +125,87 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             .where(builder)
             .fetchOne();
         return count != null ? count : 0L;
+    }
+
+    /**
+     * 모집 마감 챌린지 검색
+     * - 시작일이 오늘 이전인 챌린지를 검색
+     * - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
+     */
+    @Override
+    public Page<Challenge> searchClosedChallenges(String keyword, Pageable pageable) {
+        QChallenge challenge = QChallenge.challenge;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 모집 마감 조건: 시작일이 오늘 이전
+        builder.and(challenge.startDate.lt(LocalDate.now()));
+
+        // 제목 키워드 필터
+        addTitleKeywordFilter(builder, challenge, keyword);
+
+        // 쿼리 실행 - 오늘 날짜에 가까운 순 (startDate 내림차순)
+        List<Challenge> content = queryFactory
+            .selectFrom(challenge)
+            .where(builder)
+            .orderBy(challenge.startDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        long total = countTotal(challenge, builder);
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    /**
+     * 모집 중인 챌린지 검색
+     * - 시작일이 오늘 이후인 챌린지를 검색
+     * - 정렬: 마감 임박순(DEADLINE_SOON) 또는 최신순(NEWEST)
+     */
+    @Override
+    public Page<Challenge> searchOpenChallenges(String keyword, SearchSortType sortType,
+        Pageable pageable) {
+        QChallenge challenge = QChallenge.challenge;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 모집 중 조건: 시작일이 오늘 이후 (오늘 포함)
+        builder.and(challenge.startDate.goe(LocalDate.now()));
+
+        // 제목 키워드 필터
+        addTitleKeywordFilter(builder, challenge, keyword);
+
+        // 쿼리 생성
+        JPAQuery<Challenge> query = queryFactory
+            .selectFrom(challenge)
+            .where(builder);
+
+        // 정렬 적용
+        if (sortType == SearchSortType.NEWEST) {
+            // 최신순: 생성일 내림차순
+            query.orderBy(challenge.createdAt.desc());
+        } else {
+            // 마감 임박순 (기본값): 시작일 오름차순
+            query.orderBy(challenge.startDate.asc());
+        }
+
+        List<Challenge> content = query
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        long total = countTotal(challenge, builder);
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    /**
+     * 제목 키워드 필터 추가 (제목만 검색)
+     */
+    private void addTitleKeywordFilter(BooleanBuilder builder, QChallenge challenge,
+        String keyword) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String likeKeyword = "%" + keyword.trim() + "%";
+            builder.and(challenge.title.likeIgnoreCase(likeKeyword));
+        }
     }
 }
