@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
@@ -52,4 +53,22 @@ public interface ChallengeService {
      * @return 챌린지 참여 결과
      */
     JoinChallengeResDTO joinChallenge(Long challengeId, Long memberId);
+
+    /**
+     * 모집이 마감된 챌린지를 제목으로 검색합니다.
+     * 시작일이 오늘 이전인 챌린지를 대상으로 하며, 오늘 날짜에 가까운 순으로 정렬됩니다.
+     *
+     * @param requestDTO 검색 조건 (키워드, 페이징 정보)
+     * @return 페이지네이션된 검색 결과
+     */
+    PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(SearchChallengeReqDTO requestDTO);
+
+    /**
+     * 모집 중인 챌린지를 제목으로 검색합니다.
+     * 시작일이 오늘 이후인 챌린지를 대상으로 하며, 마감 임박순 또는 최신순으로 정렬할 수 있습니다.
+     *
+     * @param requestDTO 검색 조건 (키워드, 정렬 타입, 페이징 정보)
+     * @return 페이지네이션된 검색 결과
+     */
+    PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(SearchChallengeReqDTO requestDTO);
 }
