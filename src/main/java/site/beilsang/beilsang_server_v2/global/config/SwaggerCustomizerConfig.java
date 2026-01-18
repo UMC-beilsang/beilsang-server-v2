@@ -20,11 +20,11 @@ public class SwaggerCustomizerConfig {
             localServer.setDescription("Local 개발 서버");
 
             Server stageServer = new Server();
-            stageServer.setUrl("https://stage.beilsang.site");
+            stageServer.setUrl("https://stage.beilsang.cloud");
             stageServer.setDescription("Stage 서버");
 
             Server prodServer = new Server();
-            prodServer.setUrl("https://prod.beilsang.site");
+            prodServer.setUrl("https://prod.beilsang.cloud");
             prodServer.setDescription("Production 서버");
 
             openApi.setServers(Arrays.asList(localServer, stageServer, prodServer));
