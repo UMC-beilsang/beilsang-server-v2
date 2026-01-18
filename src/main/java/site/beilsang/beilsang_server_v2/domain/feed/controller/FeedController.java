@@ -129,8 +129,7 @@ public class FeedController {
     @GetMapping("/my")
     public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getMyFeedList(
         Authentication authentication,
-        @Parameter(description = "카테고리 필터 (선택사항, 미입력 시 전체 조회)", example = "PLOGGING")
-        @RequestParam(required = false) Category category,
+        @Parameter(description = "카테고리 필터", example = "PLOGGING") @RequestParam(defaultValue = "ALL") Category category,
         @Parameter(description = "페이지 번호", example = "0") @Min(0) @RequestParam(defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "10") @Min(1) @Max(10) @RequestParam(defaultValue = "4") int size) {
         Long memberId = (Long) authentication.getPrincipal();

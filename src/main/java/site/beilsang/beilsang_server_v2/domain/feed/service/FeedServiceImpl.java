@@ -182,8 +182,7 @@ public class FeedServiceImpl implements FeedService {
         Slice<Feed> feedSlice;
 
         // 카테고리 필터링 처리
-        if (category == null || category == Category.ALL) {
-            // 카테고리가 null이거나 ALL인 경우 전체 피드 조회
+        if (category == Category.ALL) {
             feedSlice = feedRepository.findAllByChallengeMember_Member_IdOrderByCreatedAtDesc(
                 memberId, pageable);
         } else {
