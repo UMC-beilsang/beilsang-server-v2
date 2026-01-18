@@ -107,4 +107,20 @@ public class Challenge extends BaseEntity {
     public void incrementAttendeeCount() {
         this.attendeeCount++;
     }
+
+    /**
+     * 챌린지 찜 수 증가
+     */
+    public void incrementLikeCount() {
+        this.countLikes++;
+    }
+
+    /**
+     * 챌린지 찜 수 감소
+     */
+    public void decrementLikeCount() {
+        if (this.countLikes > 0) {
+            this.countLikes--;
+        }
+    }
 }
