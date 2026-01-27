@@ -45,7 +45,9 @@ public enum BaseResponseCode {
     INVALID_START_DATE(HttpStatus.BAD_REQUEST, "C0003", "시작 날짜는 오늘 이후여야 합니다"),
     NOT_FOUND_CHALLENGE(HttpStatus.BAD_REQUEST, "C0004", "존재하지 않는 챌린지입니다"),
     ALREADY_JOINED_CHALLENGE(HttpStatus.BAD_REQUEST, "C0005", "이미 참여한 챌린지입니다"),
-    CHALLENGE_ENDED(HttpStatus.BAD_REQUEST, "C0006", "종료된 챌린지입니다");
+    CHALLENGE_ENDED(HttpStatus.BAD_REQUEST, "C0006", "종료된 챌린지입니다"),
+    ALREADY_LIKED_CHALLENGE(HttpStatus.BAD_REQUEST, "C0007", "이미 찜한 챌린지입니다"),
+    NOT_LIKED_CHALLENGE(HttpStatus.BAD_REQUEST, "C0008", "찜하지 않은 챌린지입니다");
 
     private final HttpStatus status; // 커스텀 상태코드
     private final String code; // Http 상태코드

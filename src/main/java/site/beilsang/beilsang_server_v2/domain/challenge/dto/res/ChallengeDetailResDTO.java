@@ -22,6 +22,7 @@ public class ChallengeDetailResDTO {
     private Integer joinPoint;
     private Integer attendeeCount;
     private Integer likeCount;
+    private Boolean isLiked; // 현재 사용자가 찜했는지 여부
     private List<String> infoImageUrls;
     private List<String> certImageUrls;
     private List<String> challengeNotes;

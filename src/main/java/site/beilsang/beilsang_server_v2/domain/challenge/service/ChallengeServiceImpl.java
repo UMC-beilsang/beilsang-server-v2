@@ -27,6 +27,8 @@ import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeInfoIma
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.ChallengeNote;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeNoteRepository;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
+import site.beilsang.beilsang_server_v2.domain.like.entity.ChallengeLike;
+import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
@@ -58,6 +60,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
     private final ChallengeNoteRepository challengeNoteRepository;
+    private final ChallengeLikeRepository challengeLikeRepository;
     private final PointLogRepository pointLogRepository;
     private final PointService pointService;
     private final S3Service s3Service;
@@ -222,6 +225,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         boolean isJoinable =
             challengeMemberOpt.isEmpty() && challenge.getStatus() != ChallengeStatus.END;
 
+        // 찜 여부 확인
+        boolean isLiked = challengeLikeRepository.existsByMemberIdAndChallengeId(memberId, challengeId);
+
         // 챌린지 상태
         ChallengeMemberStatus status = challengeMemberOpt
             .map(ChallengeMember::getChallengeMemberStatus)
@@ -246,7 +252,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         return ChallengeAssembler.toChallengeDetailResDTO(
-            challenge, isJoinable, status, progress, usedPoint, earnedPoint
+            challenge, isJoinable, isLiked, status, progress, usedPoint, earnedPoint
         );
     }
 
@@ -380,5 +386,50 @@ public class ChallengeServiceImpl implements ChallengeService {
             .totalPages(page.getTotalPages())
             .hasNext(page.hasNext())
             .build();
+    @Override
+    public void likeChallenge(Long challengeId, Long memberId) {
+        // 챌린지 존재 확인
+        Challenge challenge = challengeRepository.findById(challengeId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE));
+
+        // 회원 존재 확인
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        // 이미 찜한 챌린지인지 확인
+        if (challengeLikeRepository.existsByMemberIdAndChallengeId(memberId, challengeId)) {
+            throw new BaseException(BaseResponseCode.ALREADY_LIKED_CHALLENGE);
+        }
+
+        // ChallengeLike 엔티티 생성 및 저장
+        ChallengeLike challengeLike = ChallengeLike.builder()
+            .member(member)
+            .challenge(challenge)
+            .build();
+        challengeLikeRepository.save(challengeLike);
+
+        // 챌린지 찜 수 증가
+        challenge.incrementLikeCount();
+    }
+
+    @Override
+    public void unlikeChallenge(Long challengeId, Long memberId) {
+        // 챌린지 존재 확인
+        Challenge challenge = challengeRepository.findById(challengeId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE));
+
+        // 회원 존재 확인
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        // 찜한 기록 조회
+        ChallengeLike challengeLike = challengeLikeRepository.findByMemberIdAndChallengeId(memberId, challengeId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_LIKED_CHALLENGE));
+
+        // ChallengeLike 엔티티 삭제
+        challengeLikeRepository.delete(challengeLike);
+
+        // 챌린지 찜 수 감소
+        challenge.decrementLikeCount();
     }
 }

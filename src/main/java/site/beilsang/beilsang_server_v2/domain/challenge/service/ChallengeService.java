@@ -73,4 +73,18 @@ public interface ChallengeService {
      * @return 페이지네이션된 검색 결과
      */
     PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(SearchOpenChallengeReqDTO requestDTO);
+     * 챌린지를 찜합니다.
+     *
+     * @param challengeId 찜할 챌린지 ID
+     * @param memberId    찜하는 회원 ID
+     */
+    void likeChallenge(Long challengeId, Long memberId);
+
+    /**
+     * 챌린지 찜을 취소합니다.
+     *
+     * @param challengeId 찜 취소할 챌린지 ID
+     * @param memberId    찜 취소하는 회원 ID
+     */
+    void unlikeChallenge(Long challengeId, Long memberId);
 }

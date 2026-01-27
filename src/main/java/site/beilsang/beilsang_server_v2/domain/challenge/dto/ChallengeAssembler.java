@@ -88,8 +88,8 @@ public class ChallengeAssembler {
     }
 
     public static ChallengeDetailResDTO toChallengeDetailResDTO(
-        Challenge challenge, boolean isJoinable, ChallengeMemberStatus status, Float progress,
-        Integer usedPoint, Integer earnedPoint
+        Challenge challenge, boolean isJoinable, boolean isLiked, ChallengeMemberStatus status,
+        Float progress, Integer usedPoint, Integer earnedPoint
     ) {
         List<String> infoImageUrls = challenge.getInfoImages().stream()
             .sorted((a, b) -> a.getImageOrder().compareTo(b.getImageOrder()))
@@ -117,6 +117,7 @@ public class ChallengeAssembler {
             .joinPoint(challenge.getJoinPoint())
             .attendeeCount(challenge.getAttendeeCount())
             .likeCount(challenge.getCountLikes())
+            .isLiked(isLiked)
             .infoImageUrls(infoImageUrls)
             .certImageUrls(certImageUrls)
             .challengeNotes(challengeNotes)
