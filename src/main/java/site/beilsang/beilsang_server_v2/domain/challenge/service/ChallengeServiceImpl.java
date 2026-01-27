@@ -226,7 +226,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeMemberOpt.isEmpty() && challenge.getStatus() != ChallengeStatus.END;
 
         // 찜 여부 확인
-        boolean isLiked = challengeLikeRepository.existsByMemberIdAndChallengeId(memberId, challengeId);
+        boolean isLiked = challengeLikeRepository.existsByMemberIdAndChallengeId(memberId,
+            challengeId);
 
         // 챌린지 상태
         ChallengeMemberStatus status = challengeMemberOpt
@@ -331,9 +332,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 모집 마감 챌린지 검색
-     * - 시작일이 오늘 이전인 챌린지를 대상으로 검색
-     * - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
+     * 모집 마감 챌린지 검색 - 시작일이 오늘 이전인 챌린지를 대상으로 검색 - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(
@@ -360,9 +359,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 모집 중인 챌린지 검색
-     * - 시작일이 오늘 이후인 챌린지를 대상으로 검색
-     * - 정렬: 마감 임박순(DEADLINE_SOON) 또는 최신순(NEWEST)
+     * 모집 중인 챌린지 검색 - 시작일이 오늘 이후인 챌린지를 대상으로 검색 - 정렬: 마감 임박순(DEADLINE_SOON) 또는 최신순(NEWEST)
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(
@@ -386,6 +383,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             .totalPages(page.getTotalPages())
             .hasNext(page.hasNext())
             .build();
+    }
+
     @Override
     public void likeChallenge(Long challengeId, Long memberId) {
         // 챌린지 존재 확인
@@ -423,7 +422,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
         // 찜한 기록 조회
-        ChallengeLike challengeLike = challengeLikeRepository.findByMemberIdAndChallengeId(memberId, challengeId)
+        ChallengeLike challengeLike = challengeLikeRepository.findByMemberIdAndChallengeId(memberId,
+                challengeId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_LIKED_CHALLENGE));
 
         // ChallengeLike 엔티티 삭제
