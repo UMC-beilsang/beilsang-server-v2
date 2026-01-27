@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
@@ -224,7 +226,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeMemberOpt.isEmpty() && challenge.getStatus() != ChallengeStatus.END;
 
         // 찜 여부 확인
-        boolean isLiked = challengeLikeRepository.existsByMemberIdAndChallengeId(memberId, challengeId);
+        boolean isLiked = challengeLikeRepository.existsByMemberIdAndChallengeId(memberId,
+            challengeId);
 
         // 챌린지 상태
         ChallengeMemberStatus status = challengeMemberOpt
@@ -328,6 +331,60 @@ public class ChallengeServiceImpl implements ChallengeService {
             .sum();
     }
 
+    /**
+     * 모집 마감 챌린지 검색 - 시작일이 오늘 이전인 챌린지를 대상으로 검색 - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
+     */
+    @Override
+    public PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(
+        SearchClosedChallengeReqDTO requestDTO) {
+        Pageable pageable = PageRequest.of(
+            requestDTO.getPage() != null ? requestDTO.getPage() : 0,
+            requestDTO.getSize() != null ? requestDTO.getSize() : 10);
+
+        Page<Challenge> page = challengeRepository.searchClosedChallenges(
+            requestDTO.getKeyword(), pageable);
+
+        List<ChallengeListResDTO> content = page.getContent().stream()
+            .map(ChallengeAssembler::toChallengeListResDTO)
+            .collect(Collectors.toList());
+
+        return PageResponseDTO.<ChallengeListResDTO>builder()
+            .content(content)
+            .page(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasNext(page.hasNext())
+            .build();
+    }
+
+    /**
+     * 모집 중인 챌린지 검색 - 시작일이 오늘 이후인 챌린지를 대상으로 검색 - 정렬: 마감 임박순(DEADLINE_SOON) 또는 최신순(NEWEST)
+     */
+    @Override
+    public PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(
+        SearchOpenChallengeReqDTO requestDTO) {
+        Pageable pageable = PageRequest.of(
+            requestDTO.getPage() != null ? requestDTO.getPage() : 0,
+            requestDTO.getSize() != null ? requestDTO.getSize() : 10);
+
+        Page<Challenge> page = challengeRepository.searchOpenChallenges(
+            requestDTO.getKeyword(), requestDTO.getSortType(), pageable);
+
+        List<ChallengeListResDTO> content = page.getContent().stream()
+            .map(ChallengeAssembler::toChallengeListResDTO)
+            .collect(Collectors.toList());
+
+        return PageResponseDTO.<ChallengeListResDTO>builder()
+            .content(content)
+            .page(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasNext(page.hasNext())
+            .build();
+    }
+
     @Override
     public void likeChallenge(Long challengeId, Long memberId) {
         // 챌린지 존재 확인
@@ -365,7 +422,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
         // 찜한 기록 조회
-        ChallengeLike challengeLike = challengeLikeRepository.findByMemberIdAndChallengeId(memberId, challengeId)
+        ChallengeLike challengeLike = challengeLikeRepository.findByMemberIdAndChallengeId(memberId,
+                challengeId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_LIKED_CHALLENGE));
 
         // ChallengeLike 엔티티 삭제

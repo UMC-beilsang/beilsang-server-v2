@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
@@ -130,5 +132,29 @@ public class ChallengeController {
         Long memberId = (Long) authentication.getPrincipal();
         challengeService.unlikeChallenge(challengeId, memberId);
         return new BaseResponse<>();
+    }
+
+    @Operation(summary = "모집 마감 챌린지 검색",
+        description = "모집이 마감된 챌린지를 제목으로 검색합니다. 오늘 날짜에 가까운 챌린지부터 표시됩니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "검색 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/search/closed")
+    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> searchClosedChallenges(
+        @Parameter(description = "모집 마감 챌린지 검색 조건") @ModelAttribute SearchClosedChallengeReqDTO requestDTO) {
+        return new BaseResponse<>(challengeService.searchClosedChallenges(requestDTO));
+    }
+
+    @Operation(summary = "모집 중인 챌린지 검색",
+        description = "현재 모집 중인 챌린지를 제목으로 검색합니다. 마감 임박순 또는 최신순으로 정렬할 수 있습니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "검색 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/search/open")
+    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> searchOpenChallenges(
+        @Parameter(description = "모집 중인 챌린지 검색 조건") @ModelAttribute SearchOpenChallengeReqDTO requestDTO) {
+        return new BaseResponse<>(challengeService.searchOpenChallenges(requestDTO));
     }
 }
