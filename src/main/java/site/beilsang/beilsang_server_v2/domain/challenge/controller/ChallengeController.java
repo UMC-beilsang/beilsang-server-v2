@@ -132,6 +132,7 @@ public class ChallengeController {
         Long memberId = (Long) authentication.getPrincipal();
         challengeService.unlikeChallenge(challengeId, memberId);
         return new BaseResponse<>();
+    }
 
     @Operation(summary = "모집 마감 챌린지 검색",
         description = "모집이 마감된 챌린지를 제목으로 검색합니다. 오늘 날짜에 가까운 챌린지부터 표시됩니다.")
