@@ -4,7 +4,8 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
@@ -61,7 +62,8 @@ public interface ChallengeService {
      * @param requestDTO 검색 조건 (키워드, 페이징 정보)
      * @return 페이지네이션된 검색 결과
      */
-    PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(SearchChallengeReqDTO requestDTO);
+    PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(
+        SearchClosedChallengeReqDTO requestDTO);
 
     /**
      * 모집 중인 챌린지를 제목으로 검색합니다.
@@ -70,5 +72,5 @@ public interface ChallengeService {
      * @param requestDTO 검색 조건 (키워드, 정렬 타입, 페이징 정보)
      * @return 페이지네이션된 검색 결과
      */
-    PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(SearchChallengeReqDTO requestDTO);
+    PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(SearchOpenChallengeReqDTO requestDTO);
 }

@@ -5,23 +5,14 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
-import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 
-/**
- * 챌린지 검색 요청 DTO - 모집 마감/모집 중 챌린지 검색 시 사용
- */
-@Schema(description = "챌린지 검색 요청 DTO")
+@Schema(description = "모집 마감 챌린지 검색 요청 DTO")
 @Getter
 @Setter
-public class SearchChallengeReqDTO {
+public class SearchClosedChallengeReqDTO {
 
     @Schema(description = "검색 키워드 (챌린지 제목 검색)", example = "플로깅")
     private String keyword;
-
-    @Schema(description = "정렬 타입 (모집 중인 챌린지 검색 시 사용)",
-        example = "DEADLINE_SOON",
-        allowableValues = {"DEADLINE_SOON", "NEWEST"})
-    private SearchSortType sortType = SearchSortType.DEADLINE_SOON;
 
     @Schema(description = "페이지 번호 (0부터 시작)", example = "0", minimum = "0")
     @Min(value = 0, message = "페이지 번호는 0 이상이어야 합니다")

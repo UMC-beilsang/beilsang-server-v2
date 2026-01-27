@@ -15,7 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeListResDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeResDTO;
@@ -330,7 +331,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(
-        SearchChallengeReqDTO requestDTO) {
+        SearchClosedChallengeReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
             requestDTO.getSize() != null ? requestDTO.getSize() : 10);
@@ -359,7 +360,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(
-        SearchChallengeReqDTO requestDTO) {
+        SearchOpenChallengeReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
             requestDTO.getSize() != null ? requestDTO.getSize() : 10);
