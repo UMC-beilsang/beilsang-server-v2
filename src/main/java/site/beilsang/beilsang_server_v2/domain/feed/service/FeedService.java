@@ -3,6 +3,7 @@ package site.beilsang.beilsang_server_v2.domain.feed.service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedSearchReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
@@ -73,4 +74,13 @@ public interface FeedService {
      */
     SliceResponseDTO<PreviewFeedResDTO> getMyFeedList(Long memberId, Category category, int page,
         int size);
+
+    /**
+     * 피드를 검색합니다. 피드 내용(review)을 키워드로 검색하고, 등록 시간 기준으로 정렬합니다.
+     *
+     * @param memberId   요청한 사용자 ID (좋아요 상태 확인용)
+     * @param requestDTO 피드 검색 요청 DTO (keyword, sortType, page, size)
+     * @return 슬라이스된 피드 검색 결과 (무한 스크롤용)
+     */
+    SliceResponseDTO<PreviewFeedResDTO> searchFeeds(Long memberId, FeedSearchReqDTO requestDTO);
 }
