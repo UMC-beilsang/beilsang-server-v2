@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 
-public interface FeedRepository extends JpaRepository<Feed, Long> {
+public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositoryCustom {
 
     Long countByChallengeMember_IdIn(List<Long> challengeMemberIds);
 
