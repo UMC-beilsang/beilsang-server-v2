@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
@@ -192,6 +193,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
     }
 
+    @Deprecated
     @Override
     public PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
@@ -201,6 +203,34 @@ public class ChallengeServiceImpl implements ChallengeService {
         List<ChallengeListResDTO> content = page.getContent().stream()
             .map(ChallengeAssembler::toChallengeListResDTO)
             .collect(Collectors.toList());
+        return PageResponseDTO.<ChallengeListResDTO>builder()
+            .content(content)
+            .page(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasNext(page.hasNext())
+            .build();
+    }
+
+    /**
+     * 모집중인 챌린지 목록을 조회합니다.
+     * - 시작일이 오늘 이후인 챌린지를 대상으로 조회
+     * - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
+     */
+    @Override
+    public PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(
+        OpenChallengeListReqDTO requestDTO) {
+        Pageable pageable = PageRequest.of(
+            requestDTO.getPage() != null ? requestDTO.getPage() : 0,
+            requestDTO.getSize() != null ? requestDTO.getSize() : 10);
+
+        Page<Challenge> page = challengeRepository.findOpenChallenges(requestDTO, pageable);
+
+        List<ChallengeListResDTO> content = page.getContent().stream()
+            .map(ChallengeAssembler::toChallengeListResDTO)
+            .collect(Collectors.toList());
+
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
             .page(page.getNumber())
