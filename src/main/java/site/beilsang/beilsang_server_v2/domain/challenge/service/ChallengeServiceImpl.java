@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
@@ -226,6 +227,34 @@ public class ChallengeServiceImpl implements ChallengeService {
             requestDTO.getSize() != null ? requestDTO.getSize() : 10);
 
         Page<Challenge> page = challengeRepository.findOpenChallenges(requestDTO, pageable);
+
+        List<ChallengeListResDTO> content = page.getContent().stream()
+            .map(ChallengeAssembler::toChallengeListResDTO)
+            .collect(Collectors.toList());
+
+        return PageResponseDTO.<ChallengeListResDTO>builder()
+            .content(content)
+            .page(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasNext(page.hasNext())
+            .build();
+    }
+
+    /**
+     * 모집마감된 챌린지 목록을 조회합니다.
+     * - 시작일이 오늘 이전인 챌린지를 대상으로 조회
+     * - 최근 마감순(startDate DESC)으로 정렬
+     */
+    @Override
+    public PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(
+        ClosedChallengeListReqDTO requestDTO) {
+        Pageable pageable = PageRequest.of(
+            requestDTO.getPage() != null ? requestDTO.getPage() : 0,
+            requestDTO.getSize() != null ? requestDTO.getSize() : 10);
+
+        Page<Challenge> page = challengeRepository.findClosedChallenges(requestDTO, pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
             .map(ChallengeAssembler::toChallengeListResDTO)

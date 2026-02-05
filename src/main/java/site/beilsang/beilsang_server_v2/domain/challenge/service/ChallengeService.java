@@ -3,6 +3,7 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
@@ -49,6 +50,15 @@ public interface ChallengeService {
      * @return 페이지네이션된 모집중 챌린지 목록
      */
     PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(OpenChallengeListReqDTO requestDTO);
+
+    /**
+     * 모집마감된 챌린지 목록을 조회합니다. 시작일이 오늘 이전인 챌린지를 대상으로 합니다.
+     * 최근 마감순(startDate DESC)으로 정렬됩니다.
+     *
+     * @param requestDTO 모집마감 챌린지 목록 조회 조건 (카테고리, 페이징)
+     * @return 페이지네이션된 모집마감 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(ClosedChallengeListReqDTO requestDTO);
 
     /**
      * 특정 챌린지의 상세 정보를 조회합니다.
