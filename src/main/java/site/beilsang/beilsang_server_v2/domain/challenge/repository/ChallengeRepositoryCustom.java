@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
@@ -33,6 +34,19 @@ public interface ChallengeRepositoryCustom {
      * @return 모집마감된 챌린지 목록
      */
     Page<Challenge> findClosedChallenges(ClosedChallengeListReqDTO requestDTO, Pageable pageable);
+
+    /**
+     * 찜한 챌린지 목록 조회
+     * - 특정 회원이 찜한 챌린지 목록을 조회
+     * - 카테고리 필터링 및 정렬 기능 제공
+     *
+     * @param memberId   회원 ID
+     * @param requestDTO 조회 조건 (카테고리, 정렬 타입)
+     * @param pageable   페이징 정보
+     * @return 찜한 챌린지 목록
+     */
+    Page<Challenge> findLikedChallenges(Long memberId, LikedChallengeListReqDTO requestDTO,
+        Pageable pageable);
 
     /**
      * 모집 마감 챌린지 검색

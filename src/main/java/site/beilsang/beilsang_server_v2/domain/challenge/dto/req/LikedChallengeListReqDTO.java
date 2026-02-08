@@ -6,22 +6,28 @@ import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
+import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 
 /**
- * 모집마감 챌린지 목록 조회 요청 DTO
- * - 시작일이 오늘 이전인 챌린지를 대상으로 조회
- * - 정렬은 최근 마감순(startDate DESC)으로 고정
+ * 찜한 챌린지 목록 조회 요청 DTO
+ * - 내가 찜한 챌린지 목록을 조회
+ * - 카테고리 필터링 및 정렬 기능 제공
  */
-@Schema(description = "모집마감 챌린지 목록 조회 요청 DTO")
+@Schema(description = "찜한 챌린지 목록 조회 요청 DTO")
 @Getter
 @Setter
-public class ClosedChallengeListReqDTO {
+public class LikedChallengeListReqDTO {
 
     @Schema(description = "카테고리 필터 (ALL: 전체 조회)",
         example = "ALL",
         allowableValues = {"ALL", "TUMBLER", "REFILL_STATION", "MULTIPLE_CONTAINERS",
             "ECO_PRODUCT", "PLOGGING", "VEGAN", "PUBLIC_TRANSPORT", "BIKE", "RECYCLE"})
     private Category category = Category.ALL;
+
+    @Schema(description = "정렬 타입: DEADLINE_SOON(마감 임박순), NEWEST(최신순)",
+        example = "DEADLINE_SOON",
+        allowableValues = {"DEADLINE_SOON", "NEWEST"})
+    private SearchSortType sortType = SearchSortType.DEADLINE_SOON;
 
     @Schema(description = "페이지 번호 (0부터 시작)", example = "0", minimum = "0")
     @Min(value = 0, message = "페이지 번호는 0 이상이어야 합니다")

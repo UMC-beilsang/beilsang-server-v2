@@ -12,9 +12,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.QChallenge;
+import site.beilsang.beilsang_server_v2.domain.like.entity.QChallengeLike;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 import site.beilsang.beilsang_server_v2.global.enums.SortDirection;
@@ -144,8 +146,8 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         // 모집중 조건: 시작일이 오늘 이후 (오늘 포함)
         builder.and(challenge.startDate.goe(LocalDate.now()));
 
-        // 카테고리 필터 (ALL이 아니고 null이 아닌 경우에만 필터링)
-        if (requestDTO.getCategory() != null && requestDTO.getCategory() != Category.ALL) {
+        // 카테고리 필터 (ALL이 아닌 경우에만 필터링)
+        if (requestDTO.getCategory() != Category.ALL) {
             builder.and(challenge.category.eq(requestDTO.getCategory()));
         }
 
@@ -187,8 +189,8 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         // 모집마감 조건: 시작일이 오늘 이전
         builder.and(challenge.startDate.lt(LocalDate.now()));
 
-        // 카테고리 필터 (ALL이 아니고 null이 아닌 경우에만 필터링)
-        if (requestDTO.getCategory() != null && requestDTO.getCategory() != Category.ALL) {
+        // 카테고리 필터 (ALL이 아닌 경우에만 필터링)
+        if (requestDTO.getCategory() != Category.ALL) {
             builder.and(challenge.category.eq(requestDTO.getCategory()));
         }
 
@@ -204,6 +206,54 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         long total = countTotal(challenge, builder);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    /**
+     * 찜한 챌린지 목록 조회
+     * - 특정 회원이 찜한 챌린지 목록을 조회
+     * - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
+     */
+    @Override
+    public Page<Challenge> findLikedChallenges(Long memberId, LikedChallengeListReqDTO requestDTO,
+        Pageable pageable) {
+        QChallenge challenge = QChallenge.challenge;
+        QChallengeLike challengeLike = QChallengeLike.challengeLike;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 카테고리 필터 (ALL이 아닌 경우에만 필터링)
+        if (requestDTO.getCategory() != Category.ALL) {
+            builder.and(challenge.category.eq(requestDTO.getCategory()));
+        }
+
+        // 쿼리 생성 - ChallengeLike 조인
+        JPAQuery<Challenge> query = queryFactory
+            .selectFrom(challenge)
+            .innerJoin(challengeLike).on(challengeLike.challenge.eq(challenge))
+            .where(challengeLike.member.id.eq(memberId).and(builder));
+
+        // 정렬 적용
+        if (requestDTO.getSortType() == SearchSortType.NEWEST) {
+            // 최신순: 시작일 내림차순
+            query.orderBy(challenge.startDate.desc());
+        } else {
+            // 마감 임박순 (기본값): 시작일 오름차순
+            query.orderBy(challenge.startDate.asc());
+        }
+
+        List<Challenge> content = query
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        // 전체 개수 조회
+        Long total = queryFactory
+            .select(challenge.count())
+            .from(challenge)
+            .innerJoin(challengeLike).on(challengeLike.challenge.eq(challenge))
+            .where(challengeLike.member.id.eq(memberId).and(builder))
+            .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
     /**

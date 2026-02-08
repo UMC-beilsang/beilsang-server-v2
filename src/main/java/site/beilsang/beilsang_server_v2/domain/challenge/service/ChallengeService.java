@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
@@ -59,6 +60,16 @@ public interface ChallengeService {
      * @return 페이지네이션된 모집마감 챌린지 목록
      */
     PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(ClosedChallengeListReqDTO requestDTO);
+
+    /**
+     * 찜한 챌린지 목록을 조회합니다.
+     *
+     * @param memberId   조회 요청하는 회원 ID
+     * @param requestDTO 찜한 챌린지 목록 조회 조건 (카테고리, 정렬, 페이징)
+     * @return 페이지네이션된 찜한 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getLikedChallengeList(Long memberId,
+        LikedChallengeListReqDTO requestDTO);
 
     /**
      * 특정 챌린지의 상세 정보를 조회합니다.

@@ -18,11 +18,11 @@ import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 @Setter
 public class OpenChallengeListReqDTO {
 
-    @Schema(description = "카테고리 필터 (null이면 전체 조회)",
-        example = "TUMBLER",
+    @Schema(description = "카테고리 필터 (ALL: 전체 조회)",
+        example = "ALL",
         allowableValues = {"ALL", "TUMBLER", "REFILL_STATION", "MULTIPLE_CONTAINERS",
             "ECO_PRODUCT", "PLOGGING", "VEGAN", "PUBLIC_TRANSPORT", "BIKE", "RECYCLE"})
-    private Category category;
+    private Category category = Category.ALL;
 
     @Schema(description = "정렬 타입: DEADLINE_SOON(마감 임박순), NEWEST(최신순)",
         example = "DEADLINE_SOON",
