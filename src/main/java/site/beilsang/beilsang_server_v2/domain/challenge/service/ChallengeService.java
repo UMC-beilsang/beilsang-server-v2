@@ -6,6 +6,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRe
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
@@ -70,6 +71,17 @@ public interface ChallengeService {
      */
     PageResponseDTO<ChallengeListResDTO> getLikedChallengeList(Long memberId,
         LikedChallengeListReqDTO requestDTO);
+
+    /**
+     * 나의 챌린지 목록을 조회합니다.
+     * 참여 상태(ONGOING, SUCCESS, FAIL)별로 필터링하여 조회합니다.
+     *
+     * @param memberId   조회 요청하는 회원 ID
+     * @param requestDTO 나의 챌린지 목록 조회 조건 (참여상태, 카테고리, 페이징)
+     * @return 페이지네이션된 나의 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getMyChallengeList(Long memberId,
+        MyChallengeListReqDTO requestDTO);
 
     /**
      * 특정 챌린지의 상세 정보를 조회합니다.

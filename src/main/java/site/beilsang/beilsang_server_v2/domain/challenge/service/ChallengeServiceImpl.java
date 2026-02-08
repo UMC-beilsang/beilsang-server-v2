@@ -17,6 +17,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListRe
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
@@ -285,6 +286,37 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         Page<Challenge> page = challengeRepository.findLikedChallenges(memberId, requestDTO,
             pageable);
+
+        List<ChallengeListResDTO> content = page.getContent().stream()
+            .map(ChallengeAssembler::toChallengeListResDTO)
+            .collect(Collectors.toList());
+
+        return PageResponseDTO.<ChallengeListResDTO>builder()
+            .content(content)
+            .page(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasNext(page.hasNext())
+            .build();
+    }
+
+    /**
+     * 나의 챌린지 목록을 조회합니다.
+     * - 내가 참여한 챌린지를 상태별로 조회
+     * - ONGOING: ChallengeMemberStatus = ONGOING 또는 NOT_YET
+     * - SUCCESS: ChallengeMemberStatus = SUCCESS
+     * - FAIL: ChallengeMemberStatus = FAIL
+     * - 정렬은 참여일(createdAt) 내림차순으로 고정
+     */
+    @Override
+    public PageResponseDTO<ChallengeListResDTO> getMyChallengeList(Long memberId,
+        MyChallengeListReqDTO requestDTO) {
+        Pageable pageable = PageRequest.of(
+            requestDTO.getPage() != null ? requestDTO.getPage() : 0,
+            requestDTO.getSize() != null ? requestDTO.getSize() : 10);
+
+        Page<Challenge> page = challengeRepository.findMyChallenges(memberId, requestDTO, pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
             .map(ChallengeAssembler::toChallengeListResDTO)

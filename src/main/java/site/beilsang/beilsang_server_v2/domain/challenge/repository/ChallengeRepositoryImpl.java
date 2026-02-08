@@ -13,11 +13,15 @@ import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.QChallenge;
 import site.beilsang.beilsang_server_v2.domain.like.entity.QChallengeLike;
+import site.beilsang.beilsang_server_v2.domain.member.entity.QChallengeMember;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
+import site.beilsang.beilsang_server_v2.global.enums.ParticipationStatus;
 import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
 import site.beilsang.beilsang_server_v2.global.enums.SortDirection;
 
@@ -251,6 +255,64 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             .from(challenge)
             .innerJoin(challengeLike).on(challengeLike.challenge.eq(challenge))
             .where(challengeLike.member.id.eq(memberId).and(builder))
+            .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    /**
+     * 나의 챌린지 목록 조회
+     * - 내가 참여한 챌린지를 상태별로 조회
+     * - ONGOING: ChallengeMemberStatus = ONGOING 또는 NOT_YET
+     * - SUCCESS: ChallengeMemberStatus = SUCCESS
+     * - FAIL: ChallengeMemberStatus = FAIL
+     * - 정렬은 참여일(createdAt) 내림차순으로 고정
+     */
+    @Override
+    public Page<Challenge> findMyChallenges(Long memberId, MyChallengeListReqDTO requestDTO,
+        Pageable pageable) {
+        QChallenge challenge = QChallenge.challenge;
+        QChallengeMember challengeMember = QChallengeMember.challengeMember;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 카테고리 필터 (ALL이 아닌 경우에만 필터링)
+        if (requestDTO.getCategory() != Category.ALL) {
+            builder.and(challenge.category.eq(requestDTO.getCategory()));
+        }
+
+        // 참여 상태 필터
+        BooleanBuilder statusBuilder = new BooleanBuilder();
+        ParticipationStatus status = requestDTO.getParticipationStatus();
+        if (status == ParticipationStatus.ONGOING) {
+            // ONGOING: ChallengeMemberStatus = ONGOING 또는 NOT_YET
+            statusBuilder.and(challengeMember.challengeMemberStatus.in(
+                ChallengeMemberStatus.ONGOING, ChallengeMemberStatus.NOT_YET));
+        } else if (status == ParticipationStatus.SUCCESS) {
+            statusBuilder.and(challengeMember.challengeMemberStatus.eq(ChallengeMemberStatus.SUCCESS));
+        } else if (status == ParticipationStatus.FAIL) {
+            statusBuilder.and(challengeMember.challengeMemberStatus.eq(ChallengeMemberStatus.FAIL));
+        }
+
+        // 쿼리 생성 - ChallengeMember 조인
+        List<Challenge> content = queryFactory
+            .selectFrom(challenge)
+            .innerJoin(challengeMember).on(challengeMember.challenge.eq(challenge))
+            .where(challengeMember.member.id.eq(memberId)
+                .and(statusBuilder)
+                .and(builder))
+            .orderBy(challengeMember.createdAt.desc())  // 참여일 내림차순
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        // 전체 개수 조회
+        Long total = queryFactory
+            .select(challenge.count())
+            .from(challenge)
+            .innerJoin(challengeMember).on(challengeMember.challenge.eq(challenge))
+            .where(challengeMember.member.id.eq(memberId)
+                .and(statusBuilder)
+                .and(builder))
             .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);

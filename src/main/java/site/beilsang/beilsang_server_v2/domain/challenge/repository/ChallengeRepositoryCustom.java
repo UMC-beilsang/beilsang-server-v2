@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.global.enums.SearchSortType;
@@ -46,6 +47,21 @@ public interface ChallengeRepositoryCustom {
      * @return 찜한 챌린지 목록
      */
     Page<Challenge> findLikedChallenges(Long memberId, LikedChallengeListReqDTO requestDTO,
+        Pageable pageable);
+
+    /**
+     * 나의 챌린지 목록 조회
+     * - 특정 회원이 참여한 챌린지 목록을 상태별로 조회
+     * - ONGOING: ChallengeMemberStatus = ONGOING 또는 NOT_YET
+     * - SUCCESS: ChallengeMemberStatus = SUCCESS
+     * - FAIL: ChallengeMemberStatus = FAIL
+     *
+     * @param memberId   회원 ID
+     * @param requestDTO 조회 조건 (참여상태, 카테고리)
+     * @param pageable   페이징 정보
+     * @return 나의 챌린지 목록
+     */
+    Page<Challenge> findMyChallenges(Long memberId, MyChallengeListReqDTO requestDTO,
         Pageable pageable);
 
     /**
