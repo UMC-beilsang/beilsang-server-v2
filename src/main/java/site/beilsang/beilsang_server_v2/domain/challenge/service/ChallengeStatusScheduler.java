@@ -18,6 +18,7 @@ import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 public class ChallengeStatusScheduler {
 
     private final ChallengeRepository challengeRepository;
+    private final ChallengeSettlementService challengeSettlementService;
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
     public void updateChallengeStatuses() {
@@ -40,6 +41,11 @@ public class ChallengeStatusScheduler {
                 updatedCount++;
                 log.debug("챌린지 ID: {}, 상태 변경: {} -> {}",
                     challenge.getId(), currentStatus, calculatedStatus);
+
+                // END 상태로 전환된 챌린지에 대해 포인트 정산 수행
+                if (calculatedStatus == ChallengeStatus.END) {
+                    challengeSettlementService.settleChallenge(challenge);
+                }
             }
         }
 
