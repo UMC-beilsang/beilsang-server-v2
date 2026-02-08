@@ -55,4 +55,11 @@ public class ChallengeMember extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "challengeMember", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Feed> feed = new ArrayList<>();
+
+    /**
+     * 챌린지 멤버 상태 변경 (정산 시 ONGOING → SUCCESS/FAIL 전환용)
+     */
+    public void updateChallengeMemberStatus(ChallengeMemberStatus status) {
+        this.challengeMemberStatus = status;
+    }
 }
