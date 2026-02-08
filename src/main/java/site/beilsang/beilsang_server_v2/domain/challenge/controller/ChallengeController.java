@@ -26,6 +26,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallenge
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.RecommendedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
@@ -133,6 +134,18 @@ public class ChallengeController {
         @Parameter(description = "나의 챌린지 목록 조회 조건") @ModelAttribute MyChallengeListReqDTO requestDTO) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(challengeService.getMyChallengeList(memberId, requestDTO));
+    }
+
+    @Operation(summary = "추천 챌린지 조회",
+        description = "현재 모집 중인 챌린지 중 좋아요가 많은 순으로 추천 챌린지를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "추천 챌린지 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/recommended")
+    public BaseResponse<List<ChallengeListResDTO>> getRecommendedChallenges(
+        @Parameter(description = "추천 챌린지 조회 조건") @ModelAttribute RecommendedChallengeReqDTO requestDTO) {
+        return new BaseResponse<>(challengeService.getRecommendedChallenges(requestDTO));
     }
 
     @Operation(summary = "챌린지 상세 조회", description = "특정 챌린지의 상세 정보를 조회합니다.")

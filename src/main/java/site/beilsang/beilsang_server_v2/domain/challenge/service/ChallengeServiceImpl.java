@@ -19,6 +19,7 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallenge
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.RecommendedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
@@ -330,6 +331,22 @@ public class ChallengeServiceImpl implements ChallengeService {
             .totalPages(page.getTotalPages())
             .hasNext(page.hasNext())
             .build();
+    }
+
+    /**
+     * 추천 챌린지를 조회합니다.
+     * - 현재 모집 중인 챌린지 중 좋아요가 많은 순으로 조회
+     * - 페이지네이션 없이 상위 N개만 조회
+     */
+    @Override
+    public List<ChallengeListResDTO> getRecommendedChallenges(RecommendedChallengeReqDTO requestDTO) {
+        int size = requestDTO.getSize() != null ? requestDTO.getSize() : 10;
+
+        List<Challenge> challenges = challengeRepository.findRecommendedChallenges(size);
+
+        return challenges.stream()
+            .map(ChallengeAssembler::toChallengeListResDTO)
+            .collect(Collectors.toList());
     }
 
     @Override

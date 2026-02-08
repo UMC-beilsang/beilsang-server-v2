@@ -65,6 +65,16 @@ public interface ChallengeRepositoryCustom {
         Pageable pageable);
 
     /**
+     * 추천 챌린지 조회
+     * - 현재 모집 중인 챌린지(startDate >= today) 중 좋아요가 많은 순으로 조회
+     * - 페이지네이션 없이 상위 N개만 조회
+     *
+     * @param size 조회할 챌린지 개수
+     * @return 추천 챌린지 목록
+     */
+    List<Challenge> findRecommendedChallenges(int size);
+
+    /**
      * 모집 마감 챌린지 검색
      * - 시작일이 오늘 이전인 챌린지를 검색
      * - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
