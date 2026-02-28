@@ -54,6 +54,8 @@ jobs:
               sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
               sudo systemctl enable docker
               sudo systemctl start docker
+              # docker 그룹에 현재 유저 추가 (sudo 없이 docker 명령 실행 가능하도록)
+              sudo usermod -aG docker $USER
             else
               echo "✅ Docker already installed."
             fi
