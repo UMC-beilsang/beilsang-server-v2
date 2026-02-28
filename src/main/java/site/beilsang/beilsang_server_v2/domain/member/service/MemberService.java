@@ -11,6 +11,7 @@ import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepo
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.TermsAgreementReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
@@ -130,5 +131,15 @@ public class MemberService {
 
         Boolean isEnrolled = enrolledChallengeIds.contains(challengeId);
         return MemberAssembler.toCheckEnrolledDTO(isEnrolled, enrolledChallengeIds);
+    }
+
+    public void agreeToTerms(Long memberId, TermsAgreementReqDTO termsAgreementReqDTO) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        if (termsAgreementReqDTO.getAgreed()) {
+            member.agreeToTerms();
+            memberRepository.save(member);
+        }
     }
 }

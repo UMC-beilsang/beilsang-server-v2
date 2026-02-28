@@ -29,11 +29,11 @@ public class MemberAssembler {
     }
 
     public static MemberLoginResDTO toMemberLoginResDTO(String accessToken, String refreshToken,
-        Boolean isExistMember) {
+        Boolean isTermsAgreed) {
         return MemberLoginResDTO.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .isExistMember(isExistMember)
+            .isTermsAgreed(isTermsAgreed)
             .build();
     }
 

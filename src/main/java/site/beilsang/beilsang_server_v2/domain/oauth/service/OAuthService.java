@@ -63,7 +63,7 @@ public class OAuthService {
         // 3. 기존 사용자 확인 또는 새 사용자 생성
         MemberResult result = getOrCreateMember(oAuthAttributes, Provider.KAKAO);
         Member member = result.member();
-        boolean isExistMember = result.isExist();
+        boolean isTermsAgreed = result.isTermsAgreed();
 
         // 4. JWT 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(
@@ -75,7 +75,7 @@ public class OAuthService {
 
         // 5. 응답 DTO 생성
         MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(
-            accessToken, refreshToken, isExistMember
+            accessToken, refreshToken, isTermsAgreed
         );
 
         log.info("Kakao login successful for user: {}", member.getSocialId());
@@ -96,7 +96,7 @@ public class OAuthService {
         // 기존 사용자 확인 또는 새 사용자 생성
         MemberResult result = getOrCreateMember(oAuthAttributes, Provider.APPLE);
         Member member = result.member();
-        boolean isExistMember = result.isExist();
+        boolean isTermsAgreed = result.isTermsAgreed();
 
         // Apple refresh token 발급 및 저장
         if (request.getAuthorizationCode() != null) {
@@ -118,7 +118,7 @@ public class OAuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getSocialId(), member.getEmail());
 
         // 응답 DTO 생성
-        MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, isExistMember);
+        MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, isTermsAgreed);
 
         log.info("Apple login successful for user: {}", member.getSocialId());
         return response;
@@ -129,7 +129,9 @@ public class OAuthService {
             attributes.getOAuth2UserInfo().getId(), provider
         ).map(member -> {
             log.info("기존 사용자 로그인: {}", member.getSocialId());
-            return new MemberResult(member, true);
+            // 약관동의 여부로 기존 회원 판단
+            boolean isTermsAgreed = member.getTermsAgreed() != null && member.getTermsAgreed();
+            return new MemberResult(member, isTermsAgreed);
         }).orElseGet(() -> {
             log.info("새 사용자 생성: {}", attributes.getOAuth2UserInfo().getId());
             Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
@@ -287,7 +289,7 @@ public class OAuthService {
         }
     }
 
-    // Member와 isExisting을 함께 반환하는 record 클래스
-    private record MemberResult(Member member, boolean isExist) {
+    // Member와 약관동의 여부를 함께 반환하는 record 클래스
+    private record MemberResult(Member member, boolean isTermsAgreed) {
     }
 }

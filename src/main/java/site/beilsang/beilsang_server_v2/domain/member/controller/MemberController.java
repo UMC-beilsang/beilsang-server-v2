@@ -7,14 +7,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.TermsAgreementReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
@@ -93,5 +96,19 @@ public class MemberController {
         @Parameter(description = "참여 여부를 확인할 챌린지 ID", example = "1") @PathVariable(name = "challengeId") Long challengeId) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.checkEnroll(memberId, challengeId));
+    }
+
+    @Operation(summary = "약관 동의", description = "회원이 약관에 동의합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "약관 동의 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PostMapping("/terms/agree")
+    public BaseResponse<Void> agreeToTerms(Authentication authentication,
+        @Parameter(description = "약관 동의 요청 데이터") @Valid @RequestBody TermsAgreementReqDTO termsAgreementReqDTO) {
+        Long memberId = (Long) authentication.getPrincipal();
+        memberService.agreeToTerms(memberId, termsAgreementReqDTO);
+        return new BaseResponse<>();
     }
 }

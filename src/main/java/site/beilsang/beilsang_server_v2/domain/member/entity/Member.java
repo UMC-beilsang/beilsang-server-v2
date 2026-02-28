@@ -81,6 +81,9 @@ public class Member {
     private String deviceToken;
 
     @Builder.Default
+    private Boolean termsAgreed = false;
+
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PointLog> pointLogs = new ArrayList<>();
 
@@ -129,5 +132,9 @@ public class Member {
 
     public void updateAppleRefreshToken(String refreshToken) {
         this.appleRefreshToken = refreshToken;
+    }
+
+    public void agreeToTerms() {
+        this.termsAgreed = true;
     }
 }

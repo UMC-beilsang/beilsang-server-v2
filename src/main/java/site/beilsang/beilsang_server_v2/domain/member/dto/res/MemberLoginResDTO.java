@@ -10,5 +10,5 @@ public class MemberLoginResDTO {
 
     private String accessToken;
     private String refreshToken;
-    private Boolean isExistMember;
+    private Boolean isTermsAgreed;
 }
