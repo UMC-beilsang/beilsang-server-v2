@@ -34,7 +34,7 @@ spring:
       region:
         static: ap-northeast-2
       s3:
-        bucket: beilsang-bucket-stage
+        bucket: bs-stage-bucket
         path:
           challenge-main: challenge/main/
           challenge-cert: challenge/cert/
