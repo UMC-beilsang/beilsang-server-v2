@@ -2,7 +2,7 @@ spring:
   application:
     name: beilsang-server-v2
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local-mysql} # 배포시 github actions에서 환경변수로 stage/prod 설정
+    active: ${SPRING_PROFILES_ACTIVE:local-postgre} # 배포시 github actions에서 환경변수로 stage/prod 설정
   servlet:
     multipart:
       max-file-size: 3MB # 파일당 최대 크기
