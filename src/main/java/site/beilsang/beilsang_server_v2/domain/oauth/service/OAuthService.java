@@ -21,6 +21,7 @@ import site.beilsang.beilsang_server_v2.global.feign.KakaoClient;
 import site.beilsang.beilsang_server_v2.global.jwt.JwtTokenProvider;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleTokenRes;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
+import site.beilsang.beilsang_server_v2.global.util.NicknameGenerator;
 
 import java.util.Map;
 
@@ -36,10 +37,12 @@ public class OAuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoTokenConfig kakaoTokenConfig;
     private final KakaoClient kakaoClient;
+    private final NicknameGenerator nicknameGenerator;
 
     private static final String KAKAO_PREFIX = "KakaoAK ";
     private static final String KAKAO_TARGET_TYPE = "user_id";
-    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣]{2,10}$";
+    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣]{2,15}$";
+    private static final int MAX_NICKNAME_RETRY = 5;
 
     @Value("${kakao.admin-key}")
     private String kakaoAdminKey;
@@ -134,9 +137,37 @@ public class OAuthService {
             return new MemberResult(member, isTermsAgreed);
         }).orElseGet(() -> {
             log.info("새 사용자 생성: {}", attributes.getOAuth2UserInfo().getId());
-            Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
-            return new MemberResult(memberRepository.save(newMember), false);
+            Member newMember = createMemberWithUniqueNickname(provider, attributes);
+            return new MemberResult(newMember, false);
         });
+    }
+
+    /**
+     * 중복되지 않는 닉네임으로 회원 생성 (최대 5회 재시도)
+     */
+    private Member createMemberWithUniqueNickname(Provider provider, OAuthAttributes attributes) {
+        for (int attempt = 1; attempt <= MAX_NICKNAME_RETRY; attempt++) {
+            try {
+                String randomNickname = nicknameGenerator.generateRandomNickname();
+                log.info("랜덤 닉네임 생성 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, randomNickname);
+
+                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
+                Member savedMember = memberRepository.save(newMember);
+
+                log.info("회원 생성 성공 - 닉네임: {}", randomNickname);
+                return savedMember;
+
+            } catch (Exception e) {
+                // UNIQUE 제약 위반 또는 기타 에러
+                if (attempt == MAX_NICKNAME_RETRY) {
+                    log.error("닉네임 생성 최대 재시도 횟수 초과");
+                    throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
+                }
+                log.warn("닉네임 중복으로 재시도 {}/{}", attempt, MAX_NICKNAME_RETRY);
+            }
+        }
+
+        throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
     }
 
     @Transactional

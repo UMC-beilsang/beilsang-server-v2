@@ -54,6 +54,7 @@ public class Member {
 
     private String appleRefreshToken;
 
+    @Column(unique = true)
     private String nickName;
 
     private LocalDate birth;

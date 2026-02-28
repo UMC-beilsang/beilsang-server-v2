@@ -31,8 +31,10 @@ public enum BaseResponseCode {
     APPLE_REVOKE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0009", "애플 탈퇴에 실패했습니다"),
     INVALID_APPLE_AUTHORIZATION_CODE(HttpStatus.UNAUTHORIZED, "O0010", "유효하지 않거나 만료된 인증 코드입니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "O0011", "유효하지 않은 리프레시 토큰입니다."),
-    INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "O0012", "닉네임은 2~10자의 한글, 영문, 숫자만 사용할 수 있습니다."),
+    INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "O0012", "닉네임은 2~15자의 한글, 영문, 숫자만 사용할 수 있습니다."),
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "O0013", "이미 사용 중인 닉네임입니다."),
+    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "O0014", "닉네임 생성에 실패했습니다."),
+
     // member
     NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "M0001", "존재하지 않은 멤버입니다"),
 

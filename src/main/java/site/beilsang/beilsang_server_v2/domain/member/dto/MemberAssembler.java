@@ -28,6 +28,16 @@ public class MemberAssembler {
             .build();
     }
 
+    public static Member toEntity(Provider provider, OAuth2UserInfo oAuth2UserInfo, String nickName) {
+        return Member.builder()
+            .provider(provider)
+            .socialId(oAuth2UserInfo.getId())
+            .email(oAuth2UserInfo.getEmail())
+            .nickName(nickName)
+            .role(Role.GUEST)
+            .build();
+    }
+
     public static MemberLoginResDTO toMemberLoginResDTO(String accessToken, String refreshToken,
         Boolean isTermsAgreed) {
         return MemberLoginResDTO.builder()
