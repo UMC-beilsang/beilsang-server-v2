@@ -3,6 +3,7 @@ package site.beilsang.beilsang_server_v2.domain.challenge.dto.req;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
@@ -22,6 +23,7 @@ public class LikedChallengeListReqDTO {
         example = "ALL",
         allowableValues = {"ALL", "TUMBLER", "REFILL_STATION", "MULTIPLE_CONTAINERS",
             "ECO_PRODUCT", "PLOGGING", "VEGAN", "PUBLIC_TRANSPORT", "BIKE", "RECYCLE"})
+    @NotNull(message = "카테고리는 필수입니다")
     private Category category = Category.ALL;
 
     @Schema(description = "정렬 타입: DEADLINE_SOON(마감 임박순), NEWEST(최신순)",

@@ -30,6 +30,7 @@ public class MyChallengeListReqDTO {
         example = "ALL",
         allowableValues = {"ALL", "TUMBLER", "REFILL_STATION", "MULTIPLE_CONTAINERS",
             "ECO_PRODUCT", "PLOGGING", "VEGAN", "PUBLIC_TRANSPORT", "BIKE", "RECYCLE"})
+    @NotNull(message = "카테고리는 필수입니다")
     private Category category = Category.ALL;
 
     @Schema(description = "페이지 번호 (0부터 시작)", example = "0", minimum = "0")
