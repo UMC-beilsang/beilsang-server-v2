@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @ConfigurationProperties(prefix = "nickname")
+@Setter
 public class NicknameGenerator {
 
-    @Setter
     private List<String> adjectives;
-    @Setter
     private List<String> nouns;
     private final Random random = new Random();
 

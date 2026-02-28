@@ -62,13 +62,9 @@ public class MemberAssembler {
         return myPageResDTO;
     }
 
-    public static MemberProfileResDTO toEntity(Member member) {
+    public static MemberProfileResDTO toProfileResDTO(Member member) {
         return MemberProfileResDTO.builder()
-            .birth(member.getBirth())
-            .address(member.getAddress())
-            .gender(member.getGender())
             .nickName(member.getNickName())
-            .resolution(member.getResolution())
             .build();
     }
 

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberNicknameReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.TermsAgreementReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
@@ -64,11 +64,11 @@ public class MemberController {
         @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @PatchMapping("/profile")
-    public BaseResponse<MemberProfileResDTO> updateProfile(Authentication authentication,
-        @Parameter(description = "프로필 수정 요청 데이터") @RequestBody MemberProfileReqDTO memberProfileReqDTO) {
+    @PatchMapping("/nickname")
+    public BaseResponse<MemberProfileResDTO> updateNickname(Authentication authentication,
+        @Parameter(description = "프로필 수정 요청 데이터") @RequestBody MemberNicknameReqDTO memberNicknameReqDTO) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(memberService.updateProfile(memberId, memberProfileReqDTO));
+        return new BaseResponse<>(memberService.updateNickname(memberId, memberNicknameReqDTO));
     }
 
     @Operation(summary = "프로필 이미지 수정", description = "회원의 프로필 이미지를 수정합니다.")

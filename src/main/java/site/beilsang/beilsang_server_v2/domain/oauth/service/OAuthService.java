@@ -159,11 +159,12 @@ public class OAuthService {
 
             } catch (Exception e) {
                 // UNIQUE 제약 위반 또는 기타 에러
+                log.error("닉네임 생성 실패 - 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, e.getMessage(), e);
                 if (attempt == MAX_NICKNAME_RETRY) {
                     log.error("닉네임 생성 최대 재시도 횟수 초과");
                     throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
                 }
-                log.warn("닉네임 중복으로 재시도 {}/{}", attempt, MAX_NICKNAME_RETRY);
+                log.warn("재시도 {}/{}", attempt, MAX_NICKNAME_RETRY);
             }
         }
 
