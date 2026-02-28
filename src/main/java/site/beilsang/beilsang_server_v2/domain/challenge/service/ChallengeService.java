@@ -3,7 +3,12 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.RecommendedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
@@ -34,8 +39,59 @@ public interface ChallengeService {
      *
      * @param requestDTO 챌린지 목록 조회 필터 조건
      * @return 페이지네이션된 챌린지 목록
+     * @deprecated 용도별 전용 API를 사용해주세요:
+     *     {@link #getOpenChallengeList}, {@link #getClosedChallengeList},
+     *     {@link #getLikedChallengeList}, {@link #getMyChallengeList}
      */
+    @Deprecated
     PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO);
+
+    /**
+     * 모집중인 챌린지 목록을 조회합니다. 시작일이 오늘 이후인 챌린지를 대상으로 합니다.
+     *
+     * @param requestDTO 모집중 챌린지 목록 조회 조건 (카테고리, 정렬, 페이징)
+     * @return 페이지네이션된 모집중 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(OpenChallengeListReqDTO requestDTO);
+
+    /**
+     * 모집마감된 챌린지 목록을 조회합니다. 시작일이 오늘 이전인 챌린지를 대상으로 합니다.
+     * 최근 마감순(startDate DESC)으로 정렬됩니다.
+     *
+     * @param requestDTO 모집마감 챌린지 목록 조회 조건 (카테고리, 페이징)
+     * @return 페이지네이션된 모집마감 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(ClosedChallengeListReqDTO requestDTO);
+
+    /**
+     * 찜한 챌린지 목록을 조회합니다.
+     *
+     * @param memberId   조회 요청하는 회원 ID
+     * @param requestDTO 찜한 챌린지 목록 조회 조건 (카테고리, 정렬, 페이징)
+     * @return 페이지네이션된 찜한 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getLikedChallengeList(Long memberId,
+        LikedChallengeListReqDTO requestDTO);
+
+    /**
+     * 나의 챌린지 목록을 조회합니다.
+     * 참여 상태(ONGOING, SUCCESS, FAIL)별로 필터링하여 조회합니다.
+     *
+     * @param memberId   조회 요청하는 회원 ID
+     * @param requestDTO 나의 챌린지 목록 조회 조건 (참여상태, 카테고리, 페이징)
+     * @return 페이지네이션된 나의 챌린지 목록
+     */
+    PageResponseDTO<ChallengeListResDTO> getMyChallengeList(Long memberId,
+        MyChallengeListReqDTO requestDTO);
+
+    /**
+     * 추천 챌린지를 조회합니다.
+     * 현재 모집 중인 챌린지 중 좋아요가 많은 순으로 조회합니다.
+     *
+     * @param requestDTO 추천 챌린지 조회 조건 (조회 개수)
+     * @return 추천 챌린지 목록
+     */
+    List<ChallengeListResDTO> getRecommendedChallenges(RecommendedChallengeReqDTO requestDTO);
 
     /**
      * 특정 챌린지의 상세 정보를 조회합니다.

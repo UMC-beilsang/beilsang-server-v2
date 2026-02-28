@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +22,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.RecommendedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchClosedChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.SearchOpenChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.res.ChallengeDetailResDTO;
@@ -59,7 +65,12 @@ public class ChallengeController {
                 certImages));
     }
 
-    @Operation(summary = "챌린지 목록 조회", description = "조건에 따른 챌린지 목록을 페이지네이션으로 조회합니다.")
+    @Deprecated
+    @Operation(summary = "챌린지 목록 조회 (Deprecated)",
+        description = "조건에 따른 챌린지 목록을 페이지네이션으로 조회합니다. "
+            + "이 API는 더 이상 권장되지 않습니다. 용도별 전용 API를 사용해주세요: "
+            + "/challenge/list/open, /challenge/list/closed, /challenge/liked, /challenge/my",
+        deprecated = true)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "챌린지 목록 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
@@ -71,6 +82,71 @@ public class ChallengeController {
         Long memberId = (Long) authentication.getPrincipal();
         requestDTO.setMemberId(memberId);
         return new BaseResponse<>(challengeService.getChallengeList(requestDTO));
+    }
+
+    @Operation(summary = "모집중 챌린지 목록 조회",
+        description = "현재 모집중인 챌린지 목록을 조회합니다. 시작일이 오늘 이후인 챌린지를 대상으로 합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "모집중 챌린지 목록 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/list/open")
+    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getOpenChallengeList(
+        @Parameter(description = "모집중 챌린지 목록 조회 조건") @Valid @ModelAttribute OpenChallengeListReqDTO requestDTO) {
+        return new BaseResponse<>(challengeService.getOpenChallengeList(requestDTO));
+    }
+
+    @Operation(summary = "모집마감 챌린지 목록 조회",
+        description = "모집이 마감된 챌린지 목록을 조회합니다. 시작일이 오늘 이전인 챌린지를 대상으로 합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "모집마감 챌린지 목록 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/list/closed")
+    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getClosedChallengeList(
+        @Parameter(description = "모집마감 챌린지 목록 조회 조건") @Valid @ModelAttribute ClosedChallengeListReqDTO requestDTO) {
+        return new BaseResponse<>(challengeService.getClosedChallengeList(requestDTO));
+    }
+
+    @Operation(summary = "찜한 챌린지 목록 조회",
+        description = "내가 찜한 챌린지 목록을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "찜한 챌린지 목록 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/liked")
+    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getLikedChallengeList(
+        Authentication authentication,
+        @Parameter(description = "찜한 챌린지 목록 조회 조건") @Valid @ModelAttribute LikedChallengeListReqDTO requestDTO) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.getLikedChallengeList(memberId, requestDTO));
+    }
+
+    @Operation(summary = "나의 챌린지 목록 조회",
+        description = "내가 참여한 챌린지 목록을 상태별로 조회합니다. "
+            + "ONGOING(참여중), SUCCESS(달성), FAIL(실패) 상태로 필터링합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "나의 챌린지 목록 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/my")
+    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getMyChallengeList(
+        Authentication authentication,
+        @Parameter(description = "나의 챌린지 목록 조회 조건") @Valid @ModelAttribute MyChallengeListReqDTO requestDTO) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.getMyChallengeList(memberId, requestDTO));
+    }
+
+    @Operation(summary = "추천 챌린지 조회",
+        description = "현재 모집 중인 챌린지 중 좋아요가 많은 순으로 추천 챌린지를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "추천 챌린지 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/recommended")
+    public BaseResponse<List<ChallengeListResDTO>> getRecommendedChallenges(
+        @Parameter(description = "추천 챌린지 조회 조건") @Valid @ModelAttribute RecommendedChallengeReqDTO requestDTO) {
+        return new BaseResponse<>(challengeService.getRecommendedChallenges(requestDTO));
     }
 
     @Operation(summary = "챌린지 상세 조회", description = "특정 챌린지의 상세 정보를 조회합니다.")
@@ -142,7 +218,7 @@ public class ChallengeController {
     })
     @GetMapping("/search/closed")
     public BaseResponse<PageResponseDTO<ChallengeListResDTO>> searchClosedChallenges(
-        @Parameter(description = "모집 마감 챌린지 검색 조건") @ModelAttribute SearchClosedChallengeReqDTO requestDTO) {
+        @Parameter(description = "모집 마감 챌린지 검색 조건") @Valid @ModelAttribute SearchClosedChallengeReqDTO requestDTO) {
         return new BaseResponse<>(challengeService.searchClosedChallenges(requestDTO));
     }
 
@@ -154,7 +230,7 @@ public class ChallengeController {
     })
     @GetMapping("/search/open")
     public BaseResponse<PageResponseDTO<ChallengeListResDTO>> searchOpenChallenges(
-        @Parameter(description = "모집 중인 챌린지 검색 조건") @ModelAttribute SearchOpenChallengeReqDTO requestDTO) {
+        @Parameter(description = "모집 중인 챌린지 검색 조건") @Valid @ModelAttribute SearchOpenChallengeReqDTO requestDTO) {
         return new BaseResponse<>(challengeService.searchOpenChallenges(requestDTO));
     }
 }
