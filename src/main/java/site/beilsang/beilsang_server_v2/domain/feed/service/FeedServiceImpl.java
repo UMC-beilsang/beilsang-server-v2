@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedSearchReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
@@ -190,6 +191,27 @@ public class FeedServiceImpl implements FeedService {
             feedSlice = feedRepository.findAllByChallengeMember_Member_IdAndChallenge_CategoryOrderByCreatedAtDesc(
                 memberId, category, pageable);
         }
+
+        // SliceResponseDTO로 변환하여 반환
+        return FeedAssembler.toSliceResponseDTO(feedSlice);
+    }
+
+    @Override
+    public SliceResponseDTO<PreviewFeedResDTO> searchFeeds(Long memberId,
+        FeedSearchReqDTO requestDTO) {
+        // 사용자 존재 여부 확인
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + memberId));
+
+        // Pageable 객체 생성 (정렬은 Repository에서 sortType에 따라 처리)
+        Pageable pageable = PageRequest.of(requestDTO.getPage(), requestDTO.getSize());
+
+        // Repository의 searchFeeds 호출
+        Slice<Feed> feedSlice = feedRepository.searchFeeds(
+            requestDTO.getKeyword(),
+            requestDTO.getSortType(),
+            pageable
+        );
 
         // SliceResponseDTO로 변환하여 반환
         return FeedAssembler.toSliceResponseDTO(feedSlice);

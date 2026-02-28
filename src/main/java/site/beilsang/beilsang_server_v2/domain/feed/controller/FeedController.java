@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
+import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedSearchReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedCreateResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedDetailResDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.res.FeedLikeResDTO;
@@ -134,5 +135,19 @@ public class FeedController {
         @Parameter(description = "페이지 크기", example = "10") @Min(1) @Max(10) @RequestParam(defaultValue = "4") int size) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(feedService.getMyFeedList(memberId, category, page, size));
+    }
+
+    @Operation(summary = "피드 검색", description = "피드 내용(review)을 키워드로 검색하고, 등록 시간 기준으로 정렬합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "피드 검색 성공",
+            content = @Content(schema = @Schema(implementation = SliceResponseDTO.class))),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/search")
+    public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> searchFeeds(
+        Authentication authentication,
+        @Parameter(description = "피드 검색 필터 조건") @Valid @ModelAttribute FeedSearchReqDTO requestDTO) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(feedService.searchFeeds(memberId, requestDTO));
     }
 }
