@@ -87,8 +87,19 @@ public class Challenge extends BaseEntity {
 
     private Integer collectedPoint;
 
+    // 포인트 정산 완료 여부 (중복 정산 방지용)
+    @Builder.Default
+    private Boolean isSettled = false;
+
     public void updateStatus(ChallengeStatus status) {
         this.status = status;
+    }
+
+    /**
+     * 챌린지 포인트 정산 완료 처리
+     */
+    public void markAsSettled() {
+        this.isSettled = true;
     }
 
     public ChallengeStatus calculateCurrentStatus(LocalDate today) {
