@@ -4,6 +4,11 @@ spring:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      data-source-properties:
+        # 앱 재시작 시 "prepared statement already exists" 에러 방지
+        # prepareThreshold=0: 서버 사이드 prepared statement 비활성화
+        prepareThreshold: 0
   jpa:
     database: postgresql
     show-sql: true
