@@ -74,6 +74,6 @@ ssl-init:
 		--webroot --webroot-path /var/www/certbot \
 		--email yjs19990421@gmail.com \
 		--agree-tos --no-eff-email \
-		-d beilsang.xyz
+		-d stage.beilsang.xyz
 	docker compose restart nginx
 	@echo "✅ 완료!"
