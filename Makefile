@@ -72,8 +72,8 @@ ssl-init:
 	docker compose up -d nginx
 	docker compose run --rm certbot certonly \
 		--webroot --webroot-path /var/www/certbot \
-		--email judyg00dy68@gmail.com \
+		--email yjs19990421@gmail.com \
 		--agree-tos --no-eff-email \
-		-d beilsang.site
+		-d beilsang.xyz
 	docker compose restart nginx
 	@echo "✅ 완료!"
