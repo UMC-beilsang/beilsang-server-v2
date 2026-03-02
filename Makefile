@@ -70,7 +70,7 @@ prod-deploy:
 ssl-init:
 	@echo "🔒 SSL 인증서 발급 중..."
 	docker compose up -d nginx
-	docker compose run --rm certbot certonly \
+	docker compose run --rm --entrypoint certbot certbot certonly \
 		--webroot --webroot-path /var/www/certbot \
 		--email yjs19990421@gmail.com \
 		--agree-tos --no-eff-email \
