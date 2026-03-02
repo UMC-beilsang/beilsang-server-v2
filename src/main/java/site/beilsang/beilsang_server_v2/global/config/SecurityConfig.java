@@ -61,7 +61,9 @@ public class SecurityConfig {
             mvc.pattern("/swagger-ui.html"),
             mvc.pattern("/v3/api-docs/**"),
             mvc.pattern("/swagger-resources/**"),
-            mvc.pattern("/webjars/**")
+            mvc.pattern("/webjars/**"),
+            // 헬스체크 허용 (CI/CD 파이프라인에서 인증 없이 접근)
+            mvc.pattern("/actuator/health")
         };
 
         // http request 인증 설정

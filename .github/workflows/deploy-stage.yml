@@ -201,5 +201,5 @@ jobs:
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
             sleep 30
-            docker exec beilsang-server curl -f http://localhost:8080/actuator/health || exit 1
+            docker exec beilsang-server wget -qO- http://localhost:8080/actuator/health || exit 1
             echo "Stage deployment successful!"
