@@ -284,7 +284,7 @@ Authorization: Bearer {accessToken}
 
 ### 2.3 닉네임 수정
 ```http
-PATCH /api/profile
+PATCH /api/nickname
 Authorization: Bearer {accessToken}
 ```
 

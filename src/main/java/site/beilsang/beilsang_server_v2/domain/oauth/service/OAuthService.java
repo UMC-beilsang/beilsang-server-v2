@@ -152,7 +152,7 @@ public class OAuthService {
                 log.info("랜덤 닉네임 생성 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, randomNickname);
 
                 Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
-                Member savedMember = memberRepository.save(newMember);
+                Member savedMember = memberRepository.saveAndFlush(newMember);
 
                 log.info("회원 생성 성공 - 닉네임: {}", randomNickname);
                 return savedMember;

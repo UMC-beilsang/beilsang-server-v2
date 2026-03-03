@@ -58,15 +58,15 @@ public class MemberController {
         return new BaseResponse<>(memberService.getPointLog(memberId));
     }
 
-    @Operation(summary = "프로필 정보 수정", description = "회원의 프로필 정보(이름, 닉네임 등)를 수정합니다.")
+    @Operation(summary = "닉네임 수정", description = "회원의 닉네임을 수정합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "프로필 수정 성공"),
+        @ApiResponse(responseCode = "200", description = "닉네임 수정 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PatchMapping("/nickname")
     public BaseResponse<MemberProfileResDTO> updateNickname(Authentication authentication,
-        @Parameter(description = "프로필 수정 요청 데이터") @RequestBody MemberNicknameReqDTO memberNicknameReqDTO) {
+        @Parameter(description = "닉네임 수정 요청 데이터") @Valid  @RequestBody MemberNicknameReqDTO memberNicknameReqDTO) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.updateNickname(memberId, memberNicknameReqDTO));
     }
