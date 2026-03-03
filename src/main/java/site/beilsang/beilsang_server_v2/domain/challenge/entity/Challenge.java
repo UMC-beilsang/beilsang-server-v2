@@ -81,8 +81,10 @@ public class Challenge extends BaseEntity {
 
     private Integer totalGoalDay;
 
+    @Builder.Default
     private Integer attendeeCount = 1;
 
+    @Builder.Default
     private Integer countLikes = 0;
 
     private Integer collectedPoint;

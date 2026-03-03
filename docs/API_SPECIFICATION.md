@@ -50,15 +50,15 @@ POST /api/oauth/login/kakao
   "result": {
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "isExistMember": false
+    "isTermsAgreed": false
   }
 }
 ```
 
 **설명**
 - iOS SDK에서 받은 카카오 idToken으로 로그인
-- 신규 회원은 자동 가입 처리
-- `isExistMember`: `false`는 신규 회원, `true`는 기존 회원
+- 신규 회원은 자동 가입 처리되며, 랜덤 닉네임이 자동으로 생성됨 (형용사+명사+번호 형식, 예: 푸른토끼042)
+- `isTermsAgreed`: `false`는 약관 미동의, `true`는 약관 동의 완료
 
 ---
 
@@ -84,14 +84,16 @@ POST /api/oauth/login/apple
   "result": {
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "isExistMember": true
+    "isTermsAgreed": true
   }
 }
 ```
 
 **설명**
 - iOS Sign in with Apple에서 받은 identityToken으로 로그인
+- 신규 회원은 자동 가입 처리되며, 랜덤 닉네임이 자동으로 생성됨 (형용사+명사+번호 형식, 예: 푸른토끼042)
 - authorizationCode는 탈퇴 기능을 위해 선택적으로 전달
+- `isTermsAgreed`: `false`는 약관 미동의, `true`는 약관 동의 완료
 
 ---
 
@@ -116,7 +118,7 @@ POST /api/oauth/refresh
   "result": {
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "isExistMember": true
+    "isTermsAgreed": true
   }
 }
 ```
@@ -196,7 +198,7 @@ GET /api/oauth/nickname?nickname={nickname}
 ```
 
 **Query Parameters**
-- `nickname`: 검증할 닉네임 (2-10자, 한글/영문/숫자)
+- `nickname`: 검증할 닉네임 (2-15자, 한글/영문/숫자)
 
 **Response (성공)**
 ```json
@@ -217,8 +219,8 @@ GET /api/oauth/nickname?nickname={nickname}
 ```
 
 **설명**
-- 회원가입 시 닉네임 중복 및 형식 검증
-- 2-10자, 한글/영문/숫자만 허용
+- 닉네임 중복 및 형식 검증
+- 2-15자, 한글/영문/숫자만 허용
 
 ---
 
@@ -280,20 +282,16 @@ Authorization: Bearer {accessToken}
 
 ---
 
-### 2.3 프로필 정보 수정
+### 2.3 닉네임 수정
 ```http
-PATCH /api/profile
+PATCH /api/nickname
 Authorization: Bearer {accessToken}
 ```
 
 **Request Body**
 ```json
 {
-  "nickName": "새닉네임",
-  "birth": "1990-01-01",
-  "gender": "MALE",
-  "address": "서울특별시 강남구",
-  "resolution": "환경을 보호하자"
+  "nickName": "새닉네임"
 }
 ```
 
@@ -304,25 +302,46 @@ Authorization: Bearer {accessToken}
   "code": "200",
   "message": "요청에 성공하였습니다.",
   "result": {
-    "nickName": "새닉네임",
-    "birth": "1990-01-01",
-    "gender": "MALE",
-    "address": "서울특별시 강남구",
-    "resolution": "환경을 보호하자"
+    "nickName": "새닉네임"
   }
 }
 ```
 
 **필드 설명**
-- `nickName`: 닉네임 (선택)
-- `birth`: 생년월일 (yyyy-MM-dd, 선택)
-- `gender`: 성별 (MALE/FEMALE, 선택)
-- `address`: 주소 (선택)
-- `resolution`: 다짐 (선택)
+- `nickName`: 닉네임 (필수, 2-15자, 한글/영문/숫자)
+- 중복된 닉네임 사용 불가
 
 ---
 
-### 2.4 프로필 이미지 수정
+### 2.4 약관 동의
+```http
+POST /api/terms/agree
+Authorization: Bearer {accessToken}
+```
+
+**Request Body**
+```json
+{
+  "agreed": true
+}
+```
+
+**Response**
+```json
+{
+  "isSuccess": true,
+  "code": "200",
+  "message": "요청에 성공하였습니다."
+}
+```
+
+**필드 설명**
+- `agreed`: 약관 동의 여부 (필수, boolean)
+- 약관에 모두 동의한 경우 `true`로 전송
+
+---
+
+### 2.5 프로필 이미지 수정
 ```http
 PATCH /api/profile/image
 Authorization: Bearer {accessToken}
@@ -346,7 +365,7 @@ Authorization: Bearer {accessToken}
 
 ---
 
-### 2.5 챌린지 참여 여부 확인
+### 2.6 챌린지 참여 여부 확인
 ```http
 GET /api/check/{challengeId}
 Authorization: Bearer {accessToken}
@@ -1093,7 +1112,8 @@ Authorization: Bearer {accessToken}
 |-----|--------|------|
 | `NOT_FOUND_MEMBER` | 회원을 찾을 수 없습니다 | 존재하지 않는 회원 |
 | `DUPLICATE_NICKNAME` | 이미 사용 중인 닉네임입니다 | 닉네임 중복 |
-| `INVALID_NICKNAME_FORMAT` | 닉네임 형식이 올바르지 않습니다 | 2-10자 한글/영문/숫자 |
+| `INVALID_NICKNAME_FORMAT` | 닉네임 형식이 올바르지 않습니다 | 2-15자 한글/영문/숫자 |
+| `NICKNAME_GENERATION_FAILED` | 닉네임 생성에 실패했습니다 | 랜덤 닉네임 생성 실패 (최대 5회 재시도 초과) |
 | `INVALID_PROVIDER` | 잘못된 소셜 로그인 제공자입니다 | Provider 불일치 |
 
 ### 챌린지 관련 (4xx)

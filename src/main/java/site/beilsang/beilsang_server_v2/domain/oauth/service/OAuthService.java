@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
@@ -21,6 +22,7 @@ import site.beilsang.beilsang_server_v2.global.feign.KakaoClient;
 import site.beilsang.beilsang_server_v2.global.jwt.JwtTokenProvider;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleTokenRes;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
+import site.beilsang.beilsang_server_v2.global.util.NicknameGenerator;
 
 import java.util.Map;
 
@@ -36,10 +38,12 @@ public class OAuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoTokenConfig kakaoTokenConfig;
     private final KakaoClient kakaoClient;
+    private final NicknameGenerator nicknameGenerator;
 
     private static final String KAKAO_PREFIX = "KakaoAK ";
     private static final String KAKAO_TARGET_TYPE = "user_id";
-    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣]{2,10}$";
+    private static final String NICKNAME_REGEX = "^[a-zA-Z0-9가-힣]{2,15}$";
+    private static final int MAX_NICKNAME_RETRY = 5;
 
     @Value("${kakao.admin-key}")
     private String kakaoAdminKey;
@@ -63,7 +67,7 @@ public class OAuthService {
         // 3. 기존 사용자 확인 또는 새 사용자 생성
         MemberResult result = getOrCreateMember(oAuthAttributes, Provider.KAKAO);
         Member member = result.member();
-        boolean isExistMember = result.isExist();
+        boolean isTermsAgreed = result.isTermsAgreed();
 
         // 4. JWT 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(
@@ -75,7 +79,7 @@ public class OAuthService {
 
         // 5. 응답 DTO 생성
         MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(
-            accessToken, refreshToken, isExistMember
+            accessToken, refreshToken, isTermsAgreed
         );
 
         log.info("Kakao login successful for user: {}", member.getSocialId());
@@ -96,7 +100,7 @@ public class OAuthService {
         // 기존 사용자 확인 또는 새 사용자 생성
         MemberResult result = getOrCreateMember(oAuthAttributes, Provider.APPLE);
         Member member = result.member();
-        boolean isExistMember = result.isExist();
+        boolean isTermsAgreed = result.isTermsAgreed();
 
         // Apple refresh token 발급 및 저장
         if (request.getAuthorizationCode() != null) {
@@ -118,7 +122,7 @@ public class OAuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getSocialId(), member.getEmail());
 
         // 응답 DTO 생성
-        MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, isExistMember);
+        MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, isTermsAgreed);
 
         log.info("Apple login successful for user: {}", member.getSocialId());
         return response;
@@ -129,12 +133,52 @@ public class OAuthService {
             attributes.getOAuth2UserInfo().getId(), provider
         ).map(member -> {
             log.info("기존 사용자 로그인: {}", member.getSocialId());
-            return new MemberResult(member, true);
+            // 약관동의 여부로 기존 회원 판단
+            boolean isTermsAgreed = member.getTermsAgreed() != null && member.getTermsAgreed();
+            return new MemberResult(member, isTermsAgreed);
         }).orElseGet(() -> {
             log.info("새 사용자 생성: {}", attributes.getOAuth2UserInfo().getId());
-            Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
-            return new MemberResult(memberRepository.save(newMember), false);
+            Member newMember = createMemberWithUniqueNickname(provider, attributes);
+            return new MemberResult(newMember, false);
         });
+    }
+
+    /**
+     * 중복되지 않는 닉네임으로 회원 생성 (최대 5회 재시도)
+     * UNIQUE 제약 위반 시에만 재시도하고, 그 외 예외는 즉시 전파
+     */
+    private Member createMemberWithUniqueNickname(Provider provider, OAuthAttributes attributes) {
+        for (int attempt = 1; attempt <= MAX_NICKNAME_RETRY; attempt++) {
+            try {
+                String randomNickname = nicknameGenerator.generateRandomNickname();
+                log.info("랜덤 닉네임 생성 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, randomNickname);
+
+                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
+                Member savedMember = memberRepository.saveAndFlush(newMember);
+
+                log.info("회원 생성 성공 - 닉네임: {}", randomNickname);
+                return savedMember;
+
+            } catch (DataIntegrityViolationException e) {
+                // UNIQUE 제약 위반 (닉네임 중복)만 재시도
+                log.warn("닉네임 중복 발생 - 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, e.getMessage());
+                if (attempt == MAX_NICKNAME_RETRY) {
+                    log.error("닉네임 생성 최대 재시도 횟수 초과 - 중복 해결 실패");
+                    throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
+                }
+                log.info("재시도 {}/{}", attempt + 1, MAX_NICKNAME_RETRY);
+            } catch (IllegalStateException e) {
+                // NicknameGenerator 설정 오류 (adjectives/nouns 미로드)
+                log.error("닉네임 생성기 설정 오류: {}", e.getMessage());
+                throw e; // 설정 오류는 재시도 없이 즉시 전파
+            } catch (Exception e) {
+                // 기타 예상치 못한 오류 (DB 연결 오류 등)
+                log.error("회원 생성 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+                throw e; // 치명적 오류는 재시도 없이 즉시 전파
+            }
+        }
+
+        throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
     }
 
     @Transactional
@@ -287,7 +331,7 @@ public class OAuthService {
         }
     }
 
-    // Member와 isExisting을 함께 반환하는 record 클래스
-    private record MemberResult(Member member, boolean isExist) {
+    // Member와 약관동의 여부를 함께 반환하는 record 클래스
+    private record MemberResult(Member member, boolean isTermsAgreed) {
     }
 }

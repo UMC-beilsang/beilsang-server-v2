@@ -7,14 +7,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberNicknameReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.TermsAgreementReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
@@ -55,17 +58,17 @@ public class MemberController {
         return new BaseResponse<>(memberService.getPointLog(memberId));
     }
 
-    @Operation(summary = "프로필 정보 수정", description = "회원의 프로필 정보(이름, 닉네임 등)를 수정합니다.")
+    @Operation(summary = "닉네임 수정", description = "회원의 닉네임을 수정합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "프로필 수정 성공"),
+        @ApiResponse(responseCode = "200", description = "닉네임 수정 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @PatchMapping("/profile")
-    public BaseResponse<MemberProfileResDTO> updateProfile(Authentication authentication,
-        @Parameter(description = "프로필 수정 요청 데이터") @RequestBody MemberProfileReqDTO memberProfileReqDTO) {
+    @PatchMapping("/nickname")
+    public BaseResponse<MemberProfileResDTO> updateNickname(Authentication authentication,
+        @Parameter(description = "닉네임 수정 요청 데이터") @Valid  @RequestBody MemberNicknameReqDTO memberNicknameReqDTO) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(memberService.updateProfile(memberId, memberProfileReqDTO));
+        return new BaseResponse<>(memberService.updateNickname(memberId, memberNicknameReqDTO));
     }
 
     @Operation(summary = "프로필 이미지 수정", description = "회원의 프로필 이미지를 수정합니다.")
@@ -93,5 +96,19 @@ public class MemberController {
         @Parameter(description = "참여 여부를 확인할 챌린지 ID", example = "1") @PathVariable(name = "challengeId") Long challengeId) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.checkEnroll(memberId, challengeId));
+    }
+
+    @Operation(summary = "약관 동의", description = "회원이 약관에 동의합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "약관 동의 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PostMapping("/terms/agree")
+    public BaseResponse<Void> agreeToTerms(Authentication authentication,
+        @Parameter(description = "약관 동의 요청 데이터") @Valid @RequestBody TermsAgreementReqDTO termsAgreementReqDTO) {
+        Long memberId = (Long) authentication.getPrincipal();
+        memberService.agreeToTerms(memberId, termsAgreementReqDTO);
+        return new BaseResponse<>();
     }
 }

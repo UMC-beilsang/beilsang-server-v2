@@ -10,7 +10,8 @@ import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberNicknameReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.req.TermsAgreementReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
@@ -97,13 +98,21 @@ public class MemberService {
         return PointAssembler.toEntities(validPointLogList, member);
     }
 
-    public MemberProfileResDTO updateProfile(Long memberId,
-        MemberProfileReqDTO memberProfileReqDTO) {
-        Member member = memberRepository.findById(memberId).
-            orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
-        member.updateProfile(memberProfileReqDTO);
+    public MemberProfileResDTO updateNickname(Long memberId, MemberNicknameReqDTO memberNicknameReqDTO) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        String newNickname = memberNicknameReqDTO.getNickName();
+
+        // 닉네임 중복 체크 (본인 제외)
+        if (memberRepository.existsByNickName(newNickname) &&
+            !newNickname.equals(member.getNickName())) {
+            throw new BaseException(BaseResponseCode.DUPLICATE_NICKNAME);
+        }
+
+        member.updateNickname(newNickname);
         memberRepository.save(member);
-        return MemberAssembler.toEntity(member);
+        return MemberAssembler.toProfileResDTO(member);
     }
 
     public Void updateProfileImage(Long memberId,
@@ -130,5 +139,15 @@ public class MemberService {
 
         Boolean isEnrolled = enrolledChallengeIds.contains(challengeId);
         return MemberAssembler.toCheckEnrolledDTO(isEnrolled, enrolledChallengeIds);
+    }
+
+    public void agreeToTerms(Long memberId, TermsAgreementReqDTO termsAgreementReqDTO) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        if (termsAgreementReqDTO.getAgreed()) {
+            member.agreeToTerms();
+            memberRepository.save(member);
+        }
     }
 }

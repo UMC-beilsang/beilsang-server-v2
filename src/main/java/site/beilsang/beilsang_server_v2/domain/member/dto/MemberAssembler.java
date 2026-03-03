@@ -28,12 +28,22 @@ public class MemberAssembler {
             .build();
     }
 
+    public static Member toEntity(Provider provider, OAuth2UserInfo oAuth2UserInfo, String nickName) {
+        return Member.builder()
+            .provider(provider)
+            .socialId(oAuth2UserInfo.getId())
+            .email(oAuth2UserInfo.getEmail())
+            .nickName(nickName)
+            .role(Role.GUEST)
+            .build();
+    }
+
     public static MemberLoginResDTO toMemberLoginResDTO(String accessToken, String refreshToken,
-        Boolean isExistMember) {
+        Boolean isTermsAgreed) {
         return MemberLoginResDTO.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .isExistMember(isExistMember)
+            .isTermsAgreed(isTermsAgreed)
             .build();
     }
 
@@ -52,13 +62,9 @@ public class MemberAssembler {
         return myPageResDTO;
     }
 
-    public static MemberProfileResDTO toEntity(Member member) {
+    public static MemberProfileResDTO toProfileResDTO(Member member) {
         return MemberProfileResDTO.builder()
-            .birth(member.getBirth())
-            .address(member.getAddress())
-            .gender(member.getGender())
             .nickName(member.getNickName())
-            .resolution(member.getResolution())
             .build();
     }
 
