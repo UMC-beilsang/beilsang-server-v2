@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberNicknameReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.TermsAgreementReqDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.ChallengeCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.FeedCountResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.LikeCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.res.MyPageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.service.MemberService;
 import site.beilsang.beilsang_server_v2.domain.point.dto.res.PointLogListResDTO;
 import site.beilsang.beilsang_server_v2.global.common.BaseResponse;
@@ -35,17 +37,6 @@ public class MemberController {
      * 마이페이지와 관련된 컨트롤러
      */
     private final MemberService memberService;
-
-    @Operation(summary = "마이페이지 조회", description = "로그인한 사용자의 마이페이지 정보를 조회합니다.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "마이페이지 조회 성공"),
-        @ApiResponse(responseCode = "401", description = "인증 실패")
-    })
-    @GetMapping("/mypage")
-    public BaseResponse<MyPageResDTO> getMyPage(Authentication authentication) {
-        Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(memberService.getMyPage(memberId));
-    }
 
     @Operation(summary = "포인트 내역 조회", description = "로그인한 사용자의 포인트 내역을 조회합니다.")
     @ApiResponses(value = {
@@ -110,5 +101,38 @@ public class MemberController {
         Long memberId = (Long) authentication.getPrincipal();
         memberService.agreeToTerms(memberId, termsAgreementReqDTO);
         return new BaseResponse<>();
+    }
+
+    @Operation(summary = "피드 개수 조회", description = "로그인한 사용자의 피드 개수를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "피드 개수 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/mypage/feed/count")
+    public BaseResponse<FeedCountResDTO> getFeedCount(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getFeedCount(memberId));
+    }
+
+    @Operation(summary = "챌린지 개수 조회", description = "로그인한 사용자의 전체/달성/실패 챌린지 개수를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "챌린지 개수 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/mypage/challenge/count")
+    public BaseResponse<ChallengeCountResDTO> getChallengeCount(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getChallengeCount(memberId));
+    }
+
+    @Operation(summary = "찜 개수 조회", description = "로그인한 사용자의 찜한 챌린지 개수를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "찜 개수 조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/mypage/like/count")
+    public BaseResponse<LikeCountResDTO> getLikeCount(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getLikeCount(memberId));
     }
 }
