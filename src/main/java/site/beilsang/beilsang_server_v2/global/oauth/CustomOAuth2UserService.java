@@ -21,6 +21,7 @@ import site.beilsang.beilsang_server_v2.global.config.PointProperties;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
+import site.beilsang.beilsang_server_v2.global.util.NicknameGenerator;
 
 @Slf4j
 @Service
@@ -32,6 +33,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final MemberRepository memberRepository;
     private final PointService pointService;
     private final PointProperties pointProperties;
+    private final NicknameGenerator nicknameGenerator;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -71,7 +73,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             member = memberOpt.get();
         } else {
             log.info("존재하지 않는 유저, 추가하여 return");
-            member = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
+            String nickName = nicknameGenerator.generateRandomNickname();
+            member = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), nickName);
             memberRepository.save(member);
 
             // 신규 가입 보상 지급

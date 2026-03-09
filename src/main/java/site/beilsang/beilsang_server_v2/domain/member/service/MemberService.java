@@ -15,7 +15,8 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.res.ChallengeCountResD
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.FeedCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.LikeCountResDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileImageResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberNicknameResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
@@ -61,7 +62,7 @@ public class MemberService {
         return PointAssembler.toEntities(validPointLogList, member);
     }
 
-    public MemberProfileResDTO updateNickname(Long memberId, MemberNicknameReqDTO memberNicknameReqDTO) {
+    public MemberNicknameResDTO updateNickname(Long memberId, MemberNicknameReqDTO memberNicknameReqDTO) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
@@ -75,7 +76,7 @@ public class MemberService {
 
         member.updateNickname(newNickname);
         memberRepository.save(member);
-        return MemberAssembler.toProfileResDTO(member);
+        return MemberAssembler.toNicknameResDTO(member);
     }
 
     public Void updateProfileImage(Long memberId,
@@ -140,5 +141,17 @@ public class MemberService {
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
         Long countLike = challengeLikeRepository.countByMemberId(memberId);
         return MemberAssembler.toLikeCountResDTO(countLike);
+    }
+
+    public MemberNicknameResDTO getNickname(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+        return MemberAssembler.toNicknameResDTO(member);
+    }
+
+    public MemberProfileImageResDTO getProfileImage(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+        return MemberAssembler.toProfileImageResDTO(member);
     }
 }
