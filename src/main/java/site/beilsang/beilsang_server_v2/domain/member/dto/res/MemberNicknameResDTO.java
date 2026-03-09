@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class MemberProfileResDTO {
+public class MemberNicknameResDTO {
 
     private String nickName;
 }

@@ -8,7 +8,8 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDT
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.FeedCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.LikeCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileImageResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberNicknameResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.enums.Role;
@@ -47,9 +48,15 @@ public class MemberAssembler {
             .build();
     }
 
-    public static MemberProfileResDTO toProfileResDTO(Member member) {
-        return MemberProfileResDTO.builder()
+public static MemberNicknameResDTO toNicknameResDTO(Member member) {
+        return MemberNicknameResDTO.builder()
             .nickName(member.getNickName())
+            .build();
+    }
+
+    public static MemberProfileImageResDTO toProfileImageResDTO(Member member) {
+        return MemberProfileImageResDTO.builder()
+            .profileUrl(member.getProfileUrl())
             .build();
     }
 
