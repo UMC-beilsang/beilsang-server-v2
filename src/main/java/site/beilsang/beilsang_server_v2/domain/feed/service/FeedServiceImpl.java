@@ -202,6 +202,29 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
+    public SliceResponseDTO<PreviewFeedResDTO> getMyChallengeFeedList(Long challengeId,
+        Long memberId, int page, int size) {
+        // 챌린지 존재 여부 확인
+        if (!challengeRepository.existsById(challengeId)) {
+            throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
+        }
+
+        // 챌린지 참여 여부 확인
+        challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_JOINED_CHALLENGE));
+
+        // 최신순 페이징 처리
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 챌린지 ID + 멤버 ID 기준 피드 조회
+        Slice<Feed> feedSlice =
+            feedRepository.findAllByChallenge_IdAndChallengeMember_Member_IdOrderByCreatedAtDesc(
+                challengeId, memberId, pageable);
+
+        return FeedAssembler.toSliceResponseDTO(feedSlice);
+    }
+
+    @Override
     public SliceResponseDTO<PreviewFeedResDTO> getChallengeFeedList(Long challengeId, int page,
         int size) {
         // 챌린지 존재 여부 확인

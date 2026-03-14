@@ -152,6 +152,23 @@ public class FeedController {
         return new BaseResponse<>(feedService.getChallengeFeedList(challengeId, page, size));
     }
 
+    @Operation(summary = "내 챌린지 피드 조회", description = "내가 참여한 챌린지에서 내가 작성한 피드 목록을 최신순으로 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "내 챌린지 피드 조회 성공",
+            content = @Content(schema = @Schema(implementation = SliceResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "존재하지 않는 챌린지 또는 미참여 챌린지"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @GetMapping("/challenge/{challengeId}/my")
+    public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getMyChallengeFeedList(
+        @Parameter(description = "챌린지 ID", example = "1") @PathVariable Long challengeId,
+        @Parameter(description = "페이지 번호", example = "0") @Min(0) @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "10") @Min(1) @Max(10) @RequestParam(defaultValue = "10") int size,
+        Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(feedService.getMyChallengeFeedList(challengeId, memberId, page, size));
+    }
+
     @Operation(summary = "피드 검색", description = "피드 내용(review)을 키워드로 검색하고, 등록 시간 기준으로 정렬합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "피드 검색 성공",

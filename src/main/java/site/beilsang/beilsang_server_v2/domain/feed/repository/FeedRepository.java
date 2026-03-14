@@ -43,4 +43,15 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
      * @return 조회된 피드 목록 (Slice)
      */
     Slice<Feed> findAllByChallenge_IdOrderByCreatedAtDesc(Long challengeId, Pageable pageable);
+
+    /**
+     * 특정 챌린지에서 특정 멤버가 작성한 피드를 최신순으로 조회 (인증 피드 조회용)
+     *
+     * @param challengeId 챌린지 ID
+     * @param memberId    사용자 ID
+     * @param pageable    페이징 정보
+     * @return 조회된 피드 목록 (Slice)
+     */
+    Slice<Feed> findAllByChallenge_IdAndChallengeMember_Member_IdOrderByCreatedAtDesc(
+        Long challengeId, Long memberId, Pageable pageable);
 }
