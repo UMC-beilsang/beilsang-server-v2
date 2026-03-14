@@ -83,4 +83,14 @@ public interface FeedService {
      * @return 슬라이스된 피드 검색 결과 (무한 스크롤용)
      */
     SliceResponseDTO<PreviewFeedResDTO> searchFeeds(Long memberId, FeedSearchReqDTO requestDTO);
+
+    /**
+     * 특정 챌린지의 전체 피드 목록을 조회합니다.
+     *
+     * @param challengeId 조회할 챌린지 ID
+     * @param page        페이지 번호
+     * @param size        페이지 크기
+     * @return 슬라이스된 피드 목록 (무한 스크롤용)
+     */
+    SliceResponseDTO<PreviewFeedResDTO> getChallengeFeedList(Long challengeId, int page, int size);
 }

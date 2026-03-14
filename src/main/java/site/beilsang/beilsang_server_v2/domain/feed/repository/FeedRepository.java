@@ -34,4 +34,13 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
 
     @Query("SELECT COUNT(f) FROM Feed f WHERE f.challengeMember.member.id = :memberId")
     Long countByMemberId(@Param("memberId") Long memberId);
+
+    /**
+     * 특정 챌린지의 전체 피드를 최신순으로 조회
+     *
+     * @param challengeId 챌린지 ID
+     * @param pageable    페이징 정보
+     * @return 조회된 피드 목록 (Slice)
+     */
+    Slice<Feed> findAllByChallenge_IdOrderByCreatedAtDesc(Long challengeId, Pageable pageable);
 }
