@@ -8,7 +8,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
@@ -63,7 +62,7 @@ public class FeedServiceImpl implements FeedService {
         }
 
         // SliceResponseDTO로 변환
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 
     @Override
@@ -76,7 +75,7 @@ public class FeedServiceImpl implements FeedService {
         boolean isLiked = feedLikeRepository.existsByFeed_IdAndMember_Id(feedId, memberId);
 
         // FeedAssembler를 사용하여 FeedDetailResDTO 생성
-        return FeedAssembler.toFeedDetailResDTO(feed, isLiked);
+        return FeedAssembler.toFeedDetailResDTO(feed, isLiked, memberId);
     }
 
     @Override
@@ -198,7 +197,7 @@ public class FeedServiceImpl implements FeedService {
         }
 
         // SliceResponseDTO로 변환하여 반환
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 
     @Override
@@ -221,12 +220,12 @@ public class FeedServiceImpl implements FeedService {
             feedRepository.findAllByChallenge_IdAndChallengeMember_Member_IdOrderByCreatedAtDesc(
                 challengeId, memberId, pageable);
 
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 
     @Override
-    public SliceResponseDTO<PreviewFeedResDTO> getChallengeFeedList(Long challengeId, int page,
-        int size) {
+    public SliceResponseDTO<PreviewFeedResDTO> getChallengeFeedList(Long challengeId, Long memberId,
+        int page, int size) {
         // 챌린지 존재 여부 확인
         if (!challengeRepository.existsById(challengeId)) {
             throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
@@ -239,7 +238,7 @@ public class FeedServiceImpl implements FeedService {
         Slice<Feed> feedSlice = feedRepository.findAllByChallenge_IdOrderByCreatedAtDesc(
             challengeId, pageable);
 
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 
     @Override
@@ -260,6 +259,6 @@ public class FeedServiceImpl implements FeedService {
         );
 
         // SliceResponseDTO로 변환하여 반환
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 }

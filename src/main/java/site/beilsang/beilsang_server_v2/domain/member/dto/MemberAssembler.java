@@ -48,7 +48,7 @@ public class MemberAssembler {
             .build();
     }
 
-public static MemberNicknameResDTO toNicknameResDTO(Member member) {
+    public static MemberNicknameResDTO toNicknameResDTO(Member member) {
         return MemberNicknameResDTO.builder()
             .nickName(member.getNickName())
             .build();

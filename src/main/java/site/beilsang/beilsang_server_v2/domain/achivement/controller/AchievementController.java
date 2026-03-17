@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,8 +50,10 @@ public class AchievementController {
     public BaseResponse<SliceResponseDTO<PreviewFeedResDTO>> getFeedByCategory(
         @PathVariable(name = "category") Category category,
         @RequestParam(defaultValue = "4") Integer size,
-        @RequestParam("page") Integer page
+        @RequestParam("page") Integer page,
+        Authentication authentication
     ) {
-        return new BaseResponse<>(achievementService.getFeedsByCategory(category, page, size));
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(achievementService.getFeedsByCategory(category, page, size, memberId));
     }
 }

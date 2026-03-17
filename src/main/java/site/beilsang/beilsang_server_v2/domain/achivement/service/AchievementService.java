@@ -23,5 +23,5 @@ public interface AchievementService {
      * @return 해당 카테고리와 페이지에 해당하는 챌린지 피드 목록 (SliceResponseDTO)
      */
     SliceResponseDTO<PreviewFeedResDTO> getFeedsByCategory(Category category, Integer page,
-        Integer size);
+        Integer size, Long memberId);
 }

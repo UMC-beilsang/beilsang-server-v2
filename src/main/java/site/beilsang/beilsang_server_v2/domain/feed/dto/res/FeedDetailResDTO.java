@@ -42,6 +42,9 @@ public class FeedDetailResDTO {
     @Schema(description = "현재 사용자의 좋아요 여부", example = "true")
     private Boolean isLiked;
 
+    @Schema(description = "내가 작성한 피드 여부", example = "false")
+    private Boolean isMyFeed;
+
     @Schema(description = "생성 시간")
     private LocalDateTime createdAt;
 

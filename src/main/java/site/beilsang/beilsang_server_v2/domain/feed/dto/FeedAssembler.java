@@ -27,23 +27,25 @@ public class FeedAssembler {
             .build();
     }
 
-    public static PreviewFeedResDTO toPreviewFeedResDTO(Feed feed) {
+    public static PreviewFeedResDTO toPreviewFeedResDTO(Feed feed, Long memberId) {
         return PreviewFeedResDTO.builder()
             .feedId(feed.getId())
             .feedUrl(feed.getFeedUrl())
             .day(ChronoUnit.DAYS.between(feed.getUploadDate(), feed.getChallenge().getStartDate()))
+            .isMyFeed(feed.getChallengeMember().getMember().getId().equals(memberId))
             .build();
     }
 
-    public static List<PreviewFeedResDTO> toPreviewFeedResDTOList(List<Feed> feedList) {
-        return feedList.stream().map(FeedAssembler::toPreviewFeedResDTO).toList();
+    public static List<PreviewFeedResDTO> toPreviewFeedResDTOList(List<Feed> feedList,
+        Long memberId) {
+        return feedList.stream().map(feed -> toPreviewFeedResDTO(feed, memberId)).toList();
     }
 
 
     /**
      * Feed 엔티티를 FeedDetailResDTO로 변환
      */
-    public static FeedDetailResDTO toFeedDetailResDTO(Feed feed, boolean isLiked) {
+    public static FeedDetailResDTO toFeedDetailResDTO(Feed feed, boolean isLiked, Long memberId) {
         return FeedDetailResDTO.builder()
             .feedId(feed.getId())
             .memberInfo(toMemberInfoDTO(feed))
@@ -55,6 +57,7 @@ public class FeedAssembler {
             .uploadDate(feed.getUploadDate())
             .likeCount((long) feed.getFeedLikes().size())
             .isLiked(isLiked)
+            .isMyFeed(feed.getChallengeMember().getMember().getId().equals(memberId))
             .createdAt(feed.getCreatedAt())
             .updatedAt(feed.getUpdatedAt())
             .build();
@@ -77,8 +80,10 @@ public class FeedAssembler {
     /**
      * Spring Data Slice를 SliceResponseDTO로 변환
      */
-    public static SliceResponseDTO<PreviewFeedResDTO> toSliceResponseDTO(Slice<Feed> feedSlice) {
-        List<PreviewFeedResDTO> feedDtoList = toPreviewFeedResDTOList(feedSlice.getContent());
+    public static SliceResponseDTO<PreviewFeedResDTO> toSliceResponseDTO(Slice<Feed> feedSlice,
+        Long memberId) {
+        List<PreviewFeedResDTO> feedDtoList = toPreviewFeedResDTOList(feedSlice.getContent(),
+            memberId);
         return SliceResponseDTO.<PreviewFeedResDTO>builder()
             .content(feedDtoList)
             .number(feedSlice.getNumber())
