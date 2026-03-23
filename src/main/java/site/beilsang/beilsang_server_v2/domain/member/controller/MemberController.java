@@ -45,7 +45,7 @@ public class MemberController {
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping("/point")
-    public BaseResponse<PointLogListResDTO> getPoingLog(Authentication authentication) {
+    public BaseResponse<PointLogListResDTO> getPointLog(Authentication authentication) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.getPointLog(memberId));
     }

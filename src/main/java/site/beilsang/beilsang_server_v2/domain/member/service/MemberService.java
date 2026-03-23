@@ -118,9 +118,7 @@ public class MemberService {
     public FeedCountResDTO getFeedCount(Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
-        List<Long> challengeMemberIds = challengeMemberRepository.findAllByMemberId(memberId)
-            .stream().map(ChallengeMember::getId).toList();
-        Long countFeed = feedRepository.countByChallengeMember_IdIn(challengeMemberIds);
+        Long countFeed = feedRepository.countByMemberId(memberId);
         return MemberAssembler.toFeedCountResDTO(countFeed);
     }
 
