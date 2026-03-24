@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.feed.service;
 
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -91,6 +92,16 @@ public class FeedServiceImpl implements FeedService {
         // 작성자가 해당 챌린지의 참여자인지 확인
         if (!challengeMember.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("해당 챌린지의 참여자만 피드를 작성할 수 있습니다.");
+        }
+
+        // 챌린지 시작일 이전에는 피드 작성 불가
+        if (LocalDate.now().isBefore(challengeMember.getChallenge().getStartDate())) {
+            throw new BaseException(BaseResponseCode.CHALLENGE_NOT_STARTED);
+        }
+
+        // 챌린지 종료일 이후에는 피드 작성 불가
+        if (LocalDate.now().isAfter(challengeMember.getChallenge().getFinishDate())) {
+            throw new BaseException(BaseResponseCode.CHALLENGE_ENDED);
         }
 
         // 파일이 없거나 빈 파일인 경우 예외 발생
