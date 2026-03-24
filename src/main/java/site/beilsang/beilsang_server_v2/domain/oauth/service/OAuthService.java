@@ -13,9 +13,12 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.AppleLoginReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.KakaoLoginReqDTO;
+import site.beilsang.beilsang_server_v2.domain.point.service.PointService;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.config.KakaoTokenConfig;
+import site.beilsang.beilsang_server_v2.global.config.PointProperties;
+import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.config.AppleTokenConfig;
 import site.beilsang.beilsang_server_v2.global.feign.KakaoClient;
@@ -39,6 +42,8 @@ public class OAuthService {
     private final KakaoTokenConfig kakaoTokenConfig;
     private final KakaoClient kakaoClient;
     private final NicknameGenerator nicknameGenerator;
+    private final PointService pointService;
+    private final PointProperties pointProperties;
 
     private static final String KAKAO_PREFIX = "KakaoAK ";
     private static final String KAKAO_TARGET_TYPE = "user_id";
@@ -155,6 +160,11 @@ public class OAuthService {
 
                 Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
                 Member savedMember = memberRepository.saveAndFlush(newMember);
+
+                // 신규 가입 보상 지급
+                int newMemberReward = pointProperties.getNewMemberReward();
+                pointService.grantPoints(savedMember, newMemberReward, PointName.NEW_MEMBER);
+                log.info("신규 회원 가입 보상 지급 완료: {} 포인트", newMemberReward);
 
                 log.info("회원 생성 성공 - 닉네임: {}", randomNickname);
                 return savedMember;

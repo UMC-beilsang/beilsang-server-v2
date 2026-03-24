@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -17,10 +18,14 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.domain.point.service.PointService;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.config.PointProperties;
 import site.beilsang.beilsang_server_v2.global.enums.PointName;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.OAuthAttributes;
+import site.beilsang.beilsang_server_v2.global.util.NicknameGenerator;
+
 
 @Slf4j
 @Service
@@ -32,6 +37,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final MemberRepository memberRepository;
     private final PointService pointService;
     private final PointProperties pointProperties;
+    private final NicknameGenerator nicknameGenerator;
+    private static final int MAX_NICKNAME_RETRY = 5;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -71,8 +78,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             member = memberOpt.get();
         } else {
             log.info("존재하지 않는 유저, 추가하여 return");
-            member = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo());
-            memberRepository.save(member);
+            member = createMemberWithUniqueNickname(provider, attributes);
 
             // 신규 가입 보상 지급
             int newMemberReward = pointProperties.getNewMemberReward();
@@ -88,5 +94,38 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             member.getRole(),
             isExistMember
         );
+    }
+
+    /**
+     * 중복되지 않는 닉네임으로 회원 생성 (최대 5회 재시도)
+     * UNIQUE 제약 위반 시에만 재시도하고, 그 외 예외는 즉시 전파
+     */
+    private Member createMemberWithUniqueNickname(Provider provider, OAuthAttributes attributes) {
+        for (int attempt = 1; attempt <= MAX_NICKNAME_RETRY; attempt++) {
+            try {
+                String randomNickname = nicknameGenerator.generateRandomNickname();
+                log.info("랜덤 닉네임 생성 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, randomNickname);
+
+                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
+                Member savedMember = memberRepository.saveAndFlush(newMember);
+
+                log.info("회원 생성 성공 - 닉네임: {}", randomNickname);
+                return savedMember;
+
+            } catch (DataIntegrityViolationException e) {
+                log.warn("닉네임 중복 발생 - 시도 {}/{}", attempt, MAX_NICKNAME_RETRY);
+                if (attempt == MAX_NICKNAME_RETRY) {
+                    log.error("닉네임 생성 최대 재시도 횟수 초과");
+                    throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
+                }
+            } catch (IllegalStateException e) {
+                log.error("닉네임 생성기 설정 오류: {}", e.getMessage());
+                throw e;
+            } catch (Exception e) {
+                log.error("회원 생성 중 예상치 못한 오류: {}", e.getMessage(), e);
+                throw e;
+            }
+        }
+        throw new BaseException(BaseResponseCode.NICKNAME_GENERATION_FAILED);
     }
 }
