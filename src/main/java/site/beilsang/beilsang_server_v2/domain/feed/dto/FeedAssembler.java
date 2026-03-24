@@ -31,7 +31,7 @@ public class FeedAssembler {
         return PreviewFeedResDTO.builder()
             .feedId(feed.getId())
             .feedUrl(feed.getFeedUrl())
-            .day(ChronoUnit.DAYS.between(feed.getUploadDate(), feed.getChallenge().getStartDate()))
+            .day(ChronoUnit.DAYS.between(feed.getChallenge().getStartDate(), feed.getUploadDate()))
             .isMyFeed(feed.getChallengeMember().getMember().getId().equals(memberId))
             .build();
     }

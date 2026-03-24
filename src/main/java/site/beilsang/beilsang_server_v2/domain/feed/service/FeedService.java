@@ -88,6 +88,7 @@ public interface FeedService {
      * 특정 챌린지의 전체 피드 목록을 조회합니다.
      *
      * @param challengeId 조회할 챌린지 ID
+     * @param memberId    요청한 사용자 ID (isMyFeed 계산용)
      * @param page        페이지 번호
      * @param size        페이지 크기
      * @return 슬라이스된 피드 목록 (무한 스크롤용)
