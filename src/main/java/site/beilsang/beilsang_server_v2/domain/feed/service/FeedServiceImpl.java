@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.feed.service;
 
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedListReqDTO;
@@ -26,6 +28,8 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMember
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
@@ -38,6 +42,7 @@ public class FeedServiceImpl implements FeedService {
     private final FeedLikeRepository feedLikeRepository;
     private final ChallengeMemberRepository challengeMemberRepository;
     private final MemberRepository memberRepository;
+    private final ChallengeRepository challengeRepository;
     private final S3Service s3Service;
 
     @Override
@@ -58,7 +63,7 @@ public class FeedServiceImpl implements FeedService {
         }
 
         // SliceResponseDTO로 변환
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 
     @Override
@@ -71,7 +76,7 @@ public class FeedServiceImpl implements FeedService {
         boolean isLiked = feedLikeRepository.existsByFeed_IdAndMember_Id(feedId, memberId);
 
         // FeedAssembler를 사용하여 FeedDetailResDTO 생성
-        return FeedAssembler.toFeedDetailResDTO(feed, isLiked);
+        return FeedAssembler.toFeedDetailResDTO(feed, isLiked, memberId);
     }
 
     @Override
@@ -87,6 +92,16 @@ public class FeedServiceImpl implements FeedService {
         // 작성자가 해당 챌린지의 참여자인지 확인
         if (!challengeMember.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("해당 챌린지의 참여자만 피드를 작성할 수 있습니다.");
+        }
+
+        // 챌린지 시작일 이전에는 피드 작성 불가
+        if (LocalDate.now().isBefore(challengeMember.getChallenge().getStartDate())) {
+            throw new BaseException(BaseResponseCode.CHALLENGE_NOT_STARTED);
+        }
+
+        // 챌린지 종료일 이후에는 피드 작성 불가
+        if (LocalDate.now().isAfter(challengeMember.getChallenge().getFinishDate())) {
+            throw new BaseException(BaseResponseCode.CHALLENGE_ENDED);
         }
 
         // 파일이 없거나 빈 파일인 경우 예외 발생
@@ -193,7 +208,48 @@ public class FeedServiceImpl implements FeedService {
         }
 
         // SliceResponseDTO로 변환하여 반환
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
+    }
+
+    @Override
+    public SliceResponseDTO<PreviewFeedResDTO> getMyChallengeFeedList(Long challengeId,
+        Long memberId, int page, int size) {
+        // 챌린지 존재 여부 확인
+        if (!challengeRepository.existsById(challengeId)) {
+            throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
+        }
+
+        // 챌린지 참여 여부 확인
+        challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_JOINED_CHALLENGE));
+
+        // 최신순 페이징 처리
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 챌린지 ID + 멤버 ID 기준 피드 조회
+        Slice<Feed> feedSlice =
+            feedRepository.findAllByChallenge_IdAndChallengeMember_Member_IdOrderByCreatedAtDesc(
+                challengeId, memberId, pageable);
+
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
+    }
+
+    @Override
+    public SliceResponseDTO<PreviewFeedResDTO> getChallengeFeedList(Long challengeId, Long memberId,
+        int page, int size) {
+        // 챌린지 존재 여부 확인
+        if (!challengeRepository.existsById(challengeId)) {
+            throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
+        }
+
+        // 최신순 페이징 처리
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 챌린지 ID 기준 피드 조회
+        Slice<Feed> feedSlice = feedRepository.findAllByChallenge_IdOrderByCreatedAtDesc(
+            challengeId, pageable);
+
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 
     @Override
@@ -214,6 +270,6 @@ public class FeedServiceImpl implements FeedService {
         );
 
         // SliceResponseDTO로 변환하여 반환
-        return FeedAssembler.toSliceResponseDTO(feedSlice);
+        return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
     }
 }

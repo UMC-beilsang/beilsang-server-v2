@@ -83,4 +83,28 @@ public interface FeedService {
      * @return 슬라이스된 피드 검색 결과 (무한 스크롤용)
      */
     SliceResponseDTO<PreviewFeedResDTO> searchFeeds(Long memberId, FeedSearchReqDTO requestDTO);
+
+    /**
+     * 특정 챌린지의 전체 피드 목록을 조회합니다.
+     *
+     * @param challengeId 조회할 챌린지 ID
+     * @param memberId    요청한 사용자 ID (isMyFeed 계산용)
+     * @param page        페이지 번호
+     * @param size        페이지 크기
+     * @return 슬라이스된 피드 목록 (무한 스크롤용)
+     */
+    SliceResponseDTO<PreviewFeedResDTO> getChallengeFeedList(Long challengeId, Long memberId,
+        int page, int size);
+
+    /**
+     * 내가 참여한 챌린지에서 내가 작성한 피드 목록을 조회합니다. 챌린지 참여자만 조회할 수 있습니다.
+     *
+     * @param challengeId 조회할 챌린지 ID
+     * @param memberId    요청한 사용자 ID
+     * @param page        페이지 번호
+     * @param size        페이지 크기
+     * @return 슬라이스된 내 피드 목록 (무한 스크롤용)
+     */
+    SliceResponseDTO<PreviewFeedResDTO> getMyChallengeFeedList(Long challengeId, Long memberId,
+        int page, int size);
 }

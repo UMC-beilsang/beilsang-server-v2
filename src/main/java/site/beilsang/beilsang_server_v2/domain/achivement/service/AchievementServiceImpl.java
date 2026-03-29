@@ -54,7 +54,7 @@ public class AchievementServiceImpl implements AchievementService {
 
     @Override
     public SliceResponseDTO<PreviewFeedResDTO> getFeedsByCategory(Category category, Integer page,
-        Integer size) {
+        Integer size, Long memberId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Slice<Feed> feedsPage;
@@ -63,6 +63,6 @@ public class AchievementServiceImpl implements AchievementService {
         } else {
             feedsPage = feedRepository.findAllByChallenge_Category(category, pageable);
         }
-        return FeedAssembler.toSliceResponseDTO(feedsPage);
+        return FeedAssembler.toSliceResponseDTO(feedsPage, memberId);
     }
 }

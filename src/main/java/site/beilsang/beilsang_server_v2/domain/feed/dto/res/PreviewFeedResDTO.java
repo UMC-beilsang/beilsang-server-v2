@@ -17,4 +17,7 @@ public class PreviewFeedResDTO {
     
     @Schema(description = "챌린지 시작일로부터 경과일", example = "15")
     private Long day;
+
+    @Schema(description = "내가 작성한 피드 여부", example = "true")
+    private Boolean isMyFeed;
 }

@@ -20,8 +20,10 @@ public interface AchievementService {
      *
      * @param category 조회할 카테고리
      * @param page     페이지 번호
+     * @param size     페이지 크기
+     * @param memberId 요청한 사용자 ID (isMyFeed 계산용)
      * @return 해당 카테고리와 페이지에 해당하는 챌린지 피드 목록 (SliceResponseDTO)
      */
     SliceResponseDTO<PreviewFeedResDTO> getFeedsByCategory(Category category, Integer page,
-        Integer size);
+        Integer size, Long memberId);
 }
