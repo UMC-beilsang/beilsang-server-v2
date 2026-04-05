@@ -201,6 +201,15 @@ jobs:
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
-            sleep 30
-            docker exec beilsang-server wget -qO- http://localhost:8080/actuator/health || exit 1
-            echo "Stage deployment successful!"
+            echo "⏳ Waiting for server to be healthy..."
+            for i in $(seq 1 12); do
+              if docker exec beilsang-server wget -qO- http://localhost:8080/actuator/health 2>/dev/null; then
+                echo "✅ Stage deployment successful!"
+                exit 0
+              fi
+              echo "  attempt $i/12 failed, retrying in 10s..."
+              sleep 10
+            done
+            echo "❌ Health check failed after 120s"
+            docker logs --tail 50 beilsang-server
+            exit 1
