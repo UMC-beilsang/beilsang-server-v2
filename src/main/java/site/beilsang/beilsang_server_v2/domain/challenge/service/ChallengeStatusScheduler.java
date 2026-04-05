@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
+import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
+import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
 
 @Slf4j
@@ -19,6 +22,7 @@ public class ChallengeStatusScheduler {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeSettlementService challengeSettlementService;
+    private final ChallengeMemberRepository challengeMemberRepository;
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
     public void updateChallengeStatuses() {
@@ -41,6 +45,17 @@ public class ChallengeStatusScheduler {
                 updatedCount++;
                 log.debug("챌린지 ID: {}, 상태 변경: {} -> {}",
                     challenge.getId(), currentStatus, calculatedStatus);
+
+                // NOT_YET → IN_PROGRESS 전환 시 ChallengeMember 상태 동기화
+                if (calculatedStatus == ChallengeStatus.IN_PROGRESS) {
+                    List<ChallengeMember> notYetMembers = challengeMemberRepository
+                        .findAllByChallengeIdAndChallengeMemberStatus(
+                            challenge.getId(), ChallengeMemberStatus.NOT_YET);
+                    notYetMembers.forEach(member ->
+                        member.updateChallengeMemberStatus(ChallengeMemberStatus.ONGOING));
+                    log.debug("챌린지 ID: {}, ChallengeMember {}명 NOT_YET → ONGOING 전환",
+                        challenge.getId(), notYetMembers.size());
+                }
 
                 // END 상태로 전환된 챌린지에 대해 포인트 정산 수행
                 if (calculatedStatus == ChallengeStatus.END) {
