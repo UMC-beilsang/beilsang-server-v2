@@ -63,6 +63,7 @@ jobs:
   setup-docker-compose:
     name: Setup Docker Compose on Server
     runs-on: ubuntu-latest
+    needs: setup-docker
     steps:
       - name: Install Docker Compose plugin if missing
         uses: appleboy/ssh-action@v1.0.0
@@ -104,7 +105,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [setup-docker-compose, setup-network]
+    needs: [setup-make, setup-docker-compose, setup-network]
 
     steps:
       - name: Checkout code
