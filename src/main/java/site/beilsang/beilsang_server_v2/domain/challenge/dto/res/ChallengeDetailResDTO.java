@@ -31,4 +31,5 @@ public class ChallengeDetailResDTO {
     private Float progress;
     private Integer usedPoint;
     private Integer earnedPoint;
+    private String hostName; // 챌린지 개설자(호스트) 닉네임
 }
