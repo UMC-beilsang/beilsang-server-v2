@@ -89,7 +89,7 @@ public class ChallengeAssembler {
 
     public static ChallengeDetailResDTO toChallengeDetailResDTO(
         Challenge challenge, boolean isJoinable, boolean isLiked, ChallengeMemberStatus status,
-        Float progress, Integer usedPoint, Integer earnedPoint
+        Float progress, Integer usedPoint, Integer earnedPoint, String hostName
     ) {
         List<String> infoImageUrls = challenge.getInfoImages().stream()
             .sorted((a, b) -> a.getImageOrder().compareTo(b.getImageOrder()))
@@ -126,6 +126,7 @@ public class ChallengeAssembler {
             .progress(progress)
             .usedPoint(usedPoint)
             .earnedPoint(earnedPoint)
+            .hostName(hostName)
             .build();
     }
 

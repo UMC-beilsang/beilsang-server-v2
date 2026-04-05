@@ -390,8 +390,13 @@ public class ChallengeServiceImpl implements ChallengeService {
             earnedPoint = calculatePointSum(pointLogs, PointStatus.EARN);
         }
 
+        // 호스트(챌린지 개설자) 닉네임 조회
+        String hostName = challengeMemberRepository.findByChallengeIdAndIsHost(challengeId, true)
+            .map(host -> host.getMember().getNickName())
+            .orElse(null);
+
         return ChallengeAssembler.toChallengeDetailResDTO(
-            challenge, isJoinable, isLiked, status, progress, usedPoint, earnedPoint
+            challenge, isJoinable, isLiked, status, progress, usedPoint, earnedPoint, hostName
         );
     }
 
