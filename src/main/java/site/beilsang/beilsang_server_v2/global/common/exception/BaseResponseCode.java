@@ -52,7 +52,13 @@ public enum BaseResponseCode {
     NOT_LIKED_CHALLENGE(HttpStatus.BAD_REQUEST, "C0008", "찜하지 않은 챌린지입니다"),
     NOT_JOINED_CHALLENGE(HttpStatus.BAD_REQUEST, "C0009", "참여하지 않은 챌린지입니다"),
     CHALLENGE_NOT_ENDED(HttpStatus.BAD_REQUEST, "C0010", "완료되지 않은 챌린지입니다"),
-    CHALLENGE_NOT_STARTED(HttpStatus.BAD_REQUEST, "C0011", "아직 시작하지 않은 챌린지입니다");
+    CHALLENGE_NOT_STARTED(HttpStatus.BAD_REQUEST, "C0011", "아직 시작하지 않은 챌린지입니다"),
+
+    //badge
+    NOT_FOUND_MEMBER_BADGE(HttpStatus.BAD_REQUEST, "B0001", "보유하지 않은 배지입니다"),
+    NOT_ELIGIBLE_BADGE(HttpStatus.BAD_REQUEST, "B0002", "4단계 배지가 아닙니다"),
+    NOT_FOUND_BADGE(HttpStatus.BAD_REQUEST, "B0003", "존재하지 않는 배지입니다"),
+    ;
 
     private final HttpStatus status; // 커스텀 상태코드
     private final String code; // Http 상태코드

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import site.beilsang.beilsang_server_v2.domain.badge.service.BadgeService;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
@@ -31,6 +32,7 @@ import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
+import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @Service
@@ -44,6 +46,7 @@ public class FeedServiceImpl implements FeedService {
     private final MemberRepository memberRepository;
     private final ChallengeRepository challengeRepository;
     private final S3Service s3Service;
+    private final BadgeService badgeService;
 
     @Override
     public SliceResponseDTO<PreviewFeedResDTO> getFeedList(Long memberId,
@@ -120,6 +123,10 @@ public class FeedServiceImpl implements FeedService {
 
         // Feed 저장
         Feed savedFeed = feedRepository.save(feed);
+
+        //챌린지 인증 배지 부여 (최초 1회)
+        badgeService.grantActivityBadgeIfFirst(memberId, ChallengeBadgeType.CHALLENGE_VERIFY);
+
 
         // FeedAssembler를 사용하여 FeedCreateResDTO 생성 및 반환
         return FeedAssembler.toFeedCreateResDTO(savedFeed);
