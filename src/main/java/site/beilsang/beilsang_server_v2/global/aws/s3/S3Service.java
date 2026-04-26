@@ -33,13 +33,9 @@ public class S3Service {
     @Value("${spring.cloud.aws.s3.path.feed}")
     private String feedPath;
 
-    public String uploadFile(UploadPath uploadPath, MultipartFile file) {
-        return uploadFile(uploadPath, null, file);
-    }
-
     /**
-     * subDirectory를 지정하여 S3에 파일을 업로드한다.
-     * 예: uploadFile(MEMBER_PROFILE, "42", file) → member/profile/42/uuid_timestamp.ext
+     * subDirectory를 지정하여 S3에 파일을 업로드한다. 예: uploadFile(MEMBER_PROFILE, "42", file) →
+     * member/profile/42/uuid_timestamp.ext
      */
     public String uploadFile(UploadPath uploadPath, String subDirectory, MultipartFile file) {
 
