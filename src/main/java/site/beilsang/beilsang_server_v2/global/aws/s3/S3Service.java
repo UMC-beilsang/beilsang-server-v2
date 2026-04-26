@@ -24,11 +24,8 @@ public class S3Service {
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
 
-    @Value("${spring.cloud.aws.s3.path.challenge-main}")
-    private String mainPath;
-
-    @Value("${spring.cloud.aws.s3.path.challenge-cert}")
-    private String certPath;
+    @Value("${spring.cloud.aws.s3.path.challenge}")
+    private String challengePath;
 
     @Value("${spring.cloud.aws.s3.path.member-profile}")
     private String memberProfilePath;
@@ -52,8 +49,7 @@ public class S3Service {
         }
 
         String basePath = switch (uploadPath) {
-            case CHALLENGE_MAIN -> mainPath;
-            case CHALLENGE_CERT -> certPath;
+            case CHALLENGE -> challengePath;
             case MEMBER_PROFILE -> memberProfilePath;
             case FEED -> feedPath;
         };

@@ -39,8 +39,7 @@ spring:
       s3:
         bucket: bs-stage-bucket
         path:
-          challenge-main: challenge/main/
-          challenge-cert: challenge/cert/
+          challenge: challenge/
           member-profile: member/profile/
           feed: feed/
 
