@@ -37,18 +37,31 @@ public class S3Service {
     private String feedPath;
 
     public String uploadFile(UploadPath uploadPath, MultipartFile file) {
+        return uploadFile(uploadPath, null, file);
+    }
+
+    /**
+     * subDirectory를 지정하여 S3에 파일을 업로드한다.
+     * 예: uploadFile(MEMBER_PROFILE, "42", file) → member/profile/42/uuid_timestamp.ext
+     */
+    public String uploadFile(UploadPath uploadPath, String subDirectory, MultipartFile file) {
 
         if (file.isEmpty()) {
             log.info("Image is empty");
             return "";
         }
 
-        String path = switch (uploadPath) {
+        String basePath = switch (uploadPath) {
             case CHALLENGE_MAIN -> mainPath;
             case CHALLENGE_CERT -> certPath;
             case MEMBER_PROFILE -> memberProfilePath;
             case FEED -> feedPath;
         };
+
+        // subDirectory가 있으면 basePath/subDirectory/ 형태로 경로 구성
+        String path = (subDirectory != null && !subDirectory.isEmpty())
+            ? basePath + subDirectory + "/"
+            : basePath;
 
         // 파일 이름 설정
         String fileName = path + buildFileName(Objects.requireNonNull(file.getOriginalFilename()));
