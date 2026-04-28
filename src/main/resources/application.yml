@@ -63,7 +63,7 @@ point:
 
 # 회원 관련 설정
 member:
-  default-profile-image: https://bs-stage-bucket.s3.ap-northeast-2.amazonaws.com/member/profile/meber-profile-default.png  # S3에 업로드된 기본 프로필 이미지 URL
+  default-profile-image: https://bs-stage-bucket.s3.ap-northeast-2.amazonaws.com/member/profile/member-profile-default.png  # S3에 업로드된 기본 프로필 이미지 URL (member-profile-default.png)
 
 # Swagger/OpenAPI 설정
 springdoc:
