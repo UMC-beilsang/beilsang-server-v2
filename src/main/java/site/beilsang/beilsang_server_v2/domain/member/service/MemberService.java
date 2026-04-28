@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
@@ -84,6 +85,13 @@ public class MemberService {
 
     public void updateProfileImage(Long memberId,
         MemberProfileImageReqDTO memberProfileImageReqDTO) {
+        MultipartFile profileImage = memberProfileImageReqDTO.getProfileImage();
+
+        // 파일 누락 또는 빈 파일이면 즉시 실패 처리 (S3 업로드 전에 검증)
+        if (profileImage == null || profileImage.isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+        }
+
         Member member = memberRepository.findById(memberId).
             orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
@@ -91,7 +99,7 @@ public class MemberService {
         String profileUrl = s3Service.uploadFile(
             UploadPath.MEMBER_PROFILE,
             memberId.toString(),
-            memberProfileImageReqDTO.getProfileImage()
+            profileImage
         );
         member.updateProfileImageUrl(profileUrl);
         memberRepository.save(member);
@@ -156,8 +164,8 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
-        // 이번 배포 이전에 가입한 회원은 profileUrl이 null일 수 있으므로 기본 이미지로 대체
-        if (member.getProfileUrl() == null) {
+        // 이번 배포 이전에 가입한 회원은 profileUrl이 null 또는 ""일 수 있으므로 기본 이미지로 대체
+        if (member.getProfileUrl() == null || member.getProfileUrl().isBlank()) {
             member.updateProfileImageUrl(defaultProfileImageUrl);
             memberRepository.save(member);
         }
