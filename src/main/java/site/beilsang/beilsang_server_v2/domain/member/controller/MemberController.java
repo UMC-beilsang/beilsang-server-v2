@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RestController;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberProfileImageReqDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.req.MemberNicknameReqDTO;
@@ -69,11 +71,11 @@ public class MemberController {
         @ApiResponse(responseCode = "400", description = "잘못된 이미지 데이터"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @PatchMapping("/profile-image")
+    @PatchMapping(value = "/profile-image", consumes = "multipart/form-data")
     public BaseResponse<Void> updateProfileImage(Authentication authentication,
-        @Parameter(description = "프로필 이미지 수정 요청 데이터") @RequestBody MemberProfileImageReqDTO memberProfileImageReqDTO) {
+        @Parameter(description = "프로필 이미지 파일") @RequestPart("profileImage") MultipartFile profileImage) {
         Long memberId = (Long) authentication.getPrincipal();
-        memberService.updateProfileImage(memberId, memberProfileImageReqDTO);
+        memberService.updateProfileImage(memberId, new MemberProfileImageReqDTO(profileImage));
         return new BaseResponse<>();
     }
 

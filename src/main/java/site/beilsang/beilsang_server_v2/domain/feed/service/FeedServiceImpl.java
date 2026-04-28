@@ -108,7 +108,12 @@ public class FeedServiceImpl implements FeedService {
         if (feedImage == null || feedImage.isEmpty()) {
             throw new IllegalArgumentException("이미지가 비어 있습니다.");
         }
-        String feedUrl = s3Service.uploadFile(UploadPath.FEED, feedImage);
+        // feed/{challengeId}/{memberId}/filename 구조로 업로드
+        String feedUrl = s3Service.uploadFile(
+            UploadPath.FEED,
+            challengeMember.getChallenge().getId() + "/" + memberId,
+            feedImage
+        );
 
         // Feed 엔티티 생성 (FeedAssembler 오버로딩 메서드 활용)
         Feed feed = FeedAssembler.toEntity(

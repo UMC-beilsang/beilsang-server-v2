@@ -2,9 +2,10 @@ package site.beilsang.beilsang_server_v2.domain.member.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository;
 import site.beilsang.beilsang_server_v2.domain.member.dto.MemberAssembler;
@@ -26,12 +27,12 @@ import site.beilsang.beilsang_server_v2.domain.point.dto.res.PointLogListResDTO;
 import site.beilsang.beilsang_server_v2.domain.point.entity.PointLog;
 import site.beilsang.beilsang_server_v2.domain.point.repository.PointLogRepository;
 import site.beilsang.beilsang_server_v2.domain.point.service.PointService;
-import site.beilsang.beilsang_server_v2.domain.uuid.entity.Uuid;
-import site.beilsang.beilsang_server_v2.domain.uuid.repository.UuidRepository;
+import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
 import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
+import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 /**
  * 회원 관리 및 마이페이지 관련 비즈니스 로직을 처리하는 서비스 회원 프로필 관리, 포인트 내역 조회, 챌린지 참여 확인 등의 기능을 제공합니다.
@@ -46,7 +47,10 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PointLogRepository pointLogRepository;
     private final PointService pointService;
-    private final UuidRepository uuidRepository;
+    private final S3Service s3Service;
+
+    @Value("${member.default-profile-image}")
+    private String defaultProfileImageUrl;
 
     public PointLogListResDTO getPointLog(Long memberId) {
         Member member = memberRepository.findById(memberId).
@@ -79,17 +83,26 @@ public class MemberService {
         return MemberAssembler.toNicknameResDTO(member);
     }
 
-    public Void updateProfileImage(Long memberId,
+    public void updateProfileImage(Long memberId,
         MemberProfileImageReqDTO memberProfileImageReqDTO) {
+        MultipartFile profileImage = memberProfileImageReqDTO.getProfileImage();
+
+        // 파일 누락 또는 빈 파일이면 즉시 실패 처리 (S3 업로드 전에 검증)
+        if (profileImage == null || profileImage.isEmpty()) {
+            throw new BaseException(BaseResponseCode.INVALID_IMAGE_FILE);
+        }
+
         Member member = memberRepository.findById(memberId).
             orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
-        Uuid feedUuid = uuidRepository.save(
-            Uuid.builder().uuid(UUID.randomUUID().toString()).build());
-        //TODO - S3 설정
-//        String feedUrl = s3Manager.uploadFile(s3Manager.generateFeedKeyName(feedUuid), profileImageDTO.getProfileImage());
-//        member.updateProfileImageUrl(feedUrl);
-        return null;
+        // 회원 ID를 서브디렉토리로 사용하여 S3에 업로드 (member/profile/{memberId}/filename)
+        String profileUrl = s3Service.uploadFile(
+            UploadPath.MEMBER_PROFILE,
+            memberId.toString(),
+            profileImage
+        );
+        member.updateProfileImageUrl(profileUrl);
+        memberRepository.save(member);
     }
 
     public CheckEnrolledResDTO checkEnroll(Long memberId, Long challengeId) {
@@ -150,6 +163,13 @@ public class MemberService {
     public MemberProfileImageResDTO getProfileImage(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        // 이번 배포 이전에 가입한 회원은 profileUrl이 null 또는 ""일 수 있으므로 기본 이미지로 대체
+        if (member.getProfileUrl() == null || member.getProfileUrl().isBlank()) {
+            member.updateProfileImageUrl(defaultProfileImageUrl);
+            memberRepository.save(member);
+        }
+
         return MemberAssembler.toProfileImageResDTO(member);
     }
 }
