@@ -31,8 +31,8 @@ import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.SliceResponseDTO;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
+import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
 import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
 
 @Service
@@ -125,7 +125,7 @@ public class FeedServiceImpl implements FeedService {
         Feed savedFeed = feedRepository.save(feed);
 
         //챌린지 인증 배지 부여 (최초 1회)
-        badgeService.grantActivityBadgeIfFirst(memberId, ChallengeBadgeType.CHALLENGE_VERIFY);
+        badgeService.grantActivityBadgeIfFirst(memberId, BadgeType.CHALLENGE_VERIFY);
 
 
         // FeedAssembler를 사용하여 FeedCreateResDTO 생성 및 반환

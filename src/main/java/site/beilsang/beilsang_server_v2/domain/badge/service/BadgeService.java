@@ -2,7 +2,7 @@ package site.beilsang.beilsang_server_v2.domain.badge.service;
 
 import site.beilsang.beilsang_server_v2.domain.badge.dto.res.BadgeResDTO;
 import site.beilsang.beilsang_server_v2.domain.badge.dto.res.RepresentativeBadgeResDTO;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 
 import java.util.List;
 
@@ -25,5 +25,5 @@ public interface BadgeService {
      * @param memberId  배지를 받을 멤버 ID
      * @param badgeType CHALLENGE_START | CHALLENGE_CREATE | CHALLENGE_VERIFY
      */
-    void grantActivityBadgeIfFirst(Long memberId, ChallengeBadgeType badgeType);
+    void grantActivityBadgeIfFirst(Long memberId, BadgeType badgeType);
 }

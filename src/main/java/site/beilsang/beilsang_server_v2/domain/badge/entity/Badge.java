@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 
 @Entity
 @Getter
@@ -28,8 +28,8 @@ public class Badge {
      * - CATEGORY          : 카테고리 배지    (카테고리별 챌린지 성공 수에 따라 1~3단계)
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ChallengeBadgeType badgeType;
+    @Column(name = "badge_type", nullable = false, unique = true)
+    private BadgeType badgeType;
 
     /**
      * 카테고리 배지일 때만 사용. 활동 배지(CHALLENGE_*)는 null.

@@ -3,8 +3,8 @@ package site.beilsang.beilsang_server_v2.domain.badge.dto.res;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +20,7 @@ public class BadgeResDTO {
     private Long badgeId;
 
     @Schema(description = "활동 배지 타입", example = "CHALLENGE_START")
-    private ChallengeBadgeType badgeType;  // 챌린지 배지는 null
+    private BadgeType badgeType;  // 챌린지 배지는 null
 
     @Schema(description = "챌린지 배지 타입", example = "텀블러")
     private Category category;    // 활동 배지는 null

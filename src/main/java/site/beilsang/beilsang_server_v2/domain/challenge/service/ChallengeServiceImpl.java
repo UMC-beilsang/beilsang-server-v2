@@ -139,7 +139,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             .build());
 
         //챌린지 제작 배지 부여 (최초 1회)
-        badgeService.grantActivityBadgeIfFirst(memberId, ChallengeBadgeType.CHALLENGE_CREATE);
+        badgeService.grantActivityBadgeIfFirst(memberId, BadgeType.CHALLENGE_CREATE);
 
         return ChallengeAssembler.toChallengeResDTO(challenge);
     }
@@ -459,7 +459,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             .build());
 
         //챌린지 시작 배지 부여 (최초 1회)
-        badgeService.grantActivityBadgeIfFirst(memberId, ChallengeBadgeType.CHALLENGE_START);
+        badgeService.grantActivityBadgeIfFirst(memberId, BadgeType.CHALLENGE_START);
 
         // 챌린지 참여자 수 증가
         challenge.incrementAttendeeCount();

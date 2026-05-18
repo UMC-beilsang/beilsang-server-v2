@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.badge.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,7 @@ import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.BadgeMemberRepository;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
-import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.List;
 import static site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BadgeServiceImpl implements BadgeService {
@@ -79,16 +80,18 @@ public class BadgeServiceImpl implements BadgeService {
     }
     /**
      * ChallengeService, FeedService에서 호출.
-     * 이미 해당 BadgeType의 MemberBadge가 존재하면 조용히 종료 (예외 없음).
+     * 이미 해당 BadgeType의 MemberBadge가 존재하면 종료
      * 호출부의 트랜잭션에 참여하므로 별도 @Transactional 불필요.
      */
+
+    // ── 챌린지 인증 뱃지 부여 ─────────────────────────────────────────────────
     @Override
     @Transactional
-    public void grantActivityBadgeIfFirst(Long memberId, ChallengeBadgeType badgeType) {
+    public void grantActivityBadgeIfFirst(Long memberId, BadgeType badgeType) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(NOT_FOUND_MEMBER));
         // 이미 보유한 배지면 중단
-        if (badgeMemberRepository.existsByMemberAndChallengeBadgeType(member, badgeType)) {
+        if (badgeMemberRepository.existsByMemberAndBadge_BadgeType(member, badgeType)) {
             return;
         }
 

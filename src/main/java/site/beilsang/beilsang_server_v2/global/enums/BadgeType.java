@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ChallengeBadgeType {
+public enum BadgeType {
 
     /**
      * 활동 배지 (3종) - 단계 없음

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import site.beilsang.beilsang_server_v2.domain.member.entity.BadgeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeBadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,5 +27,9 @@ public interface BadgeMemberRepository extends JpaRepository<BadgeMember, Long> 
         @Param("memberId") Long memberId
     );
 
-    Boolean existsByMemberAndChallengeBadgeType(Member member, ChallengeBadgeType badgeType);
+    @Query("SELECT COUNT(mb) > 0 FROM BadgeMember mb WHERE mb.member = :member AND mb.badge.badgeType = :badgeType")
+    Boolean existsByMemberAndBadge_BadgeType(
+        @Param("member") Member member,
+        @Param("badgeType") BadgeType badgeType
+    );
 }
