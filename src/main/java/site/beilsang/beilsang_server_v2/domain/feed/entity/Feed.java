@@ -52,4 +52,20 @@ public class Feed extends BaseEntity {
     @OneToMany(mappedBy = "feed", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FeedLike> feedLikes = new ArrayList<>();
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer reportCount = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isHidden = false;
+
+    public void incrementReportCount() {
+        this.reportCount++;
+    }
+
+    public void hide() {
+        this.isHidden = true;
+    }
+
 }
