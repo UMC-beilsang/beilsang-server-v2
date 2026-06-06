@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
@@ -54,4 +55,13 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
      */
     Slice<Feed> findAllByChallenge_IdAndChallengeMember_Member_IdOrderByCreatedAtDesc(
         Long challengeId, Long memberId, Pageable pageable);
+
+    /**
+     * 챌린지 숨김 처리 시 해당 챌린지의 모든 피드를 일괄 숨김 처리
+     *
+     * @param challengeId 챌린지 ID
+     */
+    @Modifying
+    @Query("UPDATE Feed f SET f.isHidden = true WHERE f.challenge.id = :challengeId")
+    void hideAllByChallengeId(@Param("challengeId") Long challengeId);
 }
