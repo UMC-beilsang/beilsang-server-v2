@@ -72,6 +72,9 @@ class ChallengeServiceImplTest {
     @Mock
     private site.beilsang.beilsang_server_v2.domain.point.service.PointService pointService;
 
+    @Mock
+    private site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository challengeLikeRepository;
+
 
     @InjectMocks
     private ChallengeServiceImpl challengeService;
@@ -227,7 +230,7 @@ class ChallengeServiceImplTest {
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
             mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
-        when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
+        when(s3Service.uploadFile(any(UploadPath.class), any(String.class), any(MultipartFile.class)))
             .thenReturn("https://s3-url/test.jpg");
 
         // when
@@ -243,7 +246,7 @@ class ChallengeServiceImplTest {
         assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
             ChallengeMemberStatus.NOT_YET);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class),
-            any(MultipartFile.class));
+            any(String.class), any(MultipartFile.class));
     }
 
     @Test
@@ -261,7 +264,7 @@ class ChallengeServiceImplTest {
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
             mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
-        when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
+        when(s3Service.uploadFile(any(UploadPath.class), any(String.class), any(MultipartFile.class)))
             .thenReturn("https://s3-url/test.jpg");
 
         // when
@@ -277,7 +280,7 @@ class ChallengeServiceImplTest {
         assertThat(savedChallengeMember.getChallengeMemberStatus()).isEqualTo(
             ChallengeMemberStatus.ONGOING);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class),
-            any(MultipartFile.class));
+            any(String.class), any(MultipartFile.class));
     }
 
     @Test
@@ -300,7 +303,7 @@ class ChallengeServiceImplTest {
         when(challengeMemberRepository.save(any(ChallengeMember.class))).thenReturn(
             mock(ChallengeMember.class));
         when(pointLogRepository.save(any(PointLog.class))).thenReturn(mock(PointLog.class));
-        when(s3Service.uploadFile(any(UploadPath.class), any(MultipartFile.class)))
+        when(s3Service.uploadFile(any(UploadPath.class), any(String.class), any(MultipartFile.class)))
             .thenReturn("https://s3-url/test.jpg");
 
         // when
@@ -311,7 +314,7 @@ class ChallengeServiceImplTest {
         // then
         assertThat(memberWithPoint.getPoint()).isEqualTo(initialPoint - joinPoint);
         verify(s3Service, atLeastOnce()).uploadFile(any(UploadPath.class),
-            any(MultipartFile.class));
+            any(String.class), any(MultipartFile.class));
     }
 
     @Test
@@ -324,6 +327,8 @@ class ChallengeServiceImplTest {
         when(challengeRepository.getChallengeById(challengeId)).thenReturn(challenge_ONGOING);
         when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
             memberId)).thenReturn(Optional.empty());
+        when(challengeMemberRepository.findByChallengeIdAndIsHost(challengeId, true))
+            .thenReturn(Optional.empty());
 
         // when
         var result = challengeService.getChallengeDetail(challengeId, memberId);
