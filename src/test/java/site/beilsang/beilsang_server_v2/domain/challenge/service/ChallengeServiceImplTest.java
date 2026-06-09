@@ -324,7 +324,7 @@ class ChallengeServiceImplTest {
         Long memberId = 2L; // 테스트 멤버(참여하지 않은 사용자)
         Long challengeId = 1L;
 
-        when(challengeRepository.getChallengeById(challengeId)).thenReturn(challenge_ONGOING);
+        when(challengeRepository.getChallengeByIdAndIsHiddenFalse(challengeId)).thenReturn(challenge_ONGOING);
         when(challengeMemberRepository.findByChallengeIdAndMemberId(challengeId,
             memberId)).thenReturn(Optional.empty());
         when(challengeMemberRepository.findByChallengeIdAndIsHost(challengeId, true))
