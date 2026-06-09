@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -71,4 +72,14 @@ public class Report extends BaseEntity {
     @Builder.Default
     @Column(nullable = false)
     private ReportStatus status = ReportStatus.RECEIVED;
+
+    /**
+     * 저장 전 검증: feed와 challenge 중 정확히 하나만 설정되어야 한다.
+     */
+    @PrePersist
+    private void validateTarget() {
+        if ((feed == null) == (challenge == null)) {
+            throw new IllegalStateException("신고 대상은 피드 또는 챌린지 중 하나만 지정해야 합니다.");
+        }
+    }
 }
