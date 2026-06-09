@@ -10,6 +10,7 @@ spring:
     password:
   jpa:
     database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
     properties:
@@ -40,6 +41,8 @@ spring:
       credentials:
         accessKey: test-access-key
         secretKey: test-secret-key
+      stack:
+        auto: false
       region:
         static: ap-northeast-2
       s3:

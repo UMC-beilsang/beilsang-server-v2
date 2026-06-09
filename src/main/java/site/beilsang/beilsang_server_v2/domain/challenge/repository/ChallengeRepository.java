@@ -9,9 +9,12 @@ import java.util.List;
 public interface ChallengeRepository extends JpaRepository<Challenge, Long>,
     ChallengeRepositoryCustom {
 
-    Challenge getChallengeById(Long id);
+    // 숨김 처리된 챌린지 제외
+    Challenge getChallengeByIdAndIsHiddenFalse(Long id);
 
-    List<Challenge> findTop10ByOrderByCountLikesDescStartDateDesc();
+    // 숨김 처리된 챌린지 제외
+    List<Challenge> findTop10ByIsHiddenFalseOrderByCountLikesDescStartDateDesc();
 
-    List<Challenge> findTop10ByCategoryOrderByCountLikesDescStartDateDesc(Category category);
+    // 숨김 처리된 챌린지 제외
+    List<Challenge> findTop10ByCategoryAndIsHiddenFalseOrderByCountLikesDescStartDateDesc(Category category);
 }

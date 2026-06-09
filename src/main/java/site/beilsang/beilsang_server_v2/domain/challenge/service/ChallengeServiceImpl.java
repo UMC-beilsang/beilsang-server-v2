@@ -345,7 +345,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeDetailResDTO getChallengeDetail(Long challengeId, Long memberId) {
-        Challenge challenge = challengeRepository.getChallengeById(challengeId);
+        Challenge challenge = challengeRepository.getChallengeByIdAndIsHiddenFalse(challengeId);
         if (challenge == null) {
             throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
         }

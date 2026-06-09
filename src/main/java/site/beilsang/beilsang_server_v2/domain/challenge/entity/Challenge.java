@@ -93,6 +93,14 @@ public class Challenge extends BaseEntity {
     @Builder.Default
     private Boolean isSettled = false;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer reportCount = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isHidden = false;
+
     public void updateStatus(ChallengeStatus status) {
         this.status = status;
     }
@@ -135,5 +143,13 @@ public class Challenge extends BaseEntity {
         if (this.countLikes > 0) {
             this.countLikes--;
         }
+    }
+
+    public void incrementReportCount() {
+        this.reportCount++;
+    }
+
+    public void hide() {
+        this.isHidden = true;
     }
 }

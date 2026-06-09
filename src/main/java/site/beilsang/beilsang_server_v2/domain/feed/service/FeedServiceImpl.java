@@ -54,12 +54,12 @@ public class FeedServiceImpl implements FeedService {
 
         Slice<Feed> feedSlice;
         if (requestDTO.getCategory() == Category.ALL) {
-            // 전체 조회
+            // 전체 조회 (숨김 제외)
             feedSlice = feedRepository.findAll(pageable);
         } else {
-            // 카테고리별 조회
-            feedSlice = feedRepository.findAllByChallenge_Category(requestDTO.getCategory(),
-                pageable);
+            // 카테고리별 조회 (숨김 제외)
+            feedSlice = feedRepository.findAllByChallenge_CategoryAndIsHiddenFalse(
+                requestDTO.getCategory(), pageable);
         }
 
         // SliceResponseDTO로 변환
@@ -204,11 +204,12 @@ public class FeedServiceImpl implements FeedService {
 
         // 카테고리 필터링 처리
         if (category == Category.ALL) {
-            feedSlice = feedRepository.findAllByChallengeMember_Member_IdOrderByCreatedAtDesc(
+            // 전체 조회 (숨김 제외)
+            feedSlice = feedRepository.findAllByChallengeMember_Member_IdAndIsHiddenFalseOrderByCreatedAtDesc(
                 memberId, pageable);
         } else {
-            // 특정 카테고리의 피드만 조회
-            feedSlice = feedRepository.findAllByChallengeMember_Member_IdAndChallenge_CategoryOrderByCreatedAtDesc(
+            // 특정 카테고리의 피드만 조회 (숨김 제외)
+            feedSlice = feedRepository.findAllByChallengeMember_Member_IdAndChallenge_CategoryAndIsHiddenFalseOrderByCreatedAtDesc(
                 memberId, category, pageable);
         }
 
@@ -231,9 +232,9 @@ public class FeedServiceImpl implements FeedService {
         // 최신순 페이징 처리
         Pageable pageable = PageRequest.of(page, size);
 
-        // 챌린지 ID + 멤버 ID 기준 피드 조회
+        // 챌린지 ID + 멤버 ID 기준 피드 조회 (숨김 제외)
         Slice<Feed> feedSlice =
-            feedRepository.findAllByChallenge_IdAndChallengeMember_Member_IdOrderByCreatedAtDesc(
+            feedRepository.findAllByChallenge_IdAndChallengeMember_Member_IdAndIsHiddenFalseOrderByCreatedAtDesc(
                 challengeId, memberId, pageable);
 
         return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
@@ -250,8 +251,8 @@ public class FeedServiceImpl implements FeedService {
         // 최신순 페이징 처리
         Pageable pageable = PageRequest.of(page, size);
 
-        // 챌린지 ID 기준 피드 조회
-        Slice<Feed> feedSlice = feedRepository.findAllByChallenge_IdOrderByCreatedAtDesc(
+        // 챌린지 ID 기준 피드 조회 (숨김 제외)
+        Slice<Feed> feedSlice = feedRepository.findAllByChallenge_IdAndIsHiddenFalseOrderByCreatedAtDesc(
             challengeId, pageable);
 
         return FeedAssembler.toSliceResponseDTO(feedSlice, memberId);
