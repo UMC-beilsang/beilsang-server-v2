@@ -46,24 +46,32 @@ public class ChallengeStatusScheduler {
                 log.debug("챌린지 ID: {}, 상태 변경: {} -> {}",
                     challenge.getId(), currentStatus, calculatedStatus);
 
-                // NOT_YET → IN_PROGRESS 전환 시 ChallengeMember 상태 동기화
+                // IN_PROGRESS 전환 시 ChallengeMember 상태 동기화
                 if (calculatedStatus == ChallengeStatus.IN_PROGRESS) {
-                    List<ChallengeMember> notYetMembers = challengeMemberRepository
-                        .findAllByChallengeIdAndChallengeMemberStatus(
-                            challenge.getId(), ChallengeMemberStatus.NOT_YET);
-                    notYetMembers.forEach(member ->
-                        member.updateChallengeMemberStatus(ChallengeMemberStatus.ONGOING));
-                    log.debug("챌린지 ID: {}, ChallengeMember {}명 NOT_YET → ONGOING 전환",
-                        challenge.getId(), notYetMembers.size());
+                    promoteNotYetMembers(challenge);
                 }
 
                 // END 상태로 전환된 챌린지에 대해 포인트 정산 수행
                 if (calculatedStatus == ChallengeStatus.END) {
+                    // 서버 다운 등으로 NOT_YET → ONGOING 전환이 누락된 멤버 catch-up
+                    promoteNotYetMembers(challenge);
                     challengeSettlementService.settleChallenge(challenge);
                 }
             }
         }
 
         log.info("챌린지 상태 업데이트 완료. 총 {}개 챌린지 상태 변경", updatedCount);
+    }
+
+    private void promoteNotYetMembers(Challenge challenge) {
+        List<ChallengeMember> notYetMembers = challengeMemberRepository
+            .findAllByChallengeIdAndChallengeMemberStatus(
+                challenge.getId(), ChallengeMemberStatus.NOT_YET);
+        if (!notYetMembers.isEmpty()) {
+            notYetMembers.forEach(member ->
+                member.updateChallengeMemberStatus(ChallengeMemberStatus.ONGOING));
+            log.debug("챌린지 ID: {}, ChallengeMember {}명 NOT_YET → ONGOING 전환",
+                challenge.getId(), notYetMembers.size());
+        }
     }
 }
