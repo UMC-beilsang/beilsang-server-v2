@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
@@ -199,28 +198,6 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .build();
             challenge.getCertImages().add(certImage);
         }
-    }
-
-    @Deprecated
-    @Override
-    public PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO) {
-        Pageable pageable = PageRequest.of(
-            requestDTO.getPage() != null ? requestDTO.getPage() : 0,
-            requestDTO.getSize() != null ? requestDTO.getSize() : 10);
-        Page<Challenge> page = challengeRepository.findChallenges(requestDTO, pageable);
-        Long memberId = requestDTO.getMemberId();
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
-        return PageResponseDTO.<ChallengeListResDTO>builder()
-            .content(content)
-            .page(page.getNumber())
-            .size(page.getSize())
-            .totalElements(page.getTotalElements())
-            .totalPages(page.getTotalPages())
-            .hasNext(page.hasNext())
-            .build();
     }
 
     /**

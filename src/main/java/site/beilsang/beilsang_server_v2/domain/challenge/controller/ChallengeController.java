@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
@@ -63,25 +62,6 @@ public class ChallengeController {
         return new BaseResponse<>(
             challengeService.createChallenge(memberId, createChallengeReqDTO, infoImages,
                 certImages));
-    }
-
-    @Deprecated
-    @Operation(summary = "챌린지 목록 조회 (Deprecated)",
-        description = "조건에 따른 챌린지 목록을 페이지네이션으로 조회합니다. "
-            + "이 API는 더 이상 권장되지 않습니다. 용도별 전용 API를 사용해주세요: "
-            + "/challenge/list/open, /challenge/list/closed, /challenge/liked, /challenge/my",
-        deprecated = true)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "챌린지 목록 조회 성공"),
-        @ApiResponse(responseCode = "401", description = "인증 실패")
-    })
-    @GetMapping
-    public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getChallengeList(
-        Authentication authentication,
-        @Parameter(description = "챌린지 목록 조회 필터 조건") @ModelAttribute ChallengeListReqDTO requestDTO) {
-        Long memberId = (Long) authentication.getPrincipal();
-        requestDTO.setMemberId(memberId);
-        return new BaseResponse<>(challengeService.getChallengeList(requestDTO));
     }
 
     @Operation(summary = "모집중 챌린지 목록 조회",

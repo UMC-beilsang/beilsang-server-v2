@@ -2,7 +2,6 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
@@ -33,18 +32,6 @@ public interface ChallengeService {
      */
     ChallengeResDTO createChallenge(Long memberId, CreateChallengeReqDTO createChallengeReqDTO,
         List<MultipartFile> infoImages, List<MultipartFile> certImages);
-
-    /**
-     * 조건에 따른 챌린지 목록을 페이지네이션으로 조회합니다.
-     *
-     * @param requestDTO 챌린지 목록 조회 필터 조건
-     * @return 페이지네이션된 챌린지 목록
-     * @deprecated 용도별 전용 API를 사용해주세요:
-     *     {@link #getOpenChallengeList}, {@link #getClosedChallengeList},
-     *     {@link #getLikedChallengeList}, {@link #getMyChallengeList}
-     */
-    @Deprecated
-    PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO);
 
     /**
      * 모집중인 챌린지 목록을 조회합니다. 시작일이 오늘 이후인 챌린지를 대상으로 합니다.
