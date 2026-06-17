@@ -70,7 +70,8 @@ public class ChallengeAssembler {
             .build();
     }
 
-    public static ChallengeListResDTO toChallengeListResDTO(Challenge challenge) {
+    public static ChallengeListResDTO toChallengeListResDTO(Challenge challenge,
+        ChallengeMemberStatus challengeMemberStatus) {
         String imageUrl = null;
         if (!challenge.getInfoImages().isEmpty()) {
             imageUrl = challenge.getInfoImages().get(0).getImageUrl();
@@ -79,7 +80,7 @@ public class ChallengeAssembler {
             .id(challenge.getId())
             .title(challenge.getTitle())
             .category(challenge.getCategory())
-            .status(null) // TODO: ChallengeMemberStatus 추가
+            .status(challengeMemberStatus)
             .participantCount(challenge.getAttendeeCount())
             .likeCount(challenge.getCountLikes())
             .imageUrl(imageUrl)

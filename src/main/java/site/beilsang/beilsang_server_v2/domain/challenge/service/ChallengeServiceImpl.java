@@ -208,8 +208,10 @@ public class ChallengeServiceImpl implements ChallengeService {
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
             requestDTO.getSize() != null ? requestDTO.getSize() : 10);
         Page<Challenge> page = challengeRepository.findChallenges(requestDTO, pageable);
+        Long memberId = requestDTO.getMemberId();
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -225,7 +227,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      * 모집중인 챌린지 목록을 조회합니다. - 시작일이 오늘 이후인 챌린지를 대상으로 조회 - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
      */
     @Override
-    public PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(
+    public PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(Long memberId,
         OpenChallengeListReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
@@ -234,7 +236,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         Page<Challenge> page = challengeRepository.findOpenChallenges(requestDTO, pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
@@ -251,7 +254,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      * 모집마감된 챌린지 목록을 조회합니다. - 시작일이 오늘 이전인 챌린지를 대상으로 조회 - 최근 마감순(startDate DESC)으로 정렬
      */
     @Override
-    public PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(
+    public PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(Long memberId,
         ClosedChallengeListReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
@@ -260,7 +263,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         Page<Challenge> page = challengeRepository.findClosedChallenges(requestDTO, pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
@@ -287,7 +291,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
@@ -315,7 +320,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         Page<Challenge> page = challengeRepository.findMyChallenges(memberId, requestDTO, pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
@@ -332,14 +338,15 @@ public class ChallengeServiceImpl implements ChallengeService {
      * 추천 챌린지를 조회합니다. - 현재 모집 중인 챌린지 중 좋아요가 많은 순으로 조회 - 페이지네이션 없이 상위 N개만 조회
      */
     @Override
-    public List<ChallengeListResDTO> getRecommendedChallenges(
+    public List<ChallengeListResDTO> getRecommendedChallenges(Long memberId,
         RecommendedChallengeReqDTO requestDTO) {
         int size = requestDTO.getSize() != null ? requestDTO.getSize() : 10;
 
         List<Challenge> challenges = challengeRepository.findRecommendedChallenges(size);
 
         return challenges.stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
     }
 
@@ -461,6 +468,16 @@ public class ChallengeServiceImpl implements ChallengeService {
         return ChallengeAssembler.toJoinChallengeResDTO(challenge, memberId, remainingPoint);
     }
 
+    /**
+     * 특정 회원의 챌린지 참여 상태를 조회합니다.
+     * 참여한 경우 실제 ChallengeMemberStatus를, 참여하지 않은 경우 NOT_JOINED를 반환합니다.
+     */
+    private ChallengeMemberStatus resolveMemberStatus(Long challengeId, Long memberId) {
+        return challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)
+            .map(ChallengeMember::getChallengeMemberStatus)
+            .orElse(ChallengeMemberStatus.NOT_JOINED);
+    }
+
     private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {
         return pointLogs.stream()
             .filter(pointLog -> pointLog.getStatus() == targetStatus)
@@ -472,7 +489,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      * 모집 마감 챌린지 검색 - 시작일이 오늘 이전인 챌린지를 대상으로 검색 - 오늘 날짜에 가까운 순으로 정렬 (startDate 내림차순)
      */
     @Override
-    public PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(
+    public PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(Long memberId,
         SearchClosedChallengeReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
@@ -482,7 +499,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             requestDTO.getKeyword(), pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
@@ -499,7 +517,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      * 모집 중인 챌린지 검색 - 시작일이 오늘 이후인 챌린지를 대상으로 검색 - 정렬: 마감 임박순(DEADLINE_SOON) 또는 최신순(NEWEST)
      */
     @Override
-    public PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(
+    public PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(Long memberId,
         SearchOpenChallengeReqDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.getPage() != null ? requestDTO.getPage() : 0,
@@ -509,7 +527,8 @@ public class ChallengeServiceImpl implements ChallengeService {
             requestDTO.getKeyword(), requestDTO.getSortType(), pageable);
 
         List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(ChallengeAssembler::toChallengeListResDTO)
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                resolveMemberStatus(challenge.getId(), memberId)))
             .collect(Collectors.toList());
 
         return PageResponseDTO.<ChallengeListResDTO>builder()

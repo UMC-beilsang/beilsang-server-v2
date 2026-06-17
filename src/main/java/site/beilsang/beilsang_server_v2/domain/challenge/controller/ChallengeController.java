@@ -92,8 +92,10 @@ public class ChallengeController {
     })
     @GetMapping("/list/open")
     public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getOpenChallengeList(
+        Authentication authentication,
         @Parameter(description = "모집중 챌린지 목록 조회 조건") @Valid @ModelAttribute OpenChallengeListReqDTO requestDTO) {
-        return new BaseResponse<>(challengeService.getOpenChallengeList(requestDTO));
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.getOpenChallengeList(memberId, requestDTO));
     }
 
     @Operation(summary = "모집마감 챌린지 목록 조회",
@@ -104,8 +106,10 @@ public class ChallengeController {
     })
     @GetMapping("/list/closed")
     public BaseResponse<PageResponseDTO<ChallengeListResDTO>> getClosedChallengeList(
+        Authentication authentication,
         @Parameter(description = "모집마감 챌린지 목록 조회 조건") @Valid @ModelAttribute ClosedChallengeListReqDTO requestDTO) {
-        return new BaseResponse<>(challengeService.getClosedChallengeList(requestDTO));
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.getClosedChallengeList(memberId, requestDTO));
     }
 
     @Operation(summary = "찜한 챌린지 목록 조회",
@@ -145,8 +149,10 @@ public class ChallengeController {
     })
     @GetMapping("/recommended")
     public BaseResponse<List<ChallengeListResDTO>> getRecommendedChallenges(
+        Authentication authentication,
         @Parameter(description = "추천 챌린지 조회 조건") @Valid @ModelAttribute RecommendedChallengeReqDTO requestDTO) {
-        return new BaseResponse<>(challengeService.getRecommendedChallenges(requestDTO));
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.getRecommendedChallenges(memberId, requestDTO));
     }
 
     @Operation(summary = "챌린지 상세 조회", description = "특정 챌린지의 상세 정보를 조회합니다.")
@@ -218,8 +224,10 @@ public class ChallengeController {
     })
     @GetMapping("/search/closed")
     public BaseResponse<PageResponseDTO<ChallengeListResDTO>> searchClosedChallenges(
+        Authentication authentication,
         @Parameter(description = "모집 마감 챌린지 검색 조건") @Valid @ModelAttribute SearchClosedChallengeReqDTO requestDTO) {
-        return new BaseResponse<>(challengeService.searchClosedChallenges(requestDTO));
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.searchClosedChallenges(memberId, requestDTO));
     }
 
     @Operation(summary = "모집 중인 챌린지 검색",
@@ -230,7 +238,9 @@ public class ChallengeController {
     })
     @GetMapping("/search/open")
     public BaseResponse<PageResponseDTO<ChallengeListResDTO>> searchOpenChallenges(
+        Authentication authentication,
         @Parameter(description = "모집 중인 챌린지 검색 조건") @Valid @ModelAttribute SearchOpenChallengeReqDTO requestDTO) {
-        return new BaseResponse<>(challengeService.searchOpenChallenges(requestDTO));
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(challengeService.searchOpenChallenges(memberId, requestDTO));
     }
 }
