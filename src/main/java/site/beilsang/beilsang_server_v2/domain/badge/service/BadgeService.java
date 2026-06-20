@@ -3,6 +3,7 @@ package site.beilsang.beilsang_server_v2.domain.badge.service;
 import site.beilsang.beilsang_server_v2.domain.badge.dto.res.BadgeResDTO;
 import site.beilsang.beilsang_server_v2.domain.badge.dto.res.RepresentativeBadgeResDTO;
 import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 import java.util.List;
 
@@ -26,4 +27,8 @@ public interface BadgeService {
      * @param badgeType CHALLENGE_START | CHALLENGE_CREATE | CHALLENGE_VERIFY
      */
     void grantActivityBadgeIfFirst(Long memberId, BadgeType badgeType);
+
+
+    /** 챌린지 인증 시 카테고리 뱃지 갯수 +1  */
+    void incrementCategoryBadgeCount(Long memberId, Category category);
 }

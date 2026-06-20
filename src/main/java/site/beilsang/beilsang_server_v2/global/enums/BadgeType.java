@@ -13,4 +13,9 @@ public enum BadgeType {
     CHALLENGE_START,    // 챌린지 1개 참여
     CHALLENGE_CREATE,   // 챌린지 1개 제작
     CHALLENGE_VERIFY,   // 챌린지 인증 피드 1개 인증
+
+    /**
+     * 카테고리 배지
+     */
+    CATEGORY,
 }

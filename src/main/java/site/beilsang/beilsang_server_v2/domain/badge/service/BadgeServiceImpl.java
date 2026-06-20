@@ -15,9 +15,11 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.BadgeMemberRepo
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode.*;
 
@@ -104,9 +106,40 @@ public class BadgeServiceImpl implements BadgeService {
             .member(member)
             .badge(badge)
             .acquiredAt(LocalDateTime.now())
-            .currentStep(null)  // 활동 배지는 단계 없음
+            .count(1)  // 활동 배지는 단계 없음
             .build();
 
         badgeMemberRepository.save(memberBadge);
+    }
+
+    // ── 카테고리 챌린지 성공 횟수 누적 ──────────────────────────────────────
+    @Override
+    @Transactional
+    public void incrementCategoryBadgeCount(Long memberId, Category category) {
+
+        Optional<BadgeMember> optionalBadgeMember =
+            badgeMemberRepository.findByMemberIdAndBadgeCategory(memberId, category);
+
+        if (optionalBadgeMember.isPresent()) {
+            // 1. 이미 배지를 소유하고 있다면 횟수만 1 증가
+            BadgeMember badgeMember = optionalBadgeMember.get();
+            badgeMember.addCount();
+        } else {
+            // 2. 해당 카테고리 배지가 아예 없는 상태에서 첫 성공을 했다면 (생성 + count 1)
+            Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_MEMBER));
+
+            Badge badge = badgeRepository.findByCategory(category)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_BADGE));
+
+            BadgeMember newBadgeMember = BadgeMember.builder()
+                .member(member)
+                .badge(badge)
+                .acquiredAt(LocalDateTime.now())
+                .count(1) // 방금 1회 성공했으므로 1
+                .build();
+
+            badgeMemberRepository.save(newBadgeMember);
+        }
     }
 }

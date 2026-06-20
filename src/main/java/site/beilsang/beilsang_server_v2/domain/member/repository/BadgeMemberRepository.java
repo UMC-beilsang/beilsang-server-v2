@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import site.beilsang.beilsang_server_v2.domain.member.entity.BadgeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
+import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,4 +33,6 @@ public interface BadgeMemberRepository extends JpaRepository<BadgeMember, Long> 
         @Param("member") Member member,
         @Param("badgeType") BadgeType badgeType
     );
+
+    Optional<BadgeMember>  findByMemberIdAndBadgeCategory(Long memberId, Category category);
 }

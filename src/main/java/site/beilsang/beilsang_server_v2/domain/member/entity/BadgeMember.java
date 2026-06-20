@@ -35,24 +35,42 @@ public class BadgeMember {
     private LocalDateTime acquiredAt;
 
     /**
-     * 카테고리 배지의 현재 단계 (1~4단계 / 활동 배지는 null)
-     * 1단계(새싹) : 해당 카테고리 챌린지  1개 성공
-     * 2단계(씨앗) : 해당 카테고리 챌린지  3개 성공
-     * 3단계(나무) : 해당 카테고리 챌린지 10개 성공
-     * 4단계(숲)   : 해당 카테고리 챌린지 ??개 성공 (조건 확정 후 서비스 레이어에 반영)
+     * 카테고리 배지의 현재 획득 개수
+     * 1단계(새싹) : 해당 카테고리 챌린지  0개 성공
+     * 2단계(씨앗) : 해당 카테고리 챌린지  1개 성공
+     * 3단계(나무) : 해당 카테고리 챌린지  3개 성공
+     * 4단계(숲)   : 해당 카테고리 챌린지 10개 성공
      */
-    private Integer currentStep;
+    private Integer count;
 
     // -------------------------------------------------------
     // 비즈니스 메서드
     // -------------------------------------------------------
 
     /**
-     * 카테고리 배지 단계 업그레이드 (최대 4단계)
+     * 카테고리 챌린지 성공 시 카운트 증가
      */
-    public void upgradeStep() {
-        if (this.currentStep != null && this.currentStep < 4) {
-            this.currentStep++;
+    public void addCount() {
+        if (this.count == null) {
+            this.count = 0;
+        }
+        this.count++;
+    }
+
+    /**
+     * 카테고리 배지 단계 계산 (최대 4단계)
+     */
+    public int getStep() {
+        if (this.count == null) return 1; // 방어 로직 (활동 배지 등의 경우)
+
+        if (this.count >= 10) {
+            return 4; // 숲
+        } else if (this.count >= 3) {
+            return 3; // 나무
+        } else if (this.count >= 1) {
+            return 2; // 씨앗
+        } else {
+            return 1; // 새싹
         }
     }
 
@@ -60,6 +78,6 @@ public class BadgeMember {
      * 대표 배지 설정 가능 여부 — 4단계(숲)에 도달한 카테고리 배지만 가능
      */
     public boolean isEligibleForRepresentative() {
-        return this.currentStep != null && this.currentStep == 4;
+        return getStep() == 4;
     }
 }

@@ -12,7 +12,7 @@ public class BadgeAssembler {
             .badgeId(memberBadge.getBadge().getId())
             .badgeType(memberBadge.getBadge().getBadgeType())
             .category(memberBadge.getBadge().getCategory())
-            .currentStep(memberBadge.getCurrentStep())
+            .currentStep(memberBadge.getStep())
             .acquiredAt(memberBadge.getAcquiredAt())
             .build();
     }

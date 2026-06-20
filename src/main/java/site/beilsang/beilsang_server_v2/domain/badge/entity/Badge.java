@@ -9,6 +9,9 @@ import site.beilsang.beilsang_server_v2.global.enums.Category;
 import site.beilsang.beilsang_server_v2.global.enums.BadgeType;
 
 @Entity
+@Table(name = "badge", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"badge_type", "category"})
+})
 @Getter
 @Builder
 @NoArgsConstructor
@@ -28,7 +31,7 @@ public class Badge {
      * - CATEGORY          : 카테고리 배지    (카테고리별 챌린지 성공 수에 따라 1~3단계)
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "badge_type", nullable = false, unique = true)
+    @Column(name = "badge_type", nullable = false)
     private BadgeType badgeType;
 
     /**
