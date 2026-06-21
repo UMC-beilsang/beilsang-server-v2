@@ -17,41 +17,41 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/badge")
-@Tag(name = "Badge", description = "나의 배지 API")
+@Tag(name = "Badge", description = "배지 API")
 public class BadgeController {
 
     private final BadgeService badgeService;
 
     // ── 내 배지 전체 목록 조회 ────────────────────────────────────────────────
     @Operation(
-        summary = "내 배지 전체 목록 조회",
-        description = "로그인한 멤버가 보유한 전체 배지 목록을 반환합니다."
+        summary = "배지 전체 목록 조회",
+        description = "챌린저가 보유한 전체 배지 목록을 반환합니다."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "배지 목록 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패"),
         @ApiResponse(responseCode = "404", description = "멤버를 찾을 수 없음")
     })
-    @GetMapping
-    public BaseResponse<List<BadgeResDTO>> getMyBadgeList(Authentication authentication) {
+    @GetMapping("/{challengerId}")
+    public BaseResponse<List<BadgeResDTO>> getMyBadgeList(Authentication authentication, @PathVariable Long challengerId) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(badgeService.getMyBadgeList(memberId));
+        return new BaseResponse<>(badgeService.getMyBadgeList(challengerId));
     }
 
     // ── 대표 배지 조회 ────────────────────────────────────────────────────────
     @Operation(
         summary = "대표 배지 조회",
-        description = "로그인한 멤버의 대표 배지를 반환합니다. 미설정 시 null을 반환합니다."
+        description = "챌린저의 대표 배지를 반환합니다. 미설정 시 null을 반환합니다."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "대표 배지 조회 성공 (미설정 시 null)"),
         @ApiResponse(responseCode = "401", description = "인증 실패"),
         @ApiResponse(responseCode = "404", description = "멤버를 찾을 수 없음")
     })
-    @GetMapping("/representative")
-    public BaseResponse<BadgeResDTO> getRepresentativeBadge(Authentication authentication) {
+    @GetMapping("/{challengerId}/representative")
+    public BaseResponse<BadgeResDTO> getRepresentativeBadge(Authentication authentication, @PathVariable Long challengerId) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(badgeService.getRepresentativeBadge(memberId));
+        return new BaseResponse<>(badgeService.getRepresentativeBadge(challengerId));
     }
 
     // ── 대표 배지 설정 / 해제 ─────────────────────────────────────────────────

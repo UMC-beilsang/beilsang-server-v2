@@ -16,8 +16,8 @@ public interface BadgeMemberRepository extends JpaRepository<BadgeMember, Long> 
      * 멤버의 전체 보유 배지 목록 조회
      * Badge 정보를 fetch join으로 함께 로딩 (N+1 방지)
      */
-    @Query("SELECT mb FROM BadgeMember mb JOIN FETCH mb.badge WHERE mb.member.id = :memberId")
-    List<BadgeMember> findAllByMemberIdWithBadge(@Param("memberId") Long memberId);
+    @Query("SELECT mb FROM BadgeMember mb JOIN FETCH mb.badge WHERE mb.member = :member")
+    List<BadgeMember> findAllByMemberWithBadge(@Param("member") Member member);
 
     /**
      * 특정 MemberBadge 단건 조회 (본인 소유 여부 확인 포함)

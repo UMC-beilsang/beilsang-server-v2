@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.feed.repository.FeedRepository;
 import site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository;
@@ -154,8 +155,8 @@ public class MemberService {
         return MemberAssembler.toLikeCountResDTO(countLike);
     }
 
-    public MemberNicknameResDTO getNickname(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public MemberNicknameResDTO getNickname(Long challengerId) {
+        Member member = memberRepository.findById(challengerId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
         return MemberAssembler.toNicknameResDTO(member);
     }
