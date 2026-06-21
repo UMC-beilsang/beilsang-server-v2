@@ -20,10 +20,10 @@ public class BadgeResDTO {
     private Long badgeId;
 
     @Schema(description = "활동 배지 타입", example = "CHALLENGE_START")
-    private BadgeType badgeType;  // 챌린지 배지는 null
+    private BadgeType badgeType;  // 활동 배지: CHALLENGE_*, 카테고리 배지: CATEGORY
 
     @Schema(description = "챌린지 배지 타입", example = "텀블러")
-    private Category category;    // 활동 배지는 null
+    private Category category;    // 카테고리 배지일 때만 값 존재(활동 배지는 null)
 
     @Schema(description = "챌린지 배지 단계", example = "1~4")
     private Integer currentStep;  // 활동 배지는 null

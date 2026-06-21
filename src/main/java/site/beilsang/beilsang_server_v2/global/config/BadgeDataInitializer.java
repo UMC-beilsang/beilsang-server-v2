@@ -20,15 +20,10 @@ public class BadgeDataInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
 
-        if (badgeRepository.count() > 0) {
-            // 배지가 이미 존재하면 초기화 작업을 건너뜁니다.
-            return;
-        }
-
         // 1. 활동 배지 초기화 (CHALLENGE_START, CREATE, VERIFY)
         for (BadgeType badgeType : BadgeType.values()) {
             // 카테고리용 BadgeType(예: CATEGORY)이 Enum에 있다면 제외하고 처리
-            if (badgeType.name().equals("CATEGORY")) continue;
+            if (badgeType == BadgeType.CATEGORY) continue;
 
             if (!badgeRepository.existsByBadgeType(badgeType)) {
                 badgeRepository.save(Badge.builder()

@@ -29,6 +29,6 @@ public interface BadgeService {
     void grantActivityBadgeIfFirst(Long memberId, BadgeType badgeType);
 
 
-    /** 챌린지 인증 시 카테고리 뱃지 갯수 +1  */
+    /** 챌린지 정산(성공) 시 카테고리 뱃지 성공 횟수 +1 */
     void incrementCategoryBadgeCount(Long memberId, Category category);
 }

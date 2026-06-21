@@ -28,7 +28,7 @@ public class Badge {
      * - CHALLENGE_START   : 챌린지 시작 배지 (챌린지 1개 참여)
      * - CHALLENGE_CREATE  : 챌린지 제작 배지 (챌린지 1개 제작)
      * - CHALLENGE_VERIFY  : 챌린지 인증 배지 (인증 피드 1개 인증)
-     * - CATEGORY          : 카테고리 배지    (카테고리별 챌린지 성공 수에 따라 1~3단계)
+     * - CATEGORY          : 챌린지 배지    (카테고리별 챌린지 성공 수에 따라 1~4단계)
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "badge_type", nullable = false)

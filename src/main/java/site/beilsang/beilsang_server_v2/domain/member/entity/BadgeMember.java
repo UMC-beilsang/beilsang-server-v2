@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+    uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "badge_id"})
+)
 public class BadgeMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

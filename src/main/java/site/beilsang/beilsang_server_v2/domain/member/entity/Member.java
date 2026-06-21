@@ -103,6 +103,14 @@ public class Member {
         this.representativeBadge = memberBadge;
     }
 
+    /**
+     * Member 삭제 시(memberBadges cascade remove) FK 순환으로 인한 삭제 실패를 방지합니다.
+     */
+    @PreRemove
+    private void preRemove() {
+        this.representativeBadge = null;
+    }
+
 
     public void updateNickname(String nickName) {
         this.nickName = nickName;
