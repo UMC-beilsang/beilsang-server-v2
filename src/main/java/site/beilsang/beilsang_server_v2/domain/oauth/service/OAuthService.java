@@ -53,6 +53,9 @@ public class OAuthService {
     @Value("${kakao.admin-key}")
     private String kakaoAdminKey;
 
+    @Value("${member.default-profile-image}")
+    private String defaultProfileImageUrl;
+
     @Transactional
     public MemberLoginResDTO loginWithKakao(KakaoLoginReqDTO request) {
         log.info("Kakao login request received");
@@ -158,7 +161,7 @@ public class OAuthService {
                 String randomNickname = nicknameGenerator.generateRandomNickname();
                 log.info("랜덤 닉네임 생성 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, randomNickname);
 
-                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
+                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname, defaultProfileImageUrl);
                 Member savedMember = memberRepository.saveAndFlush(newMember);
 
                 // 신규 가입 보상 지급

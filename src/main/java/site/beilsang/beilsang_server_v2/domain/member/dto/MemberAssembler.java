@@ -8,8 +8,8 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.res.CheckEnrolledResDT
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.FeedCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.LikeCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
-import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileImageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberNicknameResDTO;
+import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileImageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.global.enums.Provider;
 import site.beilsang.beilsang_server_v2.global.enums.Role;
@@ -29,12 +29,14 @@ public class MemberAssembler {
             .build();
     }
 
-    public static Member toEntity(Provider provider, OAuth2UserInfo oAuth2UserInfo, String nickName) {
+    public static Member toEntity(Provider provider, OAuth2UserInfo oAuth2UserInfo, String nickName,
+        String profileUrl) {
         return Member.builder()
             .provider(provider)
             .socialId(oAuth2UserInfo.getId())
             .email(oAuth2UserInfo.getEmail())
             .nickName(nickName)
+            .profileUrl(profileUrl)
             .role(Role.GUEST)
             .build();
     }

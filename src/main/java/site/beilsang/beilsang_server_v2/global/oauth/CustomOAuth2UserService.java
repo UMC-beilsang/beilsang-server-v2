@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -39,6 +40,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final PointProperties pointProperties;
     private final NicknameGenerator nicknameGenerator;
     private static final int MAX_NICKNAME_RETRY = 5;
+
+    @Value("${member.default-profile-image}")
+    private String defaultProfileImageUrl;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -106,7 +110,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 String randomNickname = nicknameGenerator.generateRandomNickname();
                 log.info("랜덤 닉네임 생성 시도 {}/{}: {}", attempt, MAX_NICKNAME_RETRY, randomNickname);
 
-                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname);
+                Member newMember = MemberAssembler.toEntity(provider, attributes.getOAuth2UserInfo(), randomNickname, defaultProfileImageUrl);
                 Member savedMember = memberRepository.saveAndFlush(newMember);
 
                 log.info("회원 생성 성공 - 닉네임: {}", randomNickname);

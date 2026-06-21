@@ -176,7 +176,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private void saveInfoImages(Challenge challenge, List<MultipartFile> infoImages) {
         for (int i = 0; i < infoImages.size(); i++) {
-            String imageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_MAIN, infoImages.get(i));
+            // challenge/{challengeId}/main/filename 구조로 업로드
+            String imageUrl = s3Service.uploadFile(UploadPath.CHALLENGE,
+                challenge.getId() + "/main", infoImages.get(i));
             ChallengeInfoImage infoImage = ChallengeInfoImage.builder()
                 .imageUrl(imageUrl)
                 .imageOrder(i + 1)
@@ -188,7 +190,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private void saveCertImages(Challenge challenge, List<MultipartFile> certImages) {
         for (int i = 0; i < certImages.size(); i++) {
-            String imageUrl = s3Service.uploadFile(UploadPath.CHALLENGE_CERT, certImages.get(i));
+            // challenge/{challengeId}/cert/filename 구조로 업로드
+            String imageUrl = s3Service.uploadFile(UploadPath.CHALLENGE,
+                challenge.getId() + "/cert", certImages.get(i));
             ChallengeCertImage certImage = ChallengeCertImage.builder()
                 .imageUrl(imageUrl)
                 .imageOrder(i + 1)
@@ -219,9 +223,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 모집중인 챌린지 목록을 조회합니다.
-     * - 시작일이 오늘 이후인 챌린지를 대상으로 조회
-     * - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
+     * 모집중인 챌린지 목록을 조회합니다. - 시작일이 오늘 이후인 챌린지를 대상으로 조회 - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(
@@ -247,9 +249,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 모집마감된 챌린지 목록을 조회합니다.
-     * - 시작일이 오늘 이전인 챌린지를 대상으로 조회
-     * - 최근 마감순(startDate DESC)으로 정렬
+     * 모집마감된 챌린지 목록을 조회합니다. - 시작일이 오늘 이전인 챌린지를 대상으로 조회 - 최근 마감순(startDate DESC)으로 정렬
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(
@@ -275,9 +275,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 찜한 챌린지 목록을 조회합니다.
-     * - 내가 찜한 챌린지 목록을 조회
-     * - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
+     * 찜한 챌린지 목록을 조회합니다. - 내가 찜한 챌린지 목록을 조회 - 카테고리 필터링 및 정렬 기능 제공 (마감 임박순/최신순)
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> getLikedChallengeList(Long memberId,
@@ -304,12 +302,9 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 나의 챌린지 목록을 조회합니다.
-     * - 내가 참여한 챌린지를 상태별로 조회
-     * - ONGOING: ChallengeMemberStatus = ONGOING 또는 NOT_YET
-     * - SUCCESS: ChallengeMemberStatus = SUCCESS
-     * - FAIL: ChallengeMemberStatus = FAIL
-     * - 정렬은 참여일(createdAt) 내림차순으로 고정
+     * 나의 챌린지 목록을 조회합니다. - 내가 참여한 챌린지를 상태별로 조회 - ONGOING: ChallengeMemberStatus = ONGOING 또는 NOT_YET
+     * - SUCCESS: ChallengeMemberStatus = SUCCESS - FAIL: ChallengeMemberStatus = FAIL - 정렬은
+     * 참여일(createdAt) 내림차순으로 고정
      */
     @Override
     public PageResponseDTO<ChallengeListResDTO> getMyChallengeList(Long memberId,
@@ -335,12 +330,11 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 추천 챌린지를 조회합니다.
-     * - 현재 모집 중인 챌린지 중 좋아요가 많은 순으로 조회
-     * - 페이지네이션 없이 상위 N개만 조회
+     * 추천 챌린지를 조회합니다. - 현재 모집 중인 챌린지 중 좋아요가 많은 순으로 조회 - 페이지네이션 없이 상위 N개만 조회
      */
     @Override
-    public List<ChallengeListResDTO> getRecommendedChallenges(RecommendedChallengeReqDTO requestDTO) {
+    public List<ChallengeListResDTO> getRecommendedChallenges(
+        RecommendedChallengeReqDTO requestDTO) {
         int size = requestDTO.getSize() != null ? requestDTO.getSize() : 10;
 
         List<Challenge> challenges = challengeRepository.findRecommendedChallenges(size);
@@ -352,7 +346,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeDetailResDTO getChallengeDetail(Long challengeId, Long memberId) {
-        Challenge challenge = challengeRepository.getChallengeById(challengeId);
+        Challenge challenge = challengeRepository.getChallengeByIdAndIsHiddenFalse(challengeId);
         if (challenge == null) {
             throw new BaseException(BaseResponseCode.NOT_FOUND_CHALLENGE);
         }

@@ -36,6 +36,7 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         BooleanBuilder builder = new BooleanBuilder();
 
         // 필터링 조건 추가
+        addHiddenFilter(builder, challenge);
         addCategoryFilter(builder, challenge, requestDTO);
         addKeywordFilter(builder, challenge, requestDTO);
         addChallengeStatusFilter(builder, challenge, requestDTO);
@@ -53,6 +54,13 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         long total = countTotal(challenge, builder);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    /**
+     * 숨김 처리된 챌린지 제외 필터 추가
+     */
+    private void addHiddenFilter(BooleanBuilder builder, QChallenge challenge) {
+        builder.and(challenge.isHidden.isFalse());
     }
 
     private void addCategoryFilter(BooleanBuilder builder, QChallenge challenge,
@@ -150,6 +158,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         // 모집중 조건: 시작일이 오늘 이후 (오늘 포함)
         builder.and(challenge.startDate.goe(LocalDate.now()));
 
+        // 숨김 처리된 챌린지 제외
+        addHiddenFilter(builder, challenge);
+
         // 카테고리 필터 (ALL이 아닌 경우에만 필터링)
         if (requestDTO.getCategory() != Category.ALL) {
             builder.and(challenge.category.eq(requestDTO.getCategory()));
@@ -193,6 +204,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         // 모집마감 조건: 시작일이 오늘 이전
         builder.and(challenge.startDate.lt(LocalDate.now()));
 
+        // 숨김 처리된 챌린지 제외
+        addHiddenFilter(builder, challenge);
+
         // 카테고리 필터 (ALL이 아닌 경우에만 필터링)
         if (requestDTO.getCategory() != Category.ALL) {
             builder.and(challenge.category.eq(requestDTO.getCategory()));
@@ -228,6 +242,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
         if (requestDTO.getCategory() != Category.ALL) {
             builder.and(challenge.category.eq(requestDTO.getCategory()));
         }
+
+        // 숨김 처리된 챌린지 제외
+        addHiddenFilter(builder, challenge);
 
         // 쿼리 생성 - ChallengeLike 조인
         JPAQuery<Challenge> query = queryFactory
@@ -280,6 +297,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
             builder.and(challenge.category.eq(requestDTO.getCategory()));
         }
 
+        // 숨김 처리된 챌린지 제외
+        addHiddenFilter(builder, challenge);
+
         // 참여 상태 필터
         BooleanBuilder statusBuilder = new BooleanBuilder();
         ParticipationStatus status = requestDTO.getParticipationStatus();
@@ -329,7 +349,8 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
 
         return queryFactory
             .selectFrom(challenge)
-            .where(challenge.startDate.goe(LocalDate.now()))  // 모집 중 조건
+            .where(challenge.startDate.goe(LocalDate.now())  // 모집 중 조건
+                .and(challenge.isHidden.isFalse()))           // 숨김 처리된 챌린지 제외
             .orderBy(challenge.countLikes.desc(), challenge.startDate.asc())  // 좋아요 내림차순, 시작일 오름차순
             .limit(size)
             .fetch();
@@ -347,6 +368,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
 
         // 모집 마감 조건: 시작일이 오늘 이전
         builder.and(challenge.startDate.lt(LocalDate.now()));
+
+        // 숨김 처리된 챌린지 제외
+        addHiddenFilter(builder, challenge);
 
         // 제목 키워드 필터
         addTitleKeywordFilter(builder, challenge, keyword);
@@ -378,6 +402,9 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
 
         // 모집 중 조건: 시작일이 오늘 이후 (오늘 포함)
         builder.and(challenge.startDate.goe(LocalDate.now()));
+
+        // 숨김 처리된 챌린지 제외
+        addHiddenFilter(builder, challenge);
 
         // 제목 키워드 필터
         addTitleKeywordFilter(builder, challenge, keyword);

@@ -41,6 +41,9 @@ public enum BaseResponseCode {
     // point
     NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "P0001", "포인트가 부족합니다."),
 
+    // feed
+    NOT_FOUND_FEED(HttpStatus.BAD_REQUEST, "F0001", "존재하지 않는 피드입니다"),
+
     // challenge
     INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "C0001", "유효하지 않은 이미지 파일입니다"),
     INVALID_CHALLENGE_PERIOD(HttpStatus.BAD_REQUEST, "C0002", "목표 실천일수가 챌린지 기간을 초과할 수 없습니다"),
@@ -58,7 +61,12 @@ public enum BaseResponseCode {
     NOT_FOUND_MEMBER_BADGE(HttpStatus.BAD_REQUEST, "B0001", "보유하지 않은 배지입니다"),
     NOT_ELIGIBLE_BADGE(HttpStatus.BAD_REQUEST, "B0002", "4단계 배지가 아닙니다"),
     NOT_FOUND_BADGE(HttpStatus.BAD_REQUEST, "B0003", "존재하지 않는 배지입니다"),
-    ;
+    
+    // report
+    ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "R0001", "이미 신고한 피드/챌린지입니다"),
+    ALREADY_HIDDEN_FEED(HttpStatus.BAD_REQUEST, "R0002", "이미 숨김 처리된 피드입니다"),
+    ALREADY_HIDDEN_CHALLENGE(HttpStatus.BAD_REQUEST, "R0003", "이미 숨김 처리된 챌린지입니다"),
+    MISSING_REPORT_DETAIL(HttpStatus.BAD_REQUEST, "R0004", "기타 신고 사유를 입력해주세요");
 
     private final HttpStatus status; // 커스텀 상태코드
     private final String code; // Http 상태코드

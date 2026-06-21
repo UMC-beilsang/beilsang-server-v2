@@ -39,8 +39,7 @@ spring:
       s3:
         bucket: bs-stage-bucket
         path:
-          challenge-main: challenge/main/
-          challenge-cert: challenge/cert/
+          challenge: challenge/
           member-profile: member/profile/
           feed: feed/
 
@@ -61,6 +60,10 @@ kakao:
 point:
   reward:
     new-member: 1000  # 신규 가입 시 지급 포인트
+
+# 회원 관련 설정
+member:
+  default-profile-image: https://bs-stage-bucket.s3.ap-northeast-2.amazonaws.com/member/profile/member-profile-default.png  # S3에 업로드된 기본 프로필 이미지 URL (member-profile-default.png)
 
 # Swagger/OpenAPI 설정
 springdoc:

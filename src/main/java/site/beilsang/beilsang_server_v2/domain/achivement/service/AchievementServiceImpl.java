@@ -33,9 +33,9 @@ public class AchievementServiceImpl implements AchievementService {
     public HallOfFameListResDto getCategoryHallOfFame(Category category) {
         List<Challenge> topChallenges;
         if (category == Category.ALL) {
-            topChallenges = challengeRepository.findTop10ByOrderByCountLikesDescStartDateDesc();
+            topChallenges = challengeRepository.findTop10ByIsHiddenFalseOrderByCountLikesDescStartDateDesc();
         } else {
-            topChallenges = challengeRepository.findTop10ByCategoryOrderByCountLikesDescStartDateDesc(
+            topChallenges = challengeRepository.findTop10ByCategoryAndIsHiddenFalseOrderByCountLikesDescStartDateDesc(
                 category);
         }
 
@@ -61,7 +61,7 @@ public class AchievementServiceImpl implements AchievementService {
         if (category == Category.ALL) {
             feedsPage = feedRepository.findAll(pageable);
         } else {
-            feedsPage = feedRepository.findAllByChallenge_Category(category, pageable);
+            feedsPage = feedRepository.findAllByChallenge_CategoryAndIsHiddenFalse(category, pageable);
         }
         return FeedAssembler.toSliceResponseDTO(feedsPage, memberId);
     }

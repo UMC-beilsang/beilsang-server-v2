@@ -38,6 +38,9 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         // 키워드 필터링 (review 필드 검색)
         addKeywordFilter(builder, feed, keyword);
 
+        // 숨김 처리된 피드 제외
+        builder.and(feed.isHidden.isFalse());
+
         // 쿼리 생성
         JPAQuery<Feed> query = queryFactory
             .selectFrom(feed)
