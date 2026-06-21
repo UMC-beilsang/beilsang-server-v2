@@ -33,11 +33,14 @@ public class BadgeServiceImpl implements BadgeService {
     private final BadgeMemberRepository badgeMemberRepository;
     private final MemberRepository memberRepository;
 
-    // ── 내 배지 전체 목록 조회 ────────────────────────────────────────────────
+    // ── 배지 전체 목록 조회 ────────────────────────────────────────────────
     @Override
     public List<BadgeResDTO> getMyBadgeList(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(NOT_FOUND_MEMBER));
+
         List<BadgeMember> memberBadges =
-            badgeMemberRepository.findAllByMemberIdWithBadge(memberId);
+            badgeMemberRepository.findAllByMemberWithBadge(member);
         return BadgeAssembler.toBadgeResDTOList(memberBadges);
     }
 

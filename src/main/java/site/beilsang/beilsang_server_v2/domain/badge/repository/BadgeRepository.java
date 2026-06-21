@@ -18,5 +18,5 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
 
     Optional<Badge> findByCategory(Category category);
 
-    Boolean existsByCategory(Category category);
+    boolean existsByCategory(Category category);
 }
