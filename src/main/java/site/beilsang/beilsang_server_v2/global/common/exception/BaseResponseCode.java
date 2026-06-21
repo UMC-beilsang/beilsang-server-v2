@@ -57,6 +57,11 @@ public enum BaseResponseCode {
     CHALLENGE_NOT_ENDED(HttpStatus.BAD_REQUEST, "C0010", "완료되지 않은 챌린지입니다"),
     CHALLENGE_NOT_STARTED(HttpStatus.BAD_REQUEST, "C0011", "아직 시작하지 않은 챌린지입니다"),
 
+    //badge
+    NOT_FOUND_MEMBER_BADGE(HttpStatus.BAD_REQUEST, "B0001", "보유하지 않은 배지입니다"),
+    NOT_ELIGIBLE_BADGE(HttpStatus.BAD_REQUEST, "B0002", "4단계 배지가 아닙니다"),
+    NOT_FOUND_BADGE(HttpStatus.BAD_REQUEST, "B0003", "존재하지 않는 배지입니다"),
+    
     // report
     ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "R0001", "이미 신고한 피드/챌린지입니다"),
     ALREADY_HIDDEN_FEED(HttpStatus.BAD_REQUEST, "R0002", "이미 숨김 처리된 피드입니다"),

@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import site.beilsang.beilsang_server_v2.domain.badge.service.BadgeService;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.ChallengeAssembler;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
@@ -45,11 +46,7 @@ import site.beilsang.beilsang_server_v2.global.aws.s3.S3Service;
 import site.beilsang.beilsang_server_v2.global.common.PageResponseDTO;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
-import site.beilsang.beilsang_server_v2.global.enums.ChallengeStatus;
-import site.beilsang.beilsang_server_v2.global.enums.PointName;
-import site.beilsang.beilsang_server_v2.global.enums.PointStatus;
-import site.beilsang.beilsang_server_v2.global.enums.UploadPath;
+import site.beilsang.beilsang_server_v2.global.enums.*;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +67,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final PointService pointService;
     private final S3Service s3Service;
     private final ChallengeAssembler challengeAssembler;
+    private final BadgeService badgeService;
 
     @Override
     public ChallengeResDTO createChallenge(Long memberId,
@@ -139,6 +137,9 @@ public class ChallengeServiceImpl implements ChallengeService {
             .member(member)
             .challenge(challenge)
             .build());
+
+        //챌린지 제작 배지 부여 (최초 1회)
+        badgeService.grantActivityBadgeIfFirst(memberId, BadgeType.CHALLENGE_CREATE);
 
         return ChallengeAssembler.toChallengeResDTO(challenge);
     }
@@ -450,6 +451,9 @@ public class ChallengeServiceImpl implements ChallengeService {
             .member(member)
             .challenge(challenge)
             .build());
+
+        //챌린지 시작 배지 부여 (최초 1회)
+        badgeService.grantActivityBadgeIfFirst(memberId, BadgeType.CHALLENGE_START);
 
         // 챌린지 참여자 수 증가
         challenge.incrementAttendeeCount();

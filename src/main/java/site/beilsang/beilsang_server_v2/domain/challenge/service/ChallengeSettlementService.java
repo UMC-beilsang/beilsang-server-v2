@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.beilsang.beilsang_server_v2.domain.badge.service.BadgeService;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
@@ -21,6 +22,7 @@ public class ChallengeSettlementService {
 
     private final ChallengeMemberRepository challengeMemberRepository;
     private final PointService pointService;
+    private final BadgeService badgeService;
 
     // TODO: 호스트 보너스 정책 미확정 — 추후 논의 안건 상정 필요
     private static final int HOST_BONUS_POINT = 0;
@@ -57,13 +59,16 @@ public class ChallengeSettlementService {
         // 3. 성공/실패 판정
         List<ChallengeMember> successMembers = judgeMembers(challenge, ongoingMembers);
 
-        // 4. 포인트 정산
-        if (successMembers.isEmpty()) {
+        if (!successMembers.isEmpty()) {
+            // 4. 성공 멤버 배지 획득(카운트 증가) 처리
+            grantCategoryBadges(challenge, successMembers);
+
+            // 5. 포인트 정산
+            distributePoints(challenge, successMembers);
+        } else {
             // 전원 실패 시 포인트 분배 없음 (collectedPoint 소멸)
             log.info("챌린지 ID: {} — 전원 실패. collectedPoint {} 소멸",
                 challenge.getId(), challenge.getCollectedPoint());
-        } else {
-            distributePoints(challenge, successMembers);
         }
 
         // 5. 정산 완료 표시
@@ -135,5 +140,22 @@ public class ChallengeSettlementService {
                     challenge.getId(), challengeMember.getMember().getId(), HOST_BONUS_POINT);
             }
         }
+    }
+
+    /**
+     * 성공 멤버들에게 카테고리 뱃지 획득(카운트 증가) 처리를 합니다.
+     *
+     * @param challenge      정산 대상 챌린지
+     * @param successMembers 성공한 챌린지 멤버 목록
+     */
+    private void grantCategoryBadges(Challenge challenge, List<ChallengeMember> successMembers) {
+        for (ChallengeMember member : successMembers) {
+            badgeService.incrementCategoryBadgeCount(
+                member.getMember().getId(),
+                challenge.getCategory()
+            );
+        }
+        log.info("챌린지 ID: {} — 성공 멤버 {}명에 대해 카테고리({}) 뱃지 갱신 완료",
+            challenge.getId(), successMembers.size(), challenge.getCategory());
     }
 }
