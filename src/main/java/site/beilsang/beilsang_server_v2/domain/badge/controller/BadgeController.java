@@ -34,24 +34,23 @@ public class BadgeController {
     })
     @GetMapping("/{challengerId}")
     public BaseResponse<List<BadgeResDTO>> getMyBadgeList(Authentication authentication, @PathVariable Long challengerId) {
-        Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(badgeService.getMyBadgeList(challengerId));
     }
 
     // ── 대표 배지 조회 ────────────────────────────────────────────────────────
     @Operation(
         summary = "대표 배지 조회",
-        description = "챌린저의 대표 배지를 반환합니다. 미설정 시 null을 반환합니다."
+        description = "사용자의 대표 배지를 반환합니다. 미설정 시 null을 반환합니다."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "대표 배지 조회 성공 (미설정 시 null)"),
         @ApiResponse(responseCode = "401", description = "인증 실패"),
         @ApiResponse(responseCode = "404", description = "멤버를 찾을 수 없음")
     })
-    @GetMapping("/{challengerId}/representative")
-    public BaseResponse<BadgeResDTO> getRepresentativeBadge(Authentication authentication, @PathVariable Long challengerId) {
+    @GetMapping("/representative")
+    public BaseResponse<BadgeResDTO> getRepresentativeBadge(Authentication authentication) {
         Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(badgeService.getRepresentativeBadge(challengerId));
+        return new BaseResponse<>(badgeService.getRepresentativeBadge(memberId));
     }
 
     // ── 대표 배지 설정 / 해제 ─────────────────────────────────────────────────

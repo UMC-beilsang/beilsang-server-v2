@@ -113,7 +113,6 @@ public class MemberController {
     })
     @GetMapping("/{challengerId}/nickname")
     public BaseResponse<MemberNicknameResDTO> getNickname(Authentication authentication, @PathVariable Long challengerId) {
-        Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.getNickname(challengerId));
     }
 
@@ -135,7 +134,6 @@ public class MemberController {
     })
     @GetMapping("/{challengerId}/feed/count")
     public BaseResponse<FeedCountResDTO> getFeedCount(Authentication authentication, @PathVariable Long challengerId) {
-        Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(memberService.getFeedCount(challengerId));
     }
 
@@ -144,10 +142,9 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "챌린지 개수 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @GetMapping("/{challengeId}/challenge/count")
-    public BaseResponse<ChallengeCountResDTO> getChallengeCount(Authentication authentication,  @PathVariable Long challengeId) {
-        Long memberId = (Long) authentication.getPrincipal();
-        return new BaseResponse<>(memberService.getChallengeCount(challengeId));
+    @GetMapping("/{challengerId}/challenge/count")
+    public BaseResponse<ChallengeCountResDTO> getChallengeCount(Authentication authentication,  @PathVariable Long challengerId) {
+        return new BaseResponse<>(memberService.getChallengeCount(challengerId));
     }
 
     @Operation(summary = "찜 개수 조회", description = "로그인한 사용자의 찜한 챌린지 개수를 조회합니다.")
