@@ -18,7 +18,6 @@ import site.beilsang.beilsang_server_v2.domain.member.dto.res.FeedCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.LikeCountResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberProfileImageResDTO;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberNicknameResDTO;
-import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
 import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMemberRepository;
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
@@ -154,8 +153,8 @@ public class MemberService {
         return MemberAssembler.toLikeCountResDTO(countLike);
     }
 
-    public MemberNicknameResDTO getNickname(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public MemberNicknameResDTO getNickname(Long challengerId) {
+        Member member = memberRepository.findById(challengerId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
         return MemberAssembler.toNicknameResDTO(member);
     }
