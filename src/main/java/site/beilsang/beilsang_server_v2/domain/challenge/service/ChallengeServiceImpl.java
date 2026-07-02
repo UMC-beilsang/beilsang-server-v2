@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -212,10 +213,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         Page<Challenge> page = challengeRepository.findOpenChallenges(requestDTO, pageable);
 
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -239,10 +237,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         Page<Challenge> page = challengeRepository.findClosedChallenges(requestDTO, pageable);
 
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -267,10 +262,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Page<Challenge> page = challengeRepository.findLikedChallenges(memberId, requestDTO,
             pageable);
 
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -296,10 +288,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         Page<Challenge> page = challengeRepository.findMyChallenges(memberId, requestDTO, pageable);
 
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -321,10 +310,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         List<Challenge> challenges = challengeRepository.findRecommendedChallenges(size);
 
-        return challenges.stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        return toChallengeDtoList(challenges, memberId);
     }
 
     @Override
@@ -446,13 +432,37 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     /**
-     * 특정 회원의 챌린지 참여 상태를 조회합니다.
-     * 참여한 경우 실제 ChallengeMemberStatus를, 참여하지 않은 경우 NOT_JOINED를 반환합니다.
+     * 챌린지 목록을 DTO로 변환합니다.
+     * 멤버의 참여 상태를 배치로 조회하여 N+1을 방지합니다.
      */
-    private ChallengeMemberStatus resolveMemberStatus(Long challengeId, Long memberId) {
-        return challengeMemberRepository.findByChallengeIdAndMemberId(challengeId, memberId)
-            .map(ChallengeMember::getChallengeMemberStatus)
-            .orElse(ChallengeMemberStatus.NOT_JOINED);
+    private List<ChallengeListResDTO> toChallengeDtoList(List<Challenge> challenges, Long memberId) {
+        List<Long> challengeIds = challenges.stream()
+            .map(Challenge::getId)
+            .collect(Collectors.toList());
+        Map<Long, ChallengeMemberStatus> statusMap = getMemberStatusMap(challengeIds, memberId);
+        return challenges.stream()
+            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
+                statusMap.getOrDefault(challenge.getId(), ChallengeMemberStatus.NOT_JOINED)))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 챌린지 목록에 대한 회원의 참여 상태를 한 번에 조회합니다. (N+1 방지)
+     * 참여한 경우 실제 ChallengeMemberStatus를, 참여하지 않은 경우 NOT_JOINED를 반환합니다.
+     *
+     * @param challengeIds 조회할 챌린지 ID 목록
+     * @param memberId     조회 요청하는 회원 ID
+     * @return challengeId → ChallengeMemberStatus 매핑
+     */
+    private Map<Long, ChallengeMemberStatus> getMemberStatusMap(List<Long> challengeIds,
+        Long memberId) {
+        return challengeMemberRepository
+            .findAllByChallengeIdInAndMemberId(challengeIds, memberId)
+            .stream()
+            .collect(Collectors.toMap(
+                cm -> cm.getChallenge().getId(),
+                ChallengeMember::getChallengeMemberStatus
+            ));
     }
 
     private Integer calculatePointSum(List<PointLog> pointLogs, PointStatus targetStatus) {
@@ -475,10 +485,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Page<Challenge> page = challengeRepository.searchClosedChallenges(
             requestDTO.getKeyword(), pageable);
 
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -503,10 +510,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Page<Challenge> page = challengeRepository.searchOpenChallenges(
             requestDTO.getKeyword(), requestDTO.getSortType(), pageable);
 
-        List<ChallengeListResDTO> content = page.getContent().stream()
-            .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
-                resolveMemberStatus(challenge.getId(), memberId)))
-            .collect(Collectors.toList());
+        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
