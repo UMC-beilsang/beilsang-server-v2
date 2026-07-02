@@ -2,7 +2,6 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
-import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.ClosedChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.CreateChallengeReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.LikedChallengeListReqDTO;
@@ -35,24 +34,12 @@ public interface ChallengeService {
         List<MultipartFile> infoImages, List<MultipartFile> certImages);
 
     /**
-     * 조건에 따른 챌린지 목록을 페이지네이션으로 조회합니다.
-     *
-     * @param requestDTO 챌린지 목록 조회 필터 조건
-     * @return 페이지네이션된 챌린지 목록
-     * @deprecated 용도별 전용 API를 사용해주세요:
-     *     {@link #getOpenChallengeList}, {@link #getClosedChallengeList},
-     *     {@link #getLikedChallengeList}, {@link #getMyChallengeList}
-     */
-    @Deprecated
-    PageResponseDTO<ChallengeListResDTO> getChallengeList(ChallengeListReqDTO requestDTO);
-
-    /**
      * 모집중인 챌린지 목록을 조회합니다. 시작일이 오늘 이후인 챌린지를 대상으로 합니다.
      *
      * @param requestDTO 모집중 챌린지 목록 조회 조건 (카테고리, 정렬, 페이징)
      * @return 페이지네이션된 모집중 챌린지 목록
      */
-    PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(OpenChallengeListReqDTO requestDTO);
+    PageResponseDTO<ChallengeListResDTO> getOpenChallengeList(Long memberId, OpenChallengeListReqDTO requestDTO);
 
     /**
      * 모집마감된 챌린지 목록을 조회합니다. 시작일이 오늘 이전인 챌린지를 대상으로 합니다.
@@ -61,7 +48,7 @@ public interface ChallengeService {
      * @param requestDTO 모집마감 챌린지 목록 조회 조건 (카테고리, 페이징)
      * @return 페이지네이션된 모집마감 챌린지 목록
      */
-    PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(ClosedChallengeListReqDTO requestDTO);
+    PageResponseDTO<ChallengeListResDTO> getClosedChallengeList(Long memberId, ClosedChallengeListReqDTO requestDTO);
 
     /**
      * 찜한 챌린지 목록을 조회합니다.
@@ -91,7 +78,7 @@ public interface ChallengeService {
      * @param requestDTO 추천 챌린지 조회 조건 (조회 개수)
      * @return 추천 챌린지 목록
      */
-    List<ChallengeListResDTO> getRecommendedChallenges(RecommendedChallengeReqDTO requestDTO);
+    List<ChallengeListResDTO> getRecommendedChallenges(Long memberId, RecommendedChallengeReqDTO requestDTO);
 
     /**
      * 특정 챌린지의 상세 정보를 조회합니다.
@@ -117,7 +104,7 @@ public interface ChallengeService {
      * @param requestDTO 검색 조건 (키워드, 페이징 정보)
      * @return 페이지네이션된 검색 결과
      */
-    PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(
+    PageResponseDTO<ChallengeListResDTO> searchClosedChallenges(Long memberId,
         SearchClosedChallengeReqDTO requestDTO);
 
     /**
@@ -126,7 +113,7 @@ public interface ChallengeService {
      * @param requestDTO 검색 조건 (키워드, 정렬 타입, 페이징 정보)
      * @return 페이지네이션된 검색 결과
      */
-    PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(SearchOpenChallengeReqDTO requestDTO);
+    PageResponseDTO<ChallengeListResDTO> searchOpenChallenges(Long memberId, SearchOpenChallengeReqDTO requestDTO);
 
     /**
      * 챌린지를 찜합니다.

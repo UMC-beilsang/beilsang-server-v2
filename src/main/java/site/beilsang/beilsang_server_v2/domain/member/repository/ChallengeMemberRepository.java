@@ -28,4 +28,7 @@ public interface ChallengeMemberRepository extends JpaRepository<ChallengeMember
     // 특정 챌린지의 특정 상태 멤버 목록 조회 (정산 시 ONGOING 멤버 조회용)
     List<ChallengeMember> findAllByChallengeIdAndChallengeMemberStatus(
         Long challengeId, ChallengeMemberStatus challengeMemberStatus);
+
+    // 특정 멤버의 챌린지 참여 상태 배치 조회 (N+1 방지용)
+    List<ChallengeMember> findAllByChallengeIdInAndMemberId(List<Long> challengeIds, Long memberId);
 }
