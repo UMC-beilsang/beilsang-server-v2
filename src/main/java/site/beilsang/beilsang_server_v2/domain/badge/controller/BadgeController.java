@@ -32,9 +32,10 @@ public class BadgeController {
         @ApiResponse(responseCode = "401", description = "인증 실패"),
         @ApiResponse(responseCode = "404", description = "멤버를 찾을 수 없음")
     })
-    @GetMapping("/{challengerId}")
-    public BaseResponse<List<BadgeResDTO>> getMyBadgeList(Authentication authentication, @PathVariable Long challengerId) {
-        return new BaseResponse<>(badgeService.getMyBadgeList(challengerId));
+    @GetMapping("/list")
+    public BaseResponse<List<BadgeResDTO>> getMyBadgeList(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(badgeService.getMyBadgeList(memberId));
     }
 
     // ── 대표 배지 조회 ────────────────────────────────────────────────────────
