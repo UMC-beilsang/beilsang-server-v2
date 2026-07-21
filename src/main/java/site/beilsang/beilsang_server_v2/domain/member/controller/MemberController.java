@@ -111,9 +111,10 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "닉네임 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @GetMapping("/{challengerId}/nickname")
-    public BaseResponse<MemberNicknameResDTO> getNickname(Authentication authentication, @PathVariable Long challengerId) {
-        return new BaseResponse<>(memberService.getNickname(challengerId));
+    @GetMapping("/nickname")
+    public BaseResponse<MemberNicknameResDTO> getNickname(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getNickname(memberId));
     }
 
     @Operation(summary = "프로필 이미지 조회", description = "로그인한 사용자의 프로필 이미지를 조회합니다.")
@@ -132,9 +133,10 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "피드 개수 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @GetMapping("/{challengerId}/feed/count")
-    public BaseResponse<FeedCountResDTO> getFeedCount(Authentication authentication, @PathVariable Long challengerId) {
-        return new BaseResponse<>(memberService.getFeedCount(challengerId));
+    @GetMapping("/feed/count")
+    public BaseResponse<FeedCountResDTO> getFeedCount(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getFeedCount(memberId));
     }
 
     @Operation(summary = "챌린지 개수 조회", description = "챌린저의 전체/달성/실패 챌린지 개수를 조회합니다.")
@@ -142,9 +144,10 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "챌린지 개수 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @GetMapping("/{challengerId}/challenge/count")
-    public BaseResponse<ChallengeCountResDTO> getChallengeCount(Authentication authentication,  @PathVariable Long challengerId) {
-        return new BaseResponse<>(memberService.getChallengeCount(challengerId));
+    @GetMapping("/challenge/count")
+    public BaseResponse<ChallengeCountResDTO> getChallengeCount(Authentication authentication) {
+        Long memberId = (Long) authentication.getPrincipal();
+        return new BaseResponse<>(memberService.getChallengeCount(memberId));
     }
 
     @Operation(summary = "찜 개수 조회", description = "로그인한 사용자의 찜한 챌린지 개수를 조회합니다.")

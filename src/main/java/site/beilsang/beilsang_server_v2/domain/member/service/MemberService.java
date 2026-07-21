@@ -153,8 +153,8 @@ public class MemberService {
         return MemberAssembler.toLikeCountResDTO(countLike);
     }
 
-    public MemberNicknameResDTO getNickname(Long challengerId) {
-        Member member = memberRepository.findById(challengerId)
+    public MemberNicknameResDTO getNickname(Long memberId) {
+        Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
         return MemberAssembler.toNicknameResDTO(member);
     }
