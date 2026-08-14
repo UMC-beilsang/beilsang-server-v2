@@ -41,9 +41,10 @@ public class MemberAssembler {
             .build();
     }
 
-    public static MemberLoginResDTO toMemberLoginResDTO(String accessToken, String refreshToken,
+    public static MemberLoginResDTO toMemberLoginResDTO(Long memberId, String accessToken, String refreshToken,
         Boolean isTermsAgreed) {
         return MemberLoginResDTO.builder()
+            .memberId(memberId)
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .isTermsAgreed(isTermsAgreed)

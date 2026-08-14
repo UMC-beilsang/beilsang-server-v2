@@ -87,7 +87,7 @@ public class OAuthService {
 
         // 5. 응답 DTO 생성
         MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(
-            accessToken, refreshToken, isTermsAgreed
+            member.getId(), accessToken, refreshToken, isTermsAgreed
         );
 
         log.info("Kakao login successful for user: {}", member.getSocialId());
@@ -130,7 +130,7 @@ public class OAuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getSocialId(), member.getEmail());
 
         // 응답 DTO 생성
-        MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(accessToken, refreshToken, isTermsAgreed);
+        MemberLoginResDTO response = MemberAssembler.toMemberLoginResDTO(member.getId(), accessToken, refreshToken, isTermsAgreed);
 
         log.info("Apple login successful for user: {}", member.getSocialId());
         return response;
@@ -329,7 +329,7 @@ public class OAuthService {
 
         log.info("Tokens reissued for user: {}", email);
         return MemberAssembler.toMemberLoginResDTO(
-            newAccessToken, newRefreshToken, true
+            member.getId(), newAccessToken, newRefreshToken, true
         );
     }
 
@@ -346,5 +346,15 @@ public class OAuthService {
 
     // Member와 약관동의 여부를 함께 반환하는 record 클래스
     private record MemberResult(Member member, boolean isTermsAgreed) {
+    }
+
+
+    @Transactional
+    public void updateDeviceToken(Long memberId, String deviceToken) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
+
+        // 엔티티의 토큰 갱신 메서드 호출 (더티 체킹으로 자동 UPDATE 쿼리 발생)
+        member.updateDeviceToken(deviceToken);
     }
 }

@@ -8,6 +8,7 @@ import site.beilsang.beilsang_server_v2.global.enums.Role;
 @Builder
 public class MemberLoginResDTO {
 
+    private Long memberId;
     private String accessToken;
     private String refreshToken;
     private Boolean isTermsAgreed;
