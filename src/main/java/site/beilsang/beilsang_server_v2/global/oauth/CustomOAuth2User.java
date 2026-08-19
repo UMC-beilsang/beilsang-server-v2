@@ -12,6 +12,7 @@ public class CustomOAuth2User extends DefaultOAuth2User {
 
     // Set<GrantedAuthority> authorities, Map<String, Object> attributes, String nameAttributeKey
     // 위 3개 외에 아래 필드를 추가로 가진다
+    private final Long memberId;
     private final String socialId;
     private final String email;
     private final Role role;
@@ -19,9 +20,11 @@ public class CustomOAuth2User extends DefaultOAuth2User {
 
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
         Map<String, Object> attributes, String nameAttributeKey,
+        Long memberId,
         String socialId,
         String email, Role role, Boolean isExistMember) {
         super(authorities, attributes, nameAttributeKey);
+        this.memberId = memberId;
         this.socialId = socialId;
         this.email = email;
         this.role = role;

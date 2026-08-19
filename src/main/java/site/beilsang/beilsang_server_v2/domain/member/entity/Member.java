@@ -135,4 +135,8 @@ public class Member {
     public void agreeToTerms() {
         this.termsAgreed = true;
     }
+
+    public void updateDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
 }

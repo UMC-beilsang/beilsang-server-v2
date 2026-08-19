@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import site.beilsang.beilsang_server_v2.domain.member.dto.res.MemberLoginResDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.AppleLoginReqDTO;
+import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.DeviceTokenReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.KakaoLoginReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.dto.req.RefreshTokenReqDTO;
 import site.beilsang.beilsang_server_v2.domain.oauth.service.OAuthService;
@@ -218,6 +220,23 @@ public class OAuthController {
     @GetMapping("/nickname")
     public BaseResponse<Void> validateNickname(@RequestParam String nickname) {
         oAuthService.validateNickname(nickname);
+        return new BaseResponse<>();
+    }
+
+    @Operation(summary = "디바이스 토큰 갱신", description = "푸시 알림 수신을 위한 FCM 디바이스 토큰을 갱신합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PatchMapping("/device-token")
+    public BaseResponse<Void> updateDeviceToken(
+        Authentication authentication,
+        @Valid @RequestBody DeviceTokenReqDTO reqDto
+    ) {
+        Long memberId = (Long) authentication.getPrincipal();
+        oAuthService.updateDeviceToken(memberId, reqDto.getDeviceToken());
+
         return new BaseResponse<>();
     }
 }
