@@ -354,7 +354,11 @@ public class OAuthService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_FOUND_MEMBER));
 
+        if (deviceToken == null || deviceToken.isBlank()) {
+            throw new BaseException(BaseResponseCode.NULL_REQUEST_PARAM);
+        }
+
         // 엔티티의 토큰 갱신 메서드 호출 (더티 체킹으로 자동 UPDATE 쿼리 발생)
-        member.updateDeviceToken(deviceToken);
+        member.updateDeviceToken(deviceToken.trim());
     }
 }
