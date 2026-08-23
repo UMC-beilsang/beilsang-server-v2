@@ -19,6 +19,10 @@ FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
+# 타임존 설정 (KST)
+RUN apk add --no-cache tzdata
+ENV TZ=Asia/Seoul
+
 # 애플리케이션 실행을 위한 사용자 생성 (보안)
 RUN addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
