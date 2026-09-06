@@ -2,8 +2,7 @@ package site.beilsang.beilsang_server_v2.domain.notification.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,17 +28,26 @@ public class NotificationController {
     private final NotificationService appNotificationService;
     private final FCMService fcmService;
 
-    @Operation(summary = "알림 목록 조회", description = "사용자의 알림 목록을 페이징하여 최신순으로 조회합니다.")
+    @Operation(
+        summary = "알림 목록 조회",
+        description = "사용자의 알림 목록을 페이징하여 최신순으로 조회합니다.",
+        parameters = {
+            @Parameter(in = ParameterIn.QUERY, name = "page", description = "페이지 번호 (0부터 시작)", example = "0"),
+            @Parameter(in = ParameterIn.QUERY, name = "size", description = "한 페이지당 알림 개수", example = "20"),
+            @Parameter(in = ParameterIn.QUERY, name = "sort", description = "정렬 기준 - 필드명, acs/desc로 설정 (예: createdAt,DESC, isRead,asc)", example = "createdAt,DESC")
+        }
+    )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "알림 목록 조회 성공",
-            content = @Content(schema = @Schema(implementation = Page.class))),
+        @ApiResponse(responseCode = "200", description = "알림 목록 조회 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 요청"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping
     public BaseResponse<Page<NotificationResponseDto>> getNotifications(
         Authentication authentication,
-        @Parameter(description = "페이징 설정 (기본값: size=20, page=0)") @PageableDefault(size = 20) Pageable pageable
+        @Parameter(hidden = true) // 파라미터 중복 방지를 위해 Pageable 자체는 숨김 처리
+        @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC)
+        Pageable pageable
     ) {
         Long memberId = (Long) authentication.getPrincipal();
         return new BaseResponse<>(
