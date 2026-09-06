@@ -129,6 +129,9 @@ public class FeedServiceImpl implements FeedService {
         // Feed 저장
         Feed savedFeed = feedRepository.save(feed);
 
+        // 오늘 인증 완료 상태 및 성공 일수 반영
+        challengeMember.markFeedUploaded();
+
         //챌린지 인증 배지 부여 (최초 1회)
         badgeService.grantActivityBadgeIfFirst(memberId, BadgeType.CHALLENGE_VERIFY);
 

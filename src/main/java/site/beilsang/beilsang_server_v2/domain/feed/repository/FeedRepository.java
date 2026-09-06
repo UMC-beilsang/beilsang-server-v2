@@ -1,5 +1,6 @@
 package site.beilsang.beilsang_server_v2.domain.feed.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -12,10 +13,6 @@ import site.beilsang.beilsang_server_v2.domain.feed.entity.Feed;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
 
 public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositoryCustom {
-
-    Long countByChallengeMember_IdIn(List<Long> challengeMemberIds);
-
-    List<Feed> findTop4ByChallengeMember_IdInOrderByCreatedAtDesc(List<Long> challengeMemberIds);
 
     // isHidden = false 조건 추가 — 숨김 처리된 피드 제외
     Slice<Feed> findAllByChallenge_CategoryAndIsHiddenFalse(Category category, Pageable pageable);

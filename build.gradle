@@ -72,6 +72,9 @@ dependencies {
   implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
   implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 
+  // Firebase Admin SDK for FCM
+  implementation 'com.google.firebase:firebase-admin:9.2.0'
+
   // JWT 파싱용
   implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
   runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'

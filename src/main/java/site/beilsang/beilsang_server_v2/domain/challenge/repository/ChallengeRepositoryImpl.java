@@ -17,6 +17,8 @@ import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.MyChallengeList
 import site.beilsang.beilsang_server_v2.domain.challenge.dto.req.OpenChallengeListReqDTO;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.QChallenge;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.Expressions;
 import site.beilsang.beilsang_server_v2.domain.like.entity.QChallengeLike;
 import site.beilsang.beilsang_server_v2.domain.member.entity.QChallengeMember;
 import site.beilsang.beilsang_server_v2.global.enums.Category;
@@ -340,18 +342,20 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
 
     /**
      * 추천 챌린지 조회
-     * - 현재 모집 중인 챌린지(startDate >= today) 중 좋아요가 많은 순으로 조회
+     * - 시작일이 오늘보다 미래인 챌린지 중 조회수가 많은 순으로 조회
      * - 페이지네이션 없이 상위 N개만 조회
      */
     @Override
     public List<Challenge> findRecommendedChallenges(int size) {
         QChallenge challenge = QChallenge.challenge;
 
+        NumberPath<Integer> viewCountPath = Expressions.numberPath(Integer.class, "viewCount");
+
         return queryFactory
             .selectFrom(challenge)
-            .where(challenge.startDate.goe(LocalDate.now())  // 모집 중 조건
-                .and(challenge.isHidden.isFalse()))           // 숨김 처리된 챌린지 제외
-            .orderBy(challenge.countLikes.desc(), challenge.startDate.asc())  // 좋아요 내림차순, 시작일 오름차순
+            .where(challenge.startDate.gt(LocalDate.now())   // 미래 시작일 조건
+                .and(challenge.isHidden.isFalse()))          // 숨김 처리된 챌린지 제외
+            .orderBy(viewCountPath.desc(), challenge.createdAt.desc(), challenge.startDate.asc())
             .limit(size)
             .fetch();
     }
