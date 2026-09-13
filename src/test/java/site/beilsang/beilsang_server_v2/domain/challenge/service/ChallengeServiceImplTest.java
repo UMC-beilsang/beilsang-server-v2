@@ -73,6 +73,9 @@ class ChallengeServiceImplTest {
     private site.beilsang.beilsang_server_v2.domain.point.service.PointService pointService;
 
     @Mock
+    private site.beilsang.beilsang_server_v2.domain.badge.service.BadgeService badgeService;
+
+    @Mock
     private site.beilsang.beilsang_server_v2.domain.like.repository.ChallengeLikeRepository challengeLikeRepository;
 
 

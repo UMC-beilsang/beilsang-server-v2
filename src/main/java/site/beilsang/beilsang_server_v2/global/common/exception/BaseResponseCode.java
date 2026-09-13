@@ -61,12 +61,20 @@ public enum BaseResponseCode {
     NOT_FOUND_MEMBER_BADGE(HttpStatus.BAD_REQUEST, "B0001", "보유하지 않은 배지입니다"),
     NOT_ELIGIBLE_BADGE(HttpStatus.BAD_REQUEST, "B0002", "4단계 배지가 아닙니다"),
     NOT_FOUND_BADGE(HttpStatus.BAD_REQUEST, "B0003", "존재하지 않는 배지입니다"),
-    
+
     // report
     ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "R0001", "이미 신고한 피드/챌린지입니다"),
     ALREADY_HIDDEN_FEED(HttpStatus.BAD_REQUEST, "R0002", "이미 숨김 처리된 피드입니다"),
     ALREADY_HIDDEN_CHALLENGE(HttpStatus.BAD_REQUEST, "R0003", "이미 숨김 처리된 챌린지입니다"),
-    MISSING_REPORT_DETAIL(HttpStatus.BAD_REQUEST, "R0004", "기타 신고 사유를 입력해주세요");
+    MISSING_REPORT_DETAIL(HttpStatus.BAD_REQUEST, "R0004", "기타 신고 사유를 입력해주세요"),
+
+    //notification
+    NOT_FOUND_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0001", "해당 알림을 찾을 수 없습니다."),
+    NO_PERMISSION_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0002", "알림을 읽을 권한이 없습니다."),
+    BAD_REQUEST_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0003", "알림 전송에 실패하였습니다.")
+
+
+    ;
 
     private final HttpStatus status; // 커스텀 상태코드
     private final String code; // Http 상태코드

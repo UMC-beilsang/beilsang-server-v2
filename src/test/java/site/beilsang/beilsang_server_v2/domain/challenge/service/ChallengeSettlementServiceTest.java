@@ -3,7 +3,6 @@ package site.beilsang.beilsang_server_v2.domain.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import site.beilsang.beilsang_server_v2.domain.badge.service.BadgeService;
 import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.member.entity.ChallengeMember;
 import site.beilsang.beilsang_server_v2.domain.member.entity.Member;
@@ -35,6 +35,9 @@ class ChallengeSettlementServiceTest {
 
     @Mock
     private PointService pointService;
+
+    @Mock
+    private BadgeService badgeService;
 
     @InjectMocks
     private ChallengeSettlementService challengeSettlementService;
@@ -83,6 +86,7 @@ class ChallengeSettlementServiceTest {
             m -> m.getChallengeMemberStatus() == ChallengeMemberStatus.SUCCESS);
         verify(pointService, times(3)).grantChallengePoints(
             any(Member.class), eq(challenge), eq(100), eq(PointName.SUCCESS_CHALLENGE));
+        verify(badgeService, times(3)).incrementCategoryBadgeCount(any(Long.class), eq(challenge.getCategory()));
         assertThat(challenge.getIsSettled()).isTrue();
     }
 
@@ -107,6 +111,7 @@ class ChallengeSettlementServiceTest {
         assertThat(failMember2.getChallengeMemberStatus()).isEqualTo(ChallengeMemberStatus.FAIL);
         verify(pointService, times(1)).grantChallengePoints(
             eq(member1), eq(challenge), eq(300), eq(PointName.SUCCESS_CHALLENGE));
+        verify(badgeService, times(1)).incrementCategoryBadgeCount(any(Long.class), eq(challenge.getCategory()));
         assertThat(challenge.getIsSettled()).isTrue();
     }
 
@@ -129,7 +134,7 @@ class ChallengeSettlementServiceTest {
         // then — 전원 FAIL, 포인트 지급 없음
         assertThat(ongoingMembers).allMatch(
             m -> m.getChallengeMemberStatus() == ChallengeMemberStatus.FAIL);
-        verifyNoInteractions(pointService);
+        verifyNoInteractions(pointService, badgeService);
         assertThat(challenge.getIsSettled()).isTrue();
     }
 
@@ -148,7 +153,7 @@ class ChallengeSettlementServiceTest {
         challengeSettlementService.settleChallenge(settledChallenge);
 
         // then — Repository, PointService 모두 호출되지 않음
-        verifyNoInteractions(challengeMemberRepository, pointService);
+        verifyNoInteractions(challengeMemberRepository, pointService, badgeService);
     }
 
     @Test
@@ -177,6 +182,7 @@ class ChallengeSettlementServiceTest {
         // then — 1인당 150포인트 (301/2=150, 나머지 1 소멸)
         verify(pointService, times(2)).grantChallengePoints(
             any(Member.class), eq(oddChallenge), eq(150), eq(PointName.SUCCESS_CHALLENGE));
+        verify(badgeService, times(2)).incrementCategoryBadgeCount(any(Long.class), eq(oddChallenge.getCategory()));
         assertThat(oddChallenge.getIsSettled()).isTrue();
     }
 
@@ -191,7 +197,7 @@ class ChallengeSettlementServiceTest {
         challengeSettlementService.settleChallenge(challenge);
 
         // then
-        verifyNoInteractions(pointService);
+        verifyNoInteractions(pointService, badgeService);
         assertThat(challenge.getIsSettled()).isTrue();
     }
 

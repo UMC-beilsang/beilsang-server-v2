@@ -87,6 +87,9 @@ public class Challenge extends BaseEntity {
     @Builder.Default
     private Integer countLikes = 0;
 
+    @Builder.Default
+    private Integer viewCount = 0;
+
     private Integer collectedPoint;
 
     // 포인트 정산 완료 여부 (중복 정산 방지용)
@@ -134,6 +137,16 @@ public class Challenge extends BaseEntity {
      */
     public void incrementLikeCount() {
         this.countLikes++;
+    }
+
+    /**
+     * 챌린지 조회수 증가
+     */
+    public void incrementViewCount() {
+        if (this.viewCount == null) {
+            this.viewCount = 0;
+        }
+        this.viewCount++;
     }
 
     /**

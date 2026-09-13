@@ -62,4 +62,22 @@ public class ChallengeMember extends BaseEntity {
     public void updateChallengeMemberStatus(ChallengeMemberStatus status) {
         this.challengeMemberStatus = status;
     }
+
+    /**
+     * 오늘 피드 인증을 완료했음을 반영합니다.
+     * 같은 날 중복 업로드가 들어와도 successDays는 1회만 증가합니다.
+     */
+    public void markFeedUploaded() {
+        if (!Boolean.TRUE.equals(this.isFeedUpload)) {
+            this.successDays = this.successDays == null ? 1 : this.successDays + 1;
+        }
+        this.isFeedUpload = true;
+    }
+
+    /**
+     * 일일 인증 플래그를 초기화합니다. (자정 리셋용)
+     */
+    public void resetFeedUpload() {
+        this.isFeedUpload = false;
+    }
 }

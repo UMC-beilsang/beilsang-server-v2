@@ -57,7 +57,7 @@ public interface ChallengeRepositoryCustom {
         Pageable pageable);
 
     /**
-     * 추천 챌린지 조회 - 현재 모집 중인 챌린지(startDate >= today) 중 좋아요가 많은 순으로 조회 - 페이지네이션 없이 상위 N개만 조회
+     * 추천 챌린지 조회 - 시작일이 오늘보다 미래인 챌린지 중 조회수가 많은 순으로 조회 - 페이지네이션 없이 상위 N개만 조회
      *
      * @param size 조회할 챌린지 개수
      * @return 추천 챌린지 목록
