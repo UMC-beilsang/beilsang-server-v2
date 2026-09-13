@@ -14,21 +14,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class FirebaseConfig {
 
-//    @Bean
-//    public FirebaseApp firebaseApp() throws IOException {
-//        // 이미 초기화된 경우 기존 인스턴스 반환
-//        if (!FirebaseApp.getApps().isEmpty()) {
-//            return FirebaseApp.getInstance();
-//        }
-//
-//        // Docker 환경변수(GOOGLE_APPLICATION_CREDENTIALS)를 자동으로 인식하여 인증합니다.
-//        // 로컬 테스트 시에는 PC에 해당 환경변수를 설정해주면 동일하게 동작합니다.
-//        FirebaseOptions options = FirebaseOptions.builder()
-//            .setCredentials(GoogleCredentials.getApplicationDefault())
-//            .build();
-//
-//        return FirebaseApp.initializeApp(options);
-//    }
     @Bean
     public FirebaseApp firebaseApp() {
         try{
@@ -48,10 +33,10 @@ public class FirebaseConfig {
 //            FirebaseOptions options = FirebaseOptions.builder()
 //                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
 //                .build();
-
+            FirebaseApp app = FirebaseApp.initializeApp(options);
             log.info("Firebase App initialized successfully");
 
-            return FirebaseApp.initializeApp(options);
+            return app;
         }catch (IOException e) {
             log.error("FCM Key Loading Failed", e);
             throw new RuntimeException("Failed to initialize Firebase App", e);

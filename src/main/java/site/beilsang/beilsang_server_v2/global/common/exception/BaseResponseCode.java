@@ -70,7 +70,8 @@ public enum BaseResponseCode {
 
     //notification
     NOT_FOUND_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0001", "해당 알림을 찾을 수 없습니다."),
-    NO_PERMISSION_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0002", "알림을 읽을 권한이 없습니다.")
+    NO_PERMISSION_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0002", "알림을 읽을 권한이 없습니다."),
+    BAD_REQUEST_NOTIFICATION(HttpStatus.BAD_REQUEST, "N0003", "알림 전송에 실패하였습니다.")
 
 
     ;

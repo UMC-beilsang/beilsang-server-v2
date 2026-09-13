@@ -349,13 +349,15 @@ public class ChallengeRepositoryImpl implements ChallengeRepositoryCustom {
     public List<Challenge> findRecommendedChallenges(int size) {
         QChallenge challenge = QChallenge.challenge;
 
-        NumberPath<Integer> viewCountPath = Expressions.numberPath(Integer.class, "viewCount");
-
         return queryFactory
             .selectFrom(challenge)
             .where(challenge.startDate.gt(LocalDate.now())   // 미래 시작일 조건
                 .and(challenge.isHidden.isFalse()))          // 숨김 처리된 챌린지 제외
-            .orderBy(viewCountPath.desc(), challenge.createdAt.desc(), challenge.startDate.asc())
+            .orderBy(
+                challenge.viewCount.desc(),
+                challenge.createdAt.desc(),
+                challenge.startDate.asc()
+            )
             .limit(size)
             .fetch();
     }

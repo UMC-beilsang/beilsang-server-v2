@@ -34,7 +34,7 @@ public class NotificationController {
         parameters = {
             @Parameter(in = ParameterIn.QUERY, name = "page", description = "페이지 번호 (0부터 시작)", example = "0"),
             @Parameter(in = ParameterIn.QUERY, name = "size", description = "한 페이지당 알림 개수", example = "20"),
-            @Parameter(in = ParameterIn.QUERY, name = "sort", description = "정렬 기준 - 필드명, acs/desc로 설정 (예: createdAt,DESC, isRead,asc)", example = "createdAt,DESC")
+            @Parameter(in = ParameterIn.QUERY, name = "sort", description = "정렬 기준 - 필드명, asc/desc로 설정 (예: createdAt,DESC, isRead,asc)", example = "createdAt,DESC")
         }
     )
     @ApiResponses(value = {
@@ -57,11 +57,8 @@ public class NotificationController {
 
     @Operation(summary = "알림 읽음 처리", description = "특정 알림을 읽음 상태로 변경합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "알림 읽음 처리 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-        @ApiResponse(responseCode = "401", description = "인증 실패"),
-        @ApiResponse(responseCode = "403", description = "권한 없음"),
-        @ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
+        @ApiResponse(responseCode = "400", description = "잘못된 요청/권한 없음/알림을 찾을 수 없음"),
+        @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PatchMapping("/{notificationId}/read")
     public BaseResponse<Void> readNotification(

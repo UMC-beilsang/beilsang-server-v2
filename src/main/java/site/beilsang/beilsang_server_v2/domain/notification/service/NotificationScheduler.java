@@ -21,7 +21,10 @@ import site.beilsang.beilsang_server_v2.domain.member.repository.ChallengeMember
 import site.beilsang.beilsang_server_v2.domain.member.repository.MemberRepository;
 import site.beilsang.beilsang_server_v2.domain.notification.entity.ChallengeNotification;
 import site.beilsang.beilsang_server_v2.domain.notification.repository.NotificationRepository;
+import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.enums.ChallengeMemberStatus;
+
+import static site.beilsang.beilsang_server_v2.global.common.exception.BaseResponseCode.BAD_REQUEST_NOTIFICATION;
 
 @Component
 @RequiredArgsConstructor
@@ -230,6 +233,7 @@ public class NotificationScheduler {
             }
         } catch (Exception e) {
             log.warn("Notification error for member {}: {}", member.getId(), e.getMessage());
+            throw new BaseException(BAD_REQUEST_NOTIFICATION);
         }
     }
 }

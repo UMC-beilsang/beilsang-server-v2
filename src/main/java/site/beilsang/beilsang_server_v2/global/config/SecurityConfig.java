@@ -54,7 +54,6 @@ public class SecurityConfig {
             mvc.pattern("/api/oauth/login/**"),
             mvc.pattern("/api/oauth/refresh"),
             mvc.pattern("/api/oauth/nickname"),
-            mvc.pattern("/notifications/test-push"),
             mvc.pattern("/favicon.ico"),
             mvc.pattern("/error"),
             // Swagger UI 접근 허용
