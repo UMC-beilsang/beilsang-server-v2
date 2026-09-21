@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import site.beilsang.beilsang_server_v2.domain.badge.service.BadgeService;
+import site.beilsang.beilsang_server_v2.domain.challenge.entity.Challenge;
 import site.beilsang.beilsang_server_v2.domain.challenge.repository.ChallengeRepository;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.FeedAssembler;
 import site.beilsang.beilsang_server_v2.domain.feed.dto.req.FeedCreateReqDTO;
@@ -86,16 +87,17 @@ public class FeedServiceImpl implements FeedService {
     @Transactional
     public FeedCreateResDTO createFeed(Long memberId, FeedCreateReqDTO createReqDTO,
         MultipartFile feedImage) {
-        // ChallengeMember 조회 및 권한 검증
-        ChallengeMember challengeMember = challengeMemberRepository.findById(
-                createReqDTO.getChallengeMemberId())
+
+        // Challenge 조회 및 존재 여부 확인
+        Challenge challenge = challengeRepository.findById(createReqDTO.getChallengeId())
             .orElseThrow(() -> new IllegalArgumentException(
-                "챌린지 멤버를 찾을 수 없습니다. ID: " + createReqDTO.getChallengeMemberId()));
+                "챌린지를 찾을 수 없습니다. ID: " + createReqDTO.getChallengeId()));
 
         // 작성자가 해당 챌린지의 참여자인지 확인
-        if (!challengeMember.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("해당 챌린지의 참여자만 피드를 작성할 수 있습니다.");
-        }
+        ChallengeMember challengeMember = challengeMemberRepository.findByChallengeIdAndMemberId(
+                createReqDTO.getChallengeId(), memberId)
+            .orElseThrow(() -> new BaseException(BaseResponseCode.NOT_JOINED_CHALLENGE));
+
 
         // 챌린지 시작일 이전에는 피드 작성 불가
         if (LocalDate.now().isBefore(challengeMember.getChallenge().getStartDate())) {
