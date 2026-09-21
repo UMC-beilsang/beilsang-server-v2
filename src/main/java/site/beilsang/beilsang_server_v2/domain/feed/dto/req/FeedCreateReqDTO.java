@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 public class FeedCreateReqDTO {
 
-    @Schema(description = "챌린지 멤버 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "챌린지 멤버 ID는 필수입니다.")
-    private Long challengeMemberId;
+    @Schema(description = "챌린지 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "챌린지 ID는 필수입니다.")
+    private Long challengeId;
 
     @Schema(description = "피드 후기", example = "오늘도 열심히 운동했어요!", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "피드 후기는 필수입니다.")
