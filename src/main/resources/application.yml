@@ -6,6 +6,8 @@ spring:
   config:
     import:
       - classpath:nickname.yml
+  jackson:
+    time-zone: Asia/Seoul # 타임존 KST 고정 (JSON 직렬화 시 KST 기준)
   servlet:
     multipart:
       max-file-size: 3MB # 파일당 최대 크기
