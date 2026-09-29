@@ -20,4 +20,10 @@ public class ChallengeListResDTO {
     private int likeCount;
     private String imageUrl;
     private String description;
+
+    /**
+     * 나의 챌린지 달성률 (0.0 ~ 1.0)
+     * - 나의 챌린지 조회에서만 값이 채워지고, 그 외 목록 조회에서는 null
+     */
+    private Float progress;
 }

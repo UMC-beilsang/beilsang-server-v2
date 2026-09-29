@@ -289,7 +289,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         Page<Challenge> page = challengeRepository.findMyChallenges(memberId, requestDTO, pageable);
 
-        List<ChallengeListResDTO> content = toChallengeDtoList(page.getContent(), memberId);
+        List<ChallengeListResDTO> content = toMyChallengeDtoList(page.getContent(), memberId);
 
         return PageResponseDTO.<ChallengeListResDTO>builder()
             .content(content)
@@ -448,6 +448,46 @@ public class ChallengeServiceImpl implements ChallengeService {
             .map(challenge -> ChallengeAssembler.toChallengeListResDTO(challenge,
                 statusMap.getOrDefault(challenge.getId(), ChallengeMemberStatus.NOT_JOINED)))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * 나의 챌린지 목록을 달성률과 함께 DTO로 변환합니다.
+     * 참여 정보(ChallengeMember)를 배치로 조회하여 N+1을 방지합니다.
+     */
+    private List<ChallengeListResDTO> toMyChallengeDtoList(List<Challenge> challenges,
+        Long memberId) {
+        List<Long> challengeIds = challenges.stream()
+            .map(Challenge::getId)
+            .collect(Collectors.toList());
+        Map<Long, ChallengeMember> memberMap = challengeMemberRepository
+            .findAllByChallengeIdInAndMemberId(challengeIds, memberId)
+            .stream()
+            .collect(Collectors.toMap(cm -> cm.getChallenge().getId(), cm -> cm));
+
+        return challenges.stream()
+            .map(challenge -> {
+                ChallengeMember cm = memberMap.get(challenge.getId());
+                ChallengeMemberStatus status = cm != null
+                    ? cm.getChallengeMemberStatus() : ChallengeMemberStatus.NOT_JOINED;
+                return ChallengeAssembler.toChallengeListResDTO(challenge, status,
+                    calculateProgress(cm, challenge));
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 챌린지 달성률(0.0 ~ 1.0)을 계산합니다. (successDays / totalGoalDay)
+     * - 참여 정보가 없거나 목표 일수가 null/0 이하이면 0.0
+     * - 성공 일수가 목표 일수를 넘어도 최대 1.0으로 보정
+     */
+    private float calculateProgress(ChallengeMember challengeMember, Challenge challenge) {
+        Integer totalGoalDay = challenge.getTotalGoalDay();
+        if (challengeMember == null || totalGoalDay == null || totalGoalDay <= 0) {
+            return 0.0f;
+        }
+        int successDays = challengeMember.getSuccessDays() != null
+            ? challengeMember.getSuccessDays() : 0;
+        return Math.min(1.0f, (float) successDays / totalGoalDay);
     }
 
     /**

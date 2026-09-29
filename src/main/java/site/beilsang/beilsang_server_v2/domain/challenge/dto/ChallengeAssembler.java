@@ -72,6 +72,16 @@ public class ChallengeAssembler {
 
     public static ChallengeListResDTO toChallengeListResDTO(Challenge challenge,
         ChallengeMemberStatus challengeMemberStatus) {
+        return toChallengeListResDTO(challenge, challengeMemberStatus, null);
+    }
+
+    /**
+     * 챌린지 목록 응답 DTO로 변환합니다.
+     *
+     * @param progress 나의 챌린지 달성률 (0.0 ~ 1.0), 달성률이 필요 없는 목록에서는 null
+     */
+    public static ChallengeListResDTO toChallengeListResDTO(Challenge challenge,
+        ChallengeMemberStatus challengeMemberStatus, Float progress) {
         String imageUrl = null;
         if (!challenge.getInfoImages().isEmpty()) {
             imageUrl = challenge.getInfoImages().get(0).getImageUrl();
@@ -85,6 +95,7 @@ public class ChallengeAssembler {
             .likeCount(challenge.getCountLikes())
             .imageUrl(imageUrl)
             .description(challenge.getDetails())
+            .progress(progress)
             .build();
     }
 
