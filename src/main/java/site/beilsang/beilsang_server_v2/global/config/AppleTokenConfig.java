@@ -16,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import site.beilsang.beilsang_server_v2.global.common.exception.BaseException;
 import site.beilsang.beilsang_server_v2.global.feign.AppleClient;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.ApplePublicKeyRes;
-import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleRevokeReq;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleTokenRes;
 
 import java.io.IOException;
@@ -269,14 +268,13 @@ public class AppleTokenConfig {
         try {
             log.info("Revoking Apple refresh token");
 
-            AppleRevokeReq revokeRequest = AppleRevokeReq.builder()
-                .clientId(clientId)
-                .clientSecret(generateClientSecret())
-                .token(refreshToken)
-                .tokenTypeHint(REFRESH_TOKEN)
-                .build();
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("client_id", clientId);
+            formData.add("client_secret", generateClientSecret());
+            formData.add("token", refreshToken);
+            formData.add("token_type_hint", "refresh_token"); // 애플 공식 문서 기준 스네이크 케이스 권장
 
-            appleClient.revoke(revokeRequest);
+            appleClient.revoke(formData);
             log.info("Apple token revoked successfully");
 
         } catch (Exception e) {

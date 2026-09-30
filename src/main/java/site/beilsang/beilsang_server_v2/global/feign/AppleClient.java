@@ -5,7 +5,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.ApplePublicKeyRes;
-import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleRevokeReq;
 import site.beilsang.beilsang_server_v2.global.oauth.dto.AppleTokenRes;
 
 
@@ -36,5 +35,5 @@ public interface AppleClient {
      * - 일반적으로 애플 회원 탈퇴 시 사용
      */
     @PostMapping(value = "/revoke", consumes = CONTENT_TYPE)
-    void revoke(AppleRevokeReq request);
+    void revoke(MultiValueMap<String, String> form);
 }
