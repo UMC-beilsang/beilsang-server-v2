@@ -30,19 +30,19 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
         log.info("[CustomAccessDeniedHandler] :: 토큰 정보가 만료되었거나 존재하지 않음");
 
         String exception = (String) request.getAttribute("exception");
+        log.info("[CustomAccessDeniedHandler] :: {}", exception);
         BaseResponseCode errorCode;
 
         // ① 예외 분기
         if ("NO_JWT".equals(exception)) {
             errorCode = BaseResponseCode.NOT_FOUND_JWT;
-        }
-        else if ("EXPIRED_JWT".equals(exception)) {
+        } else if ("EXPIRED_JWT".equals(exception)) {
             errorCode = BaseResponseCode.EXPIRED_JWT;
-        }
-        else if ("INVALID_JWT".equals(exception)) {
+        } else if ("INVALID_JWT".equals(exception)) {
             errorCode = BaseResponseCode.INVALID_JWT;
-        }
-        else {
+        } else if("MEMBER_DELETED".equals(exception)) {
+            errorCode = BaseResponseCode.NOT_FOUND_MEMBER;
+        } else {
             errorCode = BaseResponseCode.BAD_REQUEST;
         }
 
