@@ -9,12 +9,15 @@ import lombok.Getter;
 @Getter
 public class PreviewFeedResDTO {
 
+    @Schema(description = "멤버 ID", example = "1")
+    private Long memberId;
+
     @Schema(description = "피드 ID", example = "1")
     private Long feedId;
-    
+
     @Schema(description = "피드 이미지 URL")
     private String feedUrl;
-    
+
     @Schema(description = "챌린지 시작일로부터 경과일", example = "15")
     private Long day;
 

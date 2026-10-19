@@ -29,6 +29,7 @@ public class FeedAssembler {
 
     public static PreviewFeedResDTO toPreviewFeedResDTO(Feed feed, Long memberId) {
         return PreviewFeedResDTO.builder()
+            .memberId(memberId)
             .feedId(feed.getId())
             .feedUrl(feed.getFeedUrl())
             .day(ChronoUnit.DAYS.between(feed.getChallenge().getStartDate(), feed.getUploadDate()))
