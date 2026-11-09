@@ -12,7 +12,7 @@ jobs:
       - name: Install Make plugin if missing
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
@@ -33,7 +33,7 @@ jobs:
       - name: Install Docker plugin if missing
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
@@ -68,7 +68,7 @@ jobs:
       - name: Install Docker Compose plugin if missing
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
@@ -91,7 +91,7 @@ jobs:
       - name: Setup Docker Network if missing
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
@@ -147,7 +147,7 @@ jobs:
       - name: Deploy to Stage Server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           source: "beilsang-server-stage.tar.gz,docker-compose.yml,docker-compose.stage.yml,nginx,Makefile"
@@ -156,7 +156,7 @@ jobs:
       - name: Run deployment on Stage Server
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
@@ -197,7 +197,7 @@ jobs:
       - name: Health Check
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGE_HOST }}
+          host: ${{ contains(secrets.STAGE_HOST, ':') && format('[{0}]', secrets.STAGE_HOST) || secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
