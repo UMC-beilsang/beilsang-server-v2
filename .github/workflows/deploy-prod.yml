@@ -166,7 +166,7 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          source: "beilsang-server-prod.tar.gz,docker-compose.yml,docker-compose.prod.yml,nginx,Makefile"
+          source: "docker-compose.yml,docker-compose.prod.yml,nginx,Makefile"
           target: "/home/${{ secrets.PROD_USER }}/deploy"
 
       - name: Run deployment on Production Server

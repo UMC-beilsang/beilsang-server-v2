@@ -169,7 +169,7 @@ jobs:
           host: ${{ secrets.STAGE_HOST }}
           username: ${{ secrets.STAGE_USER }}
           key: ${{ secrets.STAGE_SSH_KEY }}
-          source: "beilsang-server-stage.tar.gz,docker-compose.yml,docker-compose.stage.yml,nginx,Makefile"
+          source: "docker-compose.yml,docker-compose.stage.yml,nginx,Makefile"
           target: "/home/${{ secrets.STAGE_USER }}/deploy"
 
       - name: Run deployment on Stage Server
@@ -221,12 +221,12 @@ jobs:
           key: ${{ secrets.STAGE_SSH_KEY }}
           script: |
             echo "⏳ Waiting for server to be healthy..."
-            for i in $(seq 1 12); do
+            for i in $(seq 1 24); do
               if docker exec beilsang-server wget -qO- http://localhost:8080/actuator/health 2>/dev/null; then
                 echo "✅ Stage deployment successful!"
                 exit 0
               fi
-              echo "  attempt $i/12 failed, retrying in 10s..."
+              echo "  attempt $i/24 failed, retrying in 10s..."
               sleep 10
             done
             echo "❌ Health check failed after 120s"
