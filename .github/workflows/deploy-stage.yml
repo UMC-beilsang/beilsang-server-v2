@@ -9,6 +9,10 @@ jobs:
     name: Setup Make on Server
     runs-on: ubuntu-latest
     steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       - name: Install Make plugin if missing
         uses: appleboy/ssh-action@v1.0.0
         with:
